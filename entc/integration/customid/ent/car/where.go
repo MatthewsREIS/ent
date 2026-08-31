@@ -23,18 +23,18 @@ var F = struct {
 	// Model is the handle for the "model" field.
 	Model entfield.String[string]
 }{
-	ID:       entfield.NewNumber[int](FieldID),
-	BeforeID: entfield.NewNumber[float64](FieldBeforeID),
-	AfterID:  entfield.NewNumber[float64](FieldAfterID),
-	Model:    entfield.NewString[string](FieldModel),
+	ID:       entfield.NewNumber[int](FieldID, "id"),
+	BeforeID: entfield.NewNumber[float64](FieldBeforeID, "before_id"),
+	AfterID:  entfield.NewNumber[float64](FieldAfterID, "after_id"),
+	Model:    entfield.NewString[string](FieldModel, "model"),
 }
 
 // E holds typed edge handles for every edge of the Car type.
 var E = struct {
 	// Owner is the handle for the "owner" edge.
-	Owner entfield.Edge[predicate.Pet]
+	Owner entfield.Edge[predicate.Pet, string]
 }{
-	Owner: entfield.NewEdge[predicate.Pet](newOwnerStep),
+	Owner: entfield.NewEdge[predicate.Pet, string]("owner", newOwnerStep),
 }
 
 // And groups predicates with the AND operator between them.

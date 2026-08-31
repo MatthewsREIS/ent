@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // RelationshipCreate is the builder for creating a Relationship entity.
 type RelationshipCreate struct {
 	Config
+	err      error
 	mutation *RelationshipMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,42 +32,11 @@ func NewRelationshipCreate(c Config, hooks []Hook, mutation *RelationshipMutatio
 	return &RelationshipCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetWeight sets the "weight" field.
-func (_c *RelationshipCreate) SetWeight(v int) *RelationshipCreate {
-	_ = _c.mutation.SetField("weight", v)
-	return _c
-}
-
-// SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_c *RelationshipCreate) SetNillableWeight(v *int) *RelationshipCreate {
-	if v != nil {
-		_c.SetWeight(*v)
-	}
-	return _c
-}
-
-// SetUserID sets the "user_id" field.
-func (_c *RelationshipCreate) SetUserID(v int) *RelationshipCreate {
-	_ = _c.mutation.SetEdgeID("user", v)
-	return _c
-}
-
-// SetRelativeID sets the "relative_id" field.
-func (_c *RelationshipCreate) SetRelativeID(v int) *RelationshipCreate {
-	_ = _c.mutation.SetEdgeID("relative", v)
-	return _c
-}
-
-// SetInfoID sets the "info_id" field.
-func (_c *RelationshipCreate) SetInfoID(v int) *RelationshipCreate {
-	_ = _c.mutation.SetEdgeID("info", v)
-	return _c
-}
-
-// SetNillableInfoID sets the "info_id" field if the given value is not nil.
-func (_c *RelationshipCreate) SetNillableInfoID(v *int) *RelationshipCreate {
-	if v != nil {
-		_c.SetInfoID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RelationshipCreate builder. The first error from as is recorded and returned by Save.
+func (_c *RelationshipCreate) With(as ...entfield.Assignment) *RelationshipCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -77,6 +48,9 @@ func (_c *RelationshipCreate) Mutation() *RelationshipMutation {
 
 // Save creates the Relationship in the database.
 func (_c *RelationshipCreate) Save(ctx context.Context) (*Relationship, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	if err := _c.defaults(); err != nil {
 		return nil, err
 	}
@@ -294,6 +268,12 @@ func (_c *RelationshipCreateBulk) Save(ctx context.Context) ([]*Relationship, er
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RelationshipMutation)

@@ -37,15 +37,15 @@ var F = struct {
 	// CustomOptional is the handle for the "custom_optional" field.
 	CustomOptional entfield.String[string]
 }{
-	ID:             entfield.NewNumber[int](FieldID),
-	Binary:         entfield.NewValueScan[*url.URL](FieldBinary, func(v *url.URL) (driver.Value, error) { return ValueScanner.Binary.Value(v) }),
-	BinaryBytes:    entfield.NewValueScan[*url.URL](FieldBinaryBytes, func(v *url.URL) (driver.Value, error) { return ValueScanner.BinaryBytes.Value(v) }),
-	BinaryOptional: entfield.NewValueScan[*url.URL](FieldBinaryOptional, func(v *url.URL) (driver.Value, error) { return ValueScanner.BinaryOptional.Value(v) }),
-	Text:           entfield.NewValueScan[*big.Int](FieldText, func(v *big.Int) (driver.Value, error) { return ValueScanner.Text.Value(v) }),
-	TextOptional:   entfield.NewValueScan[*big.Int](FieldTextOptional, func(v *big.Int) (driver.Value, error) { return ValueScanner.TextOptional.Value(v) }),
-	Base64:         entfield.NewStringScan[string](FieldBase64, func(v string) (driver.Value, error) { return ValueScanner.Base64.Value(v) }),
-	Custom:         entfield.NewStringScan[string](FieldCustom, func(v string) (driver.Value, error) { return ValueScanner.Custom.Value(v) }),
-	CustomOptional: entfield.NewStringScan[string](FieldCustomOptional, func(v string) (driver.Value, error) { return ValueScanner.CustomOptional.Value(v) }),
+	ID:             entfield.NewNumber[int](FieldID, "id"),
+	Binary:         entfield.NewValueScan[*url.URL](FieldBinary, "binary", func(v *url.URL) (driver.Value, error) { return ValueScanner.Binary.Value(v) }),
+	BinaryBytes:    entfield.NewValueScan[*url.URL](FieldBinaryBytes, "binary_bytes", func(v *url.URL) (driver.Value, error) { return ValueScanner.BinaryBytes.Value(v) }),
+	BinaryOptional: entfield.NewValueScan[*url.URL](FieldBinaryOptional, "binary_optional", func(v *url.URL) (driver.Value, error) { return ValueScanner.BinaryOptional.Value(v) }),
+	Text:           entfield.NewValueScan[*big.Int](FieldText, "text", func(v *big.Int) (driver.Value, error) { return ValueScanner.Text.Value(v) }),
+	TextOptional:   entfield.NewValueScan[*big.Int](FieldTextOptional, "text_optional", func(v *big.Int) (driver.Value, error) { return ValueScanner.TextOptional.Value(v) }),
+	Base64:         entfield.NewStringScan[string](FieldBase64, "base64", func(v string) (driver.Value, error) { return ValueScanner.Base64.Value(v) }),
+	Custom:         entfield.NewStringScan[string](FieldCustom, "custom", func(v string) (driver.Value, error) { return ValueScanner.Custom.Value(v) }),
+	CustomOptional: entfield.NewStringScan[string](FieldCustomOptional, "custom_optional", func(v string) (driver.Value, error) { return ValueScanner.CustomOptional.Value(v) }),
 }
 
 // E holds typed edge handles for every edge of the ExValueScan type.

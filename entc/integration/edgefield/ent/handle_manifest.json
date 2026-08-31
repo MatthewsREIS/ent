@@ -5,6 +5,33 @@
 		},
 		"edges": {
 			"Rentals": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgefield/ent/car",
+		"setters": {
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Number": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Rentals": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Rental"
+			}
 		}
 	},
 	"card": {
@@ -14,12 +41,58 @@
 		},
 		"edges": {
 			"Owner": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgefield/ent/card",
+		"setters": {
+			"Number": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"OwnerID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"info": {
 		"fields": {},
 		"edges": {
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgefield/ent/info",
+		"setters": {
+			"Content": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": true,
+				"unique": false,
+				"methodBase": ""
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"User": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			}
 		}
 	},
 	"metadata": {
@@ -31,6 +104,49 @@
 			"Children": true,
 			"Parent": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgefield/ent/metadata",
+		"setters": {
+			"Age": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Children": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Child"
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"ParentID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"User": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			}
 		}
 	},
 	"node": {
@@ -44,6 +160,33 @@
 		},
 		"noBareEQ": {
 			"Value": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgefield/ent/node",
+		"setters": {
+			"Next": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"PrevID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Value": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"pet": {
@@ -52,6 +195,17 @@
 		},
 		"edges": {
 			"Owner": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgefield/ent/pet",
+		"setters": {
+			"OwnerID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"post": {
@@ -61,6 +215,25 @@
 		},
 		"edges": {
 			"Author": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgefield/ent/post",
+		"setters": {
+			"AuthorID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Text": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"rental": {
@@ -72,6 +245,33 @@
 		"edges": {
 			"Car": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgefield/ent/rental",
+		"setters": {
+			"CarID": {
+				"kind": "edgefield",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Date": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"UserID": {
+				"kind": "edgefield",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"user": {
@@ -88,6 +288,81 @@
 			"Pets": true,
 			"Rentals": true,
 			"Spouse": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgefield/ent/user",
+		"setters": {
+			"Card": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"Children": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Child"
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Info": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Info"
+			},
+			"Metadata": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"ParentID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Pets": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Pet"
+			},
+			"Rentals": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Rental"
+			},
+			"SpouseID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	}
 }

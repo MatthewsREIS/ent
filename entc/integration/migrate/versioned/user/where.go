@@ -23,10 +23,10 @@ var F = struct {
 	// Address is the handle for the "address" field.
 	Address entfield.String[string]
 }{
-	ID:      entfield.NewNumber[int](FieldID),
-	Age:     entfield.NewNumber[int32](FieldAge),
-	Name:    entfield.NewString[string](FieldName),
-	Address: entfield.NewString[string](FieldAddress),
+	ID:      entfield.NewNumber[int](FieldID, "id"),
+	Age:     entfield.NewNumber[int32](FieldAge, "age"),
+	Name:    entfield.NewString[string](FieldName, "name"),
+	Address: entfield.NewString[string](FieldAddress, "address"),
 }
 
 // E holds typed edge handles for every edge of the User type.

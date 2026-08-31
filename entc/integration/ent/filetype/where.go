@@ -23,18 +23,18 @@ var F = struct {
 	// State is the handle for the "state" field.
 	State entfield.Enum[State]
 }{
-	ID:    entfield.NewNumber[int](FieldID),
-	Name:  entfield.NewString[string](FieldName),
-	Type:  entfield.NewEnum[Type](FieldType),
-	State: entfield.NewEnum[State](FieldState),
+	ID:    entfield.NewNumber[int](FieldID, "id"),
+	Name:  entfield.NewString[string](FieldName, "name"),
+	Type:  entfield.NewEnum[Type](FieldType, "type"),
+	State: entfield.NewEnum[State](FieldState, "state"),
 }
 
 // E holds typed edge handles for every edge of the FileType type.
 var E = struct {
 	// Files is the handle for the "files" edge.
-	Files entfield.Edge[predicate.File]
+	Files entfield.Edge[predicate.File, int]
 }{
-	Files: entfield.NewEdge[predicate.File](newFilesStep),
+	Files: entfield.NewEdge[predicate.File, int]("files", newFilesStep),
 }
 
 // And groups predicates with the AND operator between them.

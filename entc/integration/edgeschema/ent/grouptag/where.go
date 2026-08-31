@@ -16,25 +16,25 @@ import (
 var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
-	// TagID is the handle for the "tag_id" field.
-	TagID entfield.Number[int]
-	// GroupID is the handle for the "group_id" field.
-	GroupID entfield.Number[int]
+	// TagID is the handle for the "tag_id" field (backs the "tag" edge).
+	TagID entfield.EdgeField[int]
+	// GroupID is the handle for the "group_id" field (backs the "group" edge).
+	GroupID entfield.EdgeField[int]
 }{
-	ID:      entfield.NewNumber[int](FieldID),
-	TagID:   entfield.NewNumber[int](FieldTagID),
-	GroupID: entfield.NewNumber[int](FieldGroupID),
+	ID:      entfield.NewNumber[int](FieldID, "id"),
+	TagID:   entfield.NewEdgeField[int](FieldTagID, "tag"),
+	GroupID: entfield.NewEdgeField[int](FieldGroupID, "group"),
 }
 
 // E holds typed edge handles for every edge of the GroupTag type.
 var E = struct {
 	// Tag is the handle for the "tag" edge.
-	Tag entfield.Edge[predicate.Tag]
+	Tag entfield.Edge[predicate.Tag, int]
 	// Group is the handle for the "group" edge.
-	Group entfield.Edge[predicate.Group]
+	Group entfield.Edge[predicate.Group, int]
 }{
-	Tag:   entfield.NewEdge[predicate.Tag](newTagStep),
-	Group: entfield.NewEdge[predicate.Group](newGroupStep),
+	Tag:   entfield.NewEdge[predicate.Tag, int]("tag", newTagStep),
+	Group: entfield.NewEdge[predicate.Group, int]("group", newGroupStep),
 }
 
 // And groups predicates with the AND operator between them.

@@ -17,12 +17,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	Config
+	err      error
 	mutation *UserMutation
 	hooks    []Hook
 }
@@ -32,89 +34,12 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 	return &UserCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetT sets the "t" field.
-func (_c *UserCreate) SetT(v *schema.T) *UserCreate {
-	_ = _c.mutation.SetField("t", v)
-	return _c
-}
-
-// SetURL sets the "url" field.
-func (_c *UserCreate) SetURL(v *url.URL) *UserCreate {
-	_ = _c.mutation.SetField("url", v)
-	return _c
-}
-
-// SetURLs sets the "URLs" field.
-func (_c *UserCreate) SetURLs(v []*url.URL) *UserCreate {
-	_ = _c.mutation.SetField("URLs", v)
-	return _c
-}
-
-// SetRaw sets the "raw" field.
-func (_c *UserCreate) SetRaw(v json.RawMessage) *UserCreate {
-	_ = _c.mutation.SetField("raw", v)
-	return _c
-}
-
-// SetDirs sets the "dirs" field.
-func (_c *UserCreate) SetDirs(v []http.Dir) *UserCreate {
-	_ = _c.mutation.SetField("dirs", v)
-	return _c
-}
-
-// SetInts sets the "ints" field.
-func (_c *UserCreate) SetInts(v []int) *UserCreate {
-	_ = _c.mutation.SetField("ints", v)
-	return _c
-}
-
-// SetFloats sets the "floats" field.
-func (_c *UserCreate) SetFloats(v []float64) *UserCreate {
-	_ = _c.mutation.SetField("floats", v)
-	return _c
-}
-
-// SetStrings sets the "strings" field.
-func (_c *UserCreate) SetStrings(v []string) *UserCreate {
-	_ = _c.mutation.SetField("strings", v)
-	return _c
-}
-
-// SetIntsValidate sets the "ints_validate" field.
-func (_c *UserCreate) SetIntsValidate(v []int) *UserCreate {
-	_ = _c.mutation.SetField("ints_validate", v)
-	return _c
-}
-
-// SetFloatsValidate sets the "floats_validate" field.
-func (_c *UserCreate) SetFloatsValidate(v []float64) *UserCreate {
-	_ = _c.mutation.SetField("floats_validate", v)
-	return _c
-}
-
-// SetStringsValidate sets the "strings_validate" field.
-func (_c *UserCreate) SetStringsValidate(v []string) *UserCreate {
-	_ = _c.mutation.SetField("strings_validate", v)
-	return _c
-}
-
-// SetAddr sets the "addr" field.
-func (_c *UserCreate) SetAddr(v schema.Addr) *UserCreate {
-	_ = _c.mutation.SetField("addr", v)
-	return _c
-}
-
-// SetNillableAddr sets the "addr" field if the given value is not nil.
-func (_c *UserCreate) SetNillableAddr(v *schema.Addr) *UserCreate {
-	if v != nil {
-		_c.SetAddr(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserCreate builder. The first error from as is recorded and returned by Save.
+func (_c *UserCreate) With(as ...entfield.Assignment) *UserCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetUnknown sets the "unknown" field.
-func (_c *UserCreate) SetUnknown(v any) *UserCreate {
-	_ = _c.mutation.SetField("unknown", v)
 	return _c
 }
 
@@ -125,6 +50,9 @@ func (_c *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -292,6 +220,12 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserMutation)

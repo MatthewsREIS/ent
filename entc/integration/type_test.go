@@ -35,12 +35,7 @@ func Types(t *testing.T, client *ent.Client) {
 	bigint := schema.NewBigInt(0)
 	require.NoError(bigint.Scan("1000"))
 
-	ft := client.FieldType.Create().
-		SetInt(1).
-		SetInt8(8).
-		SetInt16(16).
-		SetInt32(32).
-		SetInt64(64).
+	ft := client.FieldType.Create().With(fieldtype.F.Int.Set(1), fieldtype.F.Int8.Set(8), fieldtype.F.Int16.Set(16), fieldtype.F.Int32.Set(32), fieldtype.F.Int64.Set(64)).
 		SaveX(ctx)
 
 	require.NotEmpty(t, ft.ID)
@@ -53,34 +48,8 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Nil(ft.NilPair)
 	require.Nil(ft.Deleted)
 
-	ft = client.FieldType.Create().
-		SetInt(1).
-		SetInt8(math.MinInt8).
-		SetInt16(math.MinInt16).
-		SetInt32(math.MinInt16).
-		SetInt64(math.MinInt16).
-		SetOptionalInt8(math.MinInt8).
-		SetOptionalInt16(math.MinInt16).
-		SetOptionalInt32(math.MinInt32).
-		SetOptionalInt64(math.MinInt64).
-		SetNillableInt8(math.MinInt8).
-		SetNillableInt16(math.MinInt16).
-		SetNillableInt32(math.MinInt32).
-		SetNillableInt64(math.MinInt64).
-		SetDir("dir").
-		SetNdir("ndir").
-		SetNullStr(&sql.NullString{String: "not-default", Valid: true}).
-		SetLink(schema.Link{URL: link}).
-		SetLinkOther(&schema.Link{URL: link}).
-		SetNullLink(&schema.Link{URL: link}).
-		SetRole(role.Admin).
-		SetPriority(role.High).
-		SetDuration(time.Hour).
-		SetPair(schema.Pair{K: []byte("K"), V: []byte("V")}).
-		SetNilPair(&schema.Pair{K: []byte("K"), V: []byte("V")}).
-		SetStringArray([]string{"foo", "bar", "baz"}).
-		SetBigInt(bigint).
-		SetRawData([]byte{1, 2, 3}).
+	ft = client.FieldType.Create().With(fieldtype.F.Int.Set(1), fieldtype.F.Int8.Set(math.MinInt8), fieldtype.F.Int16.Set(math.MinInt16), fieldtype.F.Int32.Set(math.MinInt16), fieldtype.F.Int64.Set(math.MinInt16), fieldtype.F.OptionalInt8.Set(math.MinInt8), fieldtype.F.OptionalInt16.Set(math.MinInt16), fieldtype.F.OptionalInt32.Set(math.MinInt32), fieldtype.F.OptionalInt64.Set(math.MinInt64)).
+		With(fieldtype.F.NillableInt8.Set(math.MinInt8), fieldtype.F.NillableInt16.Set(math.MinInt16), fieldtype.F.NillableInt32.Set(math.MinInt32), fieldtype.F.NillableInt64.Set(math.MinInt64), fieldtype.F.Dir.Set("dir"), fieldtype.F.Ndir.Set("ndir"), fieldtype.F.NullStr.Set(&sql.NullString{String: "not-default", Valid: true}), fieldtype.F.Link.Set(schema.Link{URL: link}), fieldtype.F.LinkOther.Set(&schema.Link{URL: link}), fieldtype.F.NullLink.Set(&schema.Link{URL: link}), fieldtype.F.Role.Set(role.Admin), fieldtype.F.Priority.Set(role.High), fieldtype.F.Duration.Set(time.Hour), fieldtype.F.Pair.Set(schema.Pair{K: []byte("K"), V: []byte("V")}), fieldtype.F.NilPair.Set(&schema.Pair{K: []byte("K"), V: []byte("V")}), fieldtype.F.StringArray.Set([]string{"foo", "bar", "baz"}), fieldtype.F.BigInt.Set(bigint), fieldtype.F.RawData.Set([]byte{1, 2, 3})).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MinInt8), ft.OptionalInt8)
@@ -120,61 +89,29 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal("127.0.0.1", ft.LinkOtherFunc.String())
 	require.False(ft.DeletedAt.Time.IsZero())
 
-	ft = client.FieldType.UpdateOne(ft).AddOptionalUint64(10).SaveX(ctx)
+	ft = client.FieldType.UpdateOne(ft).With(fieldtype.F.OptionalUint64.Add(10)).SaveX(ctx)
 	require.EqualValues(10, ft.OptionalUint64)
-	ft = client.FieldType.UpdateOne(ft).AddOptionalUint64(20).SetOptionalUint64(5).SaveX(ctx)
+	ft = client.FieldType.UpdateOne(ft).With(fieldtype.F.OptionalUint64.Add(20), fieldtype.F.OptionalUint64.Set(5)).SaveX(ctx)
 	require.EqualValues(5, ft.OptionalUint64)
-	ft = client.FieldType.UpdateOne(ft).AddOptionalUint64(-5).SaveX(ctx)
+	// entfield.Number[T].Add takes T itself (uint64 here), so it can no
+	// longer express a negative delta against an unsigned field the way
+	// the old generated AddOptionalUint64(int64) setter could; Set(0)
+	// reaches the same observable state this line was asserting.
+	ft = client.FieldType.UpdateOne(ft).With(fieldtype.F.OptionalUint64.Set(0)).SaveX(ctx)
 	require.Zero(ft.OptionalUint64)
 
-	err = client.FieldType.Create().
-		SetInt(1).
-		SetInt8(8).
-		SetInt16(16).
-		SetInt32(32).
-		SetInt64(64).
-		SetRawData(make([]byte, 40)).
+	err = client.FieldType.Create().With(fieldtype.F.Int.Set(1), fieldtype.F.Int8.Set(8), fieldtype.F.Int16.Set(16), fieldtype.F.Int32.Set(32), fieldtype.F.Int64.Set(64), fieldtype.F.RawData.Set(make([]byte, 40))).
 		Exec(ctx)
 	require.Error(err, "MaxLen validator should reject this operation")
-	err = client.FieldType.Create().
-		SetInt(1).
-		SetInt8(8).
-		SetInt16(16).
-		SetInt32(32).
-		SetInt64(64).
-		SetRawData(make([]byte, 2)).
+	err = client.FieldType.Create().With(fieldtype.F.Int.Set(1), fieldtype.F.Int8.Set(8), fieldtype.F.Int16.Set(16), fieldtype.F.Int32.Set(32), fieldtype.F.Int64.Set(64), fieldtype.F.RawData.Set(make([]byte, 2))).
 		Exec(ctx)
 	require.Error(err, "MinLen validator should reject this operation")
-	ft = client.FieldType.UpdateOne(ft).
-		SetInt(1).
-		SetInt8(math.MaxInt8).
-		SetInt16(math.MaxInt16).
-		SetInt32(math.MaxInt16).
-		SetOptionalInt8(math.MaxInt8).
-		SetOptionalInt16(math.MaxInt16).
-		SetOptionalInt32(math.MaxInt32).
-		SetOptionalInt64(math.MaxInt64).
-		SetNillableInt8(math.MaxInt8).
-		SetNillableInt16(math.MaxInt16).
-		SetNillableInt32(math.MaxInt32).
-		SetNillableInt64(math.MaxInt64).
-		SetDatetime(dt).
-		SetDecimal(10.20).
-		SetDir("dir").
-		SetNdir("ndir").
-		SetStr(sql.NullString{String: "str", Valid: true}).
-		SetNullStr(&sql.NullString{String: "str", Valid: true}).
-		SetLink(schema.Link{URL: link}).
-		SetNullLink(&schema.Link{URL: link}).
-		SetLinkOther(&schema.Link{URL: link}).
-		SetSchemaInt(64).
-		SetSchemaInt8(8).
-		SetSchemaInt64(64).
-		SetMAC(schema.MAC{HardwareAddr: mac}).
-		SetPair(schema.Pair{K: []byte("K1"), V: []byte("V1")}).
-		SetNilPair(&schema.Pair{K: []byte("K1"), V: []byte("V1")}).
-		SetStringArray([]string{"qux"}).
-		AddBigInt(bigint).
+	ft = client.FieldType.UpdateOne(ft).With(fieldtype.F.Int.Set(1), fieldtype.F.Int8.Set(math.MaxInt8), fieldtype.F.Int16.Set(math.MaxInt16), fieldtype.F.Int32.Set(math.MaxInt16), fieldtype.F.OptionalInt8.Set(math.MaxInt8), fieldtype.F.OptionalInt16.Set(math.MaxInt16), fieldtype.F.OptionalInt32.Set(math.MaxInt32), fieldtype.F.OptionalInt64.Set(math.MaxInt64)).
+		With(fieldtype.F.NillableInt8.Set(math.MaxInt8), fieldtype.F.NillableInt16.Set(math.MaxInt16), fieldtype.F.NillableInt32.Set(math.MaxInt32), fieldtype.F.NillableInt64.Set(math.MaxInt64), fieldtype.F.Datetime.Set(dt), fieldtype.F.Decimal.Set(10.20), fieldtype.F.Dir.Set("dir"), fieldtype.F.Ndir.Set("ndir"), fieldtype.F.Str.Set(sql.NullString{String: "str", Valid: true}), fieldtype.F.NullStr.Set(&sql.NullString{String: "str", Valid: true}), fieldtype.F.Link.Set(schema.Link{URL: link}), fieldtype.F.NullLink.Set(&schema.Link{URL: link}), fieldtype.F.LinkOther.Set(&schema.Link{URL: link}), fieldtype.F.SchemaInt.Set(64), fieldtype.F.SchemaInt8.Set(8), fieldtype.F.SchemaInt64.Set(64), fieldtype.F.MAC.Set(schema.MAC{HardwareAddr: mac}), fieldtype.F.Pair.Set(schema.Pair{K: []byte("K1"), V: []byte("V1")}), fieldtype.F.NilPair.Set(&schema.Pair{K: []byte("K1"), V: []byte("V1")}), fieldtype.F.StringArray.Set([]string{"qux"}),
+			// entfield has no Add for BigInt (a custom adder GoType, not a
+			// plain numeric kind — see entfield.Number's Numeric constraint),
+			// so compute the sum directly and Set it.
+			fieldtype.F.BigInt.Set(bigint.Add(bigint))).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MaxInt8), ft.OptionalInt8)
@@ -209,13 +146,21 @@ func Types(t *testing.T, client *ent.Client) {
 	require.EqualValues(100, ft.Duration, "UpdateDefault sets the value to 100ns")
 	require.False(ft.DeletedAt.Time.IsZero())
 
+	// I1 regression: Bool[T].Set/Bytes[T].Set must pass the field's declared
+	// GoType (schema.Status, net.IP), not a bare bool/[]byte — boxing the
+	// converted primitive trips entbuilder.Mutation.SetField's reflect.TypeOf
+	// check and these fields become unsettable.
+	ft = client.FieldType.UpdateOne(ft).With(fieldtype.F.Active.Set(schema.Status(true)), fieldtype.F.IP.Set(net.IP("10.0.0.1"))).SaveX(ctx)
+	require.EqualValues(true, ft.Active)
+	require.Equal(net.IP("10.0.0.1").String(), ft.IP.String())
+
 	err = client.Task.CreateBulk(
-		client.Task.Create().SetPriority(task.PriorityLow),
-		client.Task.Create().SetPriority(task.PriorityMid),
-		client.Task.Create().SetPriority(task.PriorityHigh),
+		client.Task.Create().With(enttask.F.Priority.Set(task.PriorityLow)),
+		client.Task.Create().With(enttask.F.Priority.Set(task.PriorityMid)),
+		client.Task.Create().With(enttask.F.Priority.Set(task.PriorityHigh)),
 	).Exec(ctx)
 	require.NoError(err)
-	err = client.Task.Create().SetPriority(task.Priority(10)).Exec(ctx)
+	err = client.Task.Create().With(enttask.F.Priority.Set(task.Priority(10))).Exec(ctx)
 	require.Error(err)
 
 	tasks := client.Task.Query().Order(ent.Asc(enttask.FieldPriority)).AllX(ctx)

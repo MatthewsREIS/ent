@@ -25,8 +25,9 @@ type MetadataMutationOption = func(*MetadataMutation)
 // metadataDescriptor describes Metadata's fields and edges
 // for the generic mutation runtime.
 var metadataDescriptor = &entbuilder.Descriptor{
-	Name:   "Metadata",
-	IDType: reflect.TypeFor[int](),
+	Name:    "Metadata",
+	IDType:  reflect.TypeFor[int](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"age": {
 			Type:    reflect.TypeFor[int](),

@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
 type GroupInfoCreate struct {
 	Config
+	err      error
 	mutation *GroupInfoMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,29 +32,12 @@ func NewGroupInfoCreate(c Config, hooks []Hook, mutation *GroupInfoMutation) *Gr
 	return &GroupInfoCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetDesc sets the "desc" field.
-func (_c *GroupInfoCreate) SetDesc(v string) *GroupInfoCreate {
-	_ = _c.mutation.SetField("desc", v)
-	return _c
-}
-
-// SetMaxUsers sets the "max_users" field.
-func (_c *GroupInfoCreate) SetMaxUsers(v int) *GroupInfoCreate {
-	_ = _c.mutation.SetField("max_users", v)
-	return _c
-}
-
-// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_c *GroupInfoCreate) SetNillableMaxUsers(v *int) *GroupInfoCreate {
-	if v != nil {
-		_c.SetMaxUsers(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupInfoCreate builder. The first error from as is recorded and returned by Save.
+func (_c *GroupInfoCreate) With(as ...entfield.Assignment) *GroupInfoCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_c *GroupInfoCreate) AddGroupIDs(ids ...int) *GroupInfoCreate {
-	_ = _c.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -63,6 +48,9 @@ func (_c *GroupInfoCreate) Mutation() *GroupInfoMutation {
 
 // Save creates the GroupInfo in the database.
 func (_c *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -248,6 +236,12 @@ func (_c *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GroupInfoMutation)

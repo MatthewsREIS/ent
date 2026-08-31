@@ -26,9 +26,10 @@ type IntSIDMutationOption = func(*IntSIDMutation)
 // intsidDescriptor describes IntSID's fields and edges
 // for the generic mutation runtime.
 var intsidDescriptor = &entbuilder.Descriptor{
-	Name:   "IntSID",
-	IDType: reflect.TypeFor[sid.ID](),
-	Fields: map[string]entbuilder.FieldSpec{},
+	Name:    "IntSID",
+	IDType:  reflect.TypeFor[sid.ID](),
+	IDField: "id",
+	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"parent": {
 			Cardinality:  entbuilder.O2OUnique,

@@ -3,7 +3,18 @@
 		"fields": {
 			"Name": true
 		},
-		"edges": {}
+		"edges": {},
+		"importPath": "entgo.io/ent/entc/integration/multischema/ent/cleanuser",
+		"setters": {
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
+		}
 	},
 	"friendship": {
 		"fields": {
@@ -15,6 +26,41 @@
 		"edges": {
 			"Friend": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/multischema/ent/friendship",
+		"setters": {
+			"CreatedAt": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"FriendID": {
+				"kind": "edgefield",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"UserID": {
+				"kind": "edgefield",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Weight": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"group": {
@@ -23,6 +69,25 @@
 		},
 		"edges": {
 			"Users": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/multischema/ent/group",
+		"setters": {
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Users": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "User"
+			}
 		}
 	},
 	"parent": {
@@ -34,6 +99,41 @@
 		"edges": {
 			"Child": true,
 			"Parent": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/multischema/ent/parent",
+		"setters": {
+			"ByAdoption": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Child": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"ParentID": {
+				"kind": "edgefield",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"UserID": {
+				"kind": "edgefield",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"pet": {
@@ -43,6 +143,25 @@
 		},
 		"edges": {
 			"Owner": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/multischema/ent/pet",
+		"setters": {
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"OwnerID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"user": {
@@ -57,6 +176,73 @@
 			"ParentHood": true,
 			"Parents": true,
 			"Pets": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/multischema/ent/user",
+		"setters": {
+			"Children": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Child"
+			},
+			"Friends": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Friend"
+			},
+			"Friendships": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Friendship"
+			},
+			"Groups": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Group"
+			},
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"ParentHood": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "ParentHood"
+			},
+			"Parents": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Parent"
+			},
+			"Pets": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Pet"
+			}
 		}
 	}
 }

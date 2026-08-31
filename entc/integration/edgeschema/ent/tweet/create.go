@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -24,6 +25,7 @@ import (
 // TweetCreate is the builder for creating a Tweet entity.
 type TweetCreate struct {
 	Config
+	err      error
 	mutation *TweetMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -34,39 +36,12 @@ func NewTweetCreate(c Config, hooks []Hook, mutation *TweetMutation) *TweetCreat
 	return &TweetCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_c *TweetCreate) SetText(v string) *TweetCreate {
-	_ = _c.mutation.SetField("text", v)
-	return _c
-}
-
-// AddLikedUserIDs adds the "liked_users" edge to the User entity by IDs.
-func (_c *TweetCreate) AddLikedUserIDs(ids ...int) *TweetCreate {
-	_ = _c.mutation.AddEdgeIDs("liked_users", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *TweetCreate) AddUserIDs(ids ...int) *TweetCreate {
-	_ = _c.mutation.AddEdgeIDs("user", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddTagIDs adds the "tags" edge to the Tag entity by IDs.
-func (_c *TweetCreate) AddTagIDs(ids ...int) *TweetCreate {
-	_ = _c.mutation.AddEdgeIDs("tags", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddTweetUserIDs adds the "tweet_user" edge to the UserTweet entity by IDs.
-func (_c *TweetCreate) AddTweetUserIDs(ids ...int) *TweetCreate {
-	_ = _c.mutation.AddEdgeIDs("tweet_user", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
-func (_c *TweetCreate) AddTweetTagIDs(ids ...uuid.UUID) *TweetCreate {
-	_ = _c.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TweetCreate builder. The first error from as is recorded and returned by Save.
+func (_c *TweetCreate) With(as ...entfield.Assignment) *TweetCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -77,6 +52,9 @@ func (_c *TweetCreate) Mutation() *TweetMutation {
 
 // Save creates the Tweet in the database.
 func (_c *TweetCreate) Save(ctx context.Context) (*Tweet, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -334,6 +312,12 @@ func (_c *TweetCreateBulk) Save(ctx context.Context) ([]*Tweet, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TweetMutation)
 				if !ok {

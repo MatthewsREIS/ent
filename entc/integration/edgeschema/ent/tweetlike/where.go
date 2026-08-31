@@ -16,25 +16,25 @@ import (
 var F = struct {
 	// LikedAt is the handle for the "liked_at" field.
 	LikedAt entfield.Time
-	// UserID is the handle for the "user_id" field.
-	UserID entfield.Number[int]
-	// TweetID is the handle for the "tweet_id" field.
-	TweetID entfield.Number[int]
+	// UserID is the handle for the "user_id" field (backs the "user" edge).
+	UserID entfield.EdgeField[int]
+	// TweetID is the handle for the "tweet_id" field (backs the "tweet" edge).
+	TweetID entfield.EdgeField[int]
 }{
-	LikedAt: entfield.NewTime(FieldLikedAt),
-	UserID:  entfield.NewNumber[int](FieldUserID),
-	TweetID: entfield.NewNumber[int](FieldTweetID),
+	LikedAt: entfield.NewTime(FieldLikedAt, "liked_at"),
+	UserID:  entfield.NewEdgeField[int](FieldUserID, "user"),
+	TweetID: entfield.NewEdgeField[int](FieldTweetID, "tweet"),
 }
 
 // E holds typed edge handles for every edge of the TweetLike type.
 var E = struct {
 	// Tweet is the handle for the "tweet" edge.
-	Tweet entfield.Edge[predicate.Tweet]
+	Tweet entfield.Edge[predicate.Tweet, int]
 	// User is the handle for the "user" edge.
-	User entfield.Edge[predicate.User]
+	User entfield.Edge[predicate.User, int]
 }{
-	Tweet: entfield.NewEdge[predicate.Tweet](newTweetStep),
-	User:  entfield.NewEdge[predicate.User](newUserStep),
+	Tweet: entfield.NewEdge[predicate.Tweet, int]("tweet", newTweetStep),
+	User:  entfield.NewEdge[predicate.User, int]("user", newUserStep),
 }
 
 // And groups predicates with the AND operator between them.

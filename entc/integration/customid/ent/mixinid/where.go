@@ -22,9 +22,9 @@ var F = struct {
 	// MixinField is the handle for the "mixin_field" field.
 	MixinField entfield.String[string]
 }{
-	ID:         entfield.NewValue[uuid.UUID](FieldID),
-	SomeField:  entfield.NewString[string](FieldSomeField),
-	MixinField: entfield.NewString[string](FieldMixinField),
+	ID:         entfield.NewValue[uuid.UUID](FieldID, "id"),
+	SomeField:  entfield.NewString[string](FieldSomeField, "some_field"),
+	MixinField: entfield.NewString[string](FieldMixinField, "mixin_field"),
 }
 
 // E holds typed edge handles for every edge of the MixinID type.

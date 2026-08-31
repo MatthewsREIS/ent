@@ -25,9 +25,10 @@ type UserMutationOption = func(*UserMutation)
 // userDescriptor describes User's fields and edges
 // for the generic mutation runtime.
 var userDescriptor = &entbuilder.Descriptor{
-	Name:   "User",
-	IDType: reflect.TypeFor[int](),
-	Fields: map[string]entbuilder.FieldSpec{},
+	Name:    "User",
+	IDType:  reflect.TypeFor[int](),
+	IDField: "id",
+	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"pets": {
 			Cardinality:  entbuilder.O2M,
@@ -40,6 +41,7 @@ var userDescriptor = &entbuilder.Descriptor{
 			TargetIDType: reflect.TypeFor[int](),
 			Inverse:      true,
 			Field:        "parent_id",
+			Immutable:    true,
 		},
 		"children": {
 			Cardinality:  entbuilder.O2M,

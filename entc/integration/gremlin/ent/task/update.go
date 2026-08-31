@@ -18,11 +18,13 @@ import (
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // TaskUpdate is the builder for updating Task entities.
 type TaskUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *TaskMutation
 }
@@ -38,143 +40,11 @@ func (_u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
 	return _u
 }
 
-// SetPriority sets the "priority" field.
-func (_u *TaskUpdate) SetPriority(v task.Priority) *TaskUpdate {
-	_ = _u.mutation.ResetField("priority")
-	_ = _u.mutation.SetField("priority", v)
-	return _u
-}
-
-// SetNillablePriority sets the "priority" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillablePriority(v *task.Priority) *TaskUpdate {
-	if v != nil {
-		_u.SetPriority(*v)
-	}
-	return _u
-}
-
-// AddPriority adds value to the "priority" field.
-func (_u *TaskUpdate) AddPriority(v task.Priority) *TaskUpdate {
-	_ = _u.mutation.AddField("priority", v)
-	return _u
-}
-
-// SetPriorities sets the "priorities" field.
-func (_u *TaskUpdate) SetPriorities(v map[string]task.Priority) *TaskUpdate {
-	_ = _u.mutation.SetField("priorities", v)
-	return _u
-}
-
-// ClearPriorities clears the value of the "priorities" field.
-func (_u *TaskUpdate) ClearPriorities() *TaskUpdate {
-	_ = _u.mutation.ClearField("priorities")
-	return _u
-}
-
-// SetName sets the "name" field.
-func (_u *TaskUpdate) SetName(v string) *TaskUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableName(v *string) *TaskUpdate {
-	if v != nil {
-		_u.SetName(*v)
-	}
-	return _u
-}
-
-// ClearName clears the value of the "name" field.
-func (_u *TaskUpdate) ClearName() *TaskUpdate {
-	_ = _u.mutation.ClearField("name")
-	return _u
-}
-
-// SetOwner sets the "owner" field.
-func (_u *TaskUpdate) SetOwner(v string) *TaskUpdate {
-	_ = _u.mutation.SetField("owner", v)
-	return _u
-}
-
-// SetNillableOwner sets the "owner" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableOwner(v *string) *TaskUpdate {
-	if v != nil {
-		_u.SetOwner(*v)
-	}
-	return _u
-}
-
-// ClearOwner clears the value of the "owner" field.
-func (_u *TaskUpdate) ClearOwner() *TaskUpdate {
-	_ = _u.mutation.ClearField("owner")
-	return _u
-}
-
-// SetOrder sets the "order" field.
-func (_u *TaskUpdate) SetOrder(v int) *TaskUpdate {
-	_ = _u.mutation.ResetField("order")
-	_ = _u.mutation.SetField("order", v)
-	return _u
-}
-
-// SetNillableOrder sets the "order" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableOrder(v *int) *TaskUpdate {
-	if v != nil {
-		_u.SetOrder(*v)
-	}
-	return _u
-}
-
-// AddOrder adds value to the "order" field.
-func (_u *TaskUpdate) AddOrder(v int) *TaskUpdate {
-	_ = _u.mutation.AddField("order", v)
-	return _u
-}
-
-// ClearOrder clears the value of the "order" field.
-func (_u *TaskUpdate) ClearOrder() *TaskUpdate {
-	_ = _u.mutation.ClearField("order")
-	return _u
-}
-
-// SetOrderOption sets the "order_option" field.
-func (_u *TaskUpdate) SetOrderOption(v int) *TaskUpdate {
-	_ = _u.mutation.ResetField("order_option")
-	_ = _u.mutation.SetField("order_option", v)
-	return _u
-}
-
-// SetNillableOrderOption sets the "order_option" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableOrderOption(v *int) *TaskUpdate {
-	if v != nil {
-		_u.SetOrderOption(*v)
-	}
-	return _u
-}
-
-// AddOrderOption adds value to the "order_option" field.
-func (_u *TaskUpdate) AddOrderOption(v int) *TaskUpdate {
-	_ = _u.mutation.AddField("order_option", v)
-	return _u
-}
-
-// ClearOrderOption clears the value of the "order_option" field.
-func (_u *TaskUpdate) ClearOrderOption() *TaskUpdate {
-	_ = _u.mutation.ClearField("order_option")
-	return _u
-}
-
-// SetOp sets the "op" field.
-func (_u *TaskUpdate) SetOp(v string) *TaskUpdate {
-	_ = _u.mutation.SetField("op", v)
-	return _u
-}
-
-// SetNillableOp sets the "op" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableOp(v *string) *TaskUpdate {
-	if v != nil {
-		_u.SetOp(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TaskUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *TaskUpdate) With(as ...entfield.Assignment) *TaskUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -186,6 +56,9 @@ func (_u *TaskUpdate) Mutation() *TaskMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TaskUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
@@ -308,6 +181,7 @@ func (_u *TaskUpdate) gremlin() *dsl.Traversal {
 type TaskUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *TaskMutation
 }
@@ -317,143 +191,11 @@ func NewTaskUpdateOne(c Config, hooks []Hook, mutation *TaskMutation) *TaskUpdat
 	return &TaskUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetPriority sets the "priority" field.
-func (_u *TaskUpdateOne) SetPriority(v task.Priority) *TaskUpdateOne {
-	_ = _u.mutation.ResetField("priority")
-	_ = _u.mutation.SetField("priority", v)
-	return _u
-}
-
-// SetNillablePriority sets the "priority" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillablePriority(v *task.Priority) *TaskUpdateOne {
-	if v != nil {
-		_u.SetPriority(*v)
-	}
-	return _u
-}
-
-// AddPriority adds value to the "priority" field.
-func (_u *TaskUpdateOne) AddPriority(v task.Priority) *TaskUpdateOne {
-	_ = _u.mutation.AddField("priority", v)
-	return _u
-}
-
-// SetPriorities sets the "priorities" field.
-func (_u *TaskUpdateOne) SetPriorities(v map[string]task.Priority) *TaskUpdateOne {
-	_ = _u.mutation.SetField("priorities", v)
-	return _u
-}
-
-// ClearPriorities clears the value of the "priorities" field.
-func (_u *TaskUpdateOne) ClearPriorities() *TaskUpdateOne {
-	_ = _u.mutation.ClearField("priorities")
-	return _u
-}
-
-// SetName sets the "name" field.
-func (_u *TaskUpdateOne) SetName(v string) *TaskUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableName(v *string) *TaskUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
-	}
-	return _u
-}
-
-// ClearName clears the value of the "name" field.
-func (_u *TaskUpdateOne) ClearName() *TaskUpdateOne {
-	_ = _u.mutation.ClearField("name")
-	return _u
-}
-
-// SetOwner sets the "owner" field.
-func (_u *TaskUpdateOne) SetOwner(v string) *TaskUpdateOne {
-	_ = _u.mutation.SetField("owner", v)
-	return _u
-}
-
-// SetNillableOwner sets the "owner" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableOwner(v *string) *TaskUpdateOne {
-	if v != nil {
-		_u.SetOwner(*v)
-	}
-	return _u
-}
-
-// ClearOwner clears the value of the "owner" field.
-func (_u *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
-	_ = _u.mutation.ClearField("owner")
-	return _u
-}
-
-// SetOrder sets the "order" field.
-func (_u *TaskUpdateOne) SetOrder(v int) *TaskUpdateOne {
-	_ = _u.mutation.ResetField("order")
-	_ = _u.mutation.SetField("order", v)
-	return _u
-}
-
-// SetNillableOrder sets the "order" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableOrder(v *int) *TaskUpdateOne {
-	if v != nil {
-		_u.SetOrder(*v)
-	}
-	return _u
-}
-
-// AddOrder adds value to the "order" field.
-func (_u *TaskUpdateOne) AddOrder(v int) *TaskUpdateOne {
-	_ = _u.mutation.AddField("order", v)
-	return _u
-}
-
-// ClearOrder clears the value of the "order" field.
-func (_u *TaskUpdateOne) ClearOrder() *TaskUpdateOne {
-	_ = _u.mutation.ClearField("order")
-	return _u
-}
-
-// SetOrderOption sets the "order_option" field.
-func (_u *TaskUpdateOne) SetOrderOption(v int) *TaskUpdateOne {
-	_ = _u.mutation.ResetField("order_option")
-	_ = _u.mutation.SetField("order_option", v)
-	return _u
-}
-
-// SetNillableOrderOption sets the "order_option" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableOrderOption(v *int) *TaskUpdateOne {
-	if v != nil {
-		_u.SetOrderOption(*v)
-	}
-	return _u
-}
-
-// AddOrderOption adds value to the "order_option" field.
-func (_u *TaskUpdateOne) AddOrderOption(v int) *TaskUpdateOne {
-	_ = _u.mutation.AddField("order_option", v)
-	return _u
-}
-
-// ClearOrderOption clears the value of the "order_option" field.
-func (_u *TaskUpdateOne) ClearOrderOption() *TaskUpdateOne {
-	_ = _u.mutation.ClearField("order_option")
-	return _u
-}
-
-// SetOp sets the "op" field.
-func (_u *TaskUpdateOne) SetOp(v string) *TaskUpdateOne {
-	_ = _u.mutation.SetField("op", v)
-	return _u
-}
-
-// SetNillableOp sets the "op" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableOp(v *string) *TaskUpdateOne {
-	if v != nil {
-		_u.SetOp(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TaskUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *TaskUpdateOne) With(as ...entfield.Assignment) *TaskUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -478,6 +220,9 @@ func (_u *TaskUpdateOne) Select(field string, fields ...string) *TaskUpdateOne {
 
 // Save executes the query and returns the updated Task entity.
 func (_u *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 

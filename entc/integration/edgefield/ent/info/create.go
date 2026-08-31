@@ -14,12 +14,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // InfoCreate is the builder for creating a Info entity.
 type InfoCreate struct {
 	Config
+	err      error
 	mutation *InfoMutation
 	hooks    []Hook
 }
@@ -29,28 +31,11 @@ func NewInfoCreate(c Config, hooks []Hook, mutation *InfoMutation) *InfoCreate {
 	return &InfoCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetContent sets the "content" field.
-func (_c *InfoCreate) SetContent(v json.RawMessage) *InfoCreate {
-	_ = _c.mutation.SetField("content", v)
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *InfoCreate) SetID(v int) *InfoCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_c *InfoCreate) SetUserID(id int) *InfoCreate {
-	_ = _c.mutation.SetEdgeID("user", id)
-	return _c
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_c *InfoCreate) SetNillableUserID(id *int) *InfoCreate {
-	if id != nil {
-		_c = _c.SetUserID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the InfoCreate builder. The first error from as is recorded and returned by Save.
+func (_c *InfoCreate) With(as ...entfield.Assignment) *InfoCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -62,6 +47,9 @@ func (_c *InfoCreate) Mutation() *InfoMutation {
 
 // Save creates the Info in the database.
 func (_c *InfoCreate) Save(ctx context.Context) (*Info, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -176,6 +164,12 @@ func (_c *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*InfoMutation)
 				if !ok {

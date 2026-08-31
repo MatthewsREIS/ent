@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // PostUpdate is the builder for updating Post entities.
 type PostUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *PostMutation
 }
@@ -36,37 +38,12 @@ func (_u *PostUpdate) Where(ps ...predicate.Post) *PostUpdate {
 	return _u
 }
 
-// SetText sets the "text" field.
-func (_u *PostUpdate) SetText(v string) *PostUpdate {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *PostUpdate) SetNillableText(v *string) *PostUpdate {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PostUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *PostUpdate) With(as ...entfield.Assignment) *PostUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetAuthorID sets the "author_id" field.
-func (_u *PostUpdate) SetAuthorID(v int) *PostUpdate {
-	_ = _u.mutation.SetEdgeID("author", v)
-	return _u
-}
-
-// SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_u *PostUpdate) SetNillableAuthorID(v *int) *PostUpdate {
-	if v != nil {
-		_u.SetAuthorID(*v)
-	}
-	return _u
-}
-
-// ClearAuthorID clears the value of the "author_id" field.
-func (_u *PostUpdate) ClearAuthorID() *PostUpdate {
-	_ = _u.mutation.ClearEdge("author")
 	return _u
 }
 
@@ -83,6 +60,9 @@ func (_u *PostUpdate) ClearAuthor() *PostUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PostUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*PostMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -165,6 +145,7 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type PostUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *PostMutation
 }
@@ -174,37 +155,12 @@ func NewPostUpdateOne(c Config, hooks []Hook, mutation *PostMutation) *PostUpdat
 	return &PostUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_u *PostUpdateOne) SetText(v string) *PostUpdateOne {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *PostUpdateOne) SetNillableText(v *string) *PostUpdateOne {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PostUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *PostUpdateOne) With(as ...entfield.Assignment) *PostUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetAuthorID sets the "author_id" field.
-func (_u *PostUpdateOne) SetAuthorID(v int) *PostUpdateOne {
-	_ = _u.mutation.SetEdgeID("author", v)
-	return _u
-}
-
-// SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_u *PostUpdateOne) SetNillableAuthorID(v *int) *PostUpdateOne {
-	if v != nil {
-		_u.SetAuthorID(*v)
-	}
-	return _u
-}
-
-// ClearAuthorID clears the value of the "author_id" field.
-func (_u *PostUpdateOne) ClearAuthorID() *PostUpdateOne {
-	_ = _u.mutation.ClearEdge("author")
 	return _u
 }
 
@@ -234,6 +190,9 @@ func (_u *PostUpdateOne) Select(field string, fields ...string) *PostUpdateOne {
 
 // Save executes the query and returns the updated Post entity.
 func (_u *PostUpdateOne) Save(ctx context.Context) (*Post, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Post](ctx, &entbuilder.UpdateState[*PostMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

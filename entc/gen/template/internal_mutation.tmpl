@@ -56,6 +56,9 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 	{{- with $n.HasOneFieldID }}
 	IDType: reflect.TypeFor[{{ $n.ID.Type }}](),
 	{{- end }}
+	{{- if and $n.HasOneFieldID $n.ID.UserDefined }}
+	IDField: {{ $n.ID.Name | printf "%q" }},
+	{{- end }}
 	Fields: map[string]entbuilder.FieldSpec{
 		{{- range $f := $n.MutationFields }}
 		{{ $f.Name | printf "%q" }}: {
@@ -66,6 +69,9 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 			{{- end }}
 			{{- if $f.SupportsMutationAdd }}
 			Numeric: true,
+			{{- end }}
+			{{- if $f.Immutable }}
+			Immutable: true,
 			{{- end }}
 		},
 		{{- end }}
@@ -81,6 +87,9 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 			{{- end }}
 			{{- with $e.Field }}
 			Field: {{ .Name | printf "%q" }},
+			{{- end }}
+			{{- if $e.Immutable }}
+			Immutable: true,
 			{{- end }}
 		},
 		{{- end }}

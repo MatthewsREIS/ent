@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // NoteUpdate is the builder for updating Note entities.
 type NoteUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *NoteMutation
 }
@@ -37,43 +39,12 @@ func (_u *NoteUpdate) Where(ps ...predicate.Note) *NoteUpdate {
 	return _u
 }
 
-// SetText sets the "text" field.
-func (_u *NoteUpdate) SetText(v string) *NoteUpdate {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *NoteUpdate) SetNillableText(v *string) *NoteUpdate {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the NoteUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *NoteUpdate) With(as ...entfield.Assignment) *NoteUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearText clears the value of the "text" field.
-func (_u *NoteUpdate) ClearText() *NoteUpdate {
-	_ = _u.mutation.ClearField("text")
-	return _u
-}
-
-// SetParentID sets the "parent" edge to the Note entity by ID.
-func (_u *NoteUpdate) SetParentID(id schema.NoteID) *NoteUpdate {
-	_ = _u.mutation.SetEdgeID("parent", id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the Note entity by ID if the given value is not nil.
-func (_u *NoteUpdate) SetNillableParentID(id *schema.NoteID) *NoteUpdate {
-	if id != nil {
-		_u = _u.SetParentID(*id)
-	}
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the Note entity by IDs.
-func (_u *NoteUpdate) AddChildIDs(ids ...schema.NoteID) *NoteUpdate {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -102,6 +73,9 @@ func (_u *NoteUpdate) RemoveChildIDs(ids ...schema.NoteID) *NoteUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *NoteUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*NoteMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -232,6 +206,7 @@ func (_u *NoteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type NoteUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *NoteMutation
 }
@@ -241,43 +216,12 @@ func NewNoteUpdateOne(c Config, hooks []Hook, mutation *NoteMutation) *NoteUpdat
 	return &NoteUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_u *NoteUpdateOne) SetText(v string) *NoteUpdateOne {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *NoteUpdateOne) SetNillableText(v *string) *NoteUpdateOne {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the NoteUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *NoteUpdateOne) With(as ...entfield.Assignment) *NoteUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearText clears the value of the "text" field.
-func (_u *NoteUpdateOne) ClearText() *NoteUpdateOne {
-	_ = _u.mutation.ClearField("text")
-	return _u
-}
-
-// SetParentID sets the "parent" edge to the Note entity by ID.
-func (_u *NoteUpdateOne) SetParentID(id schema.NoteID) *NoteUpdateOne {
-	_ = _u.mutation.SetEdgeID("parent", id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the Note entity by ID if the given value is not nil.
-func (_u *NoteUpdateOne) SetNillableParentID(id *schema.NoteID) *NoteUpdateOne {
-	if id != nil {
-		_u = _u.SetParentID(*id)
-	}
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the Note entity by IDs.
-func (_u *NoteUpdateOne) AddChildIDs(ids ...schema.NoteID) *NoteUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -319,6 +263,9 @@ func (_u *NoteUpdateOne) Select(field string, fields ...string) *NoteUpdateOne {
 
 // Save executes the query and returns the updated Note entity.
 func (_u *NoteUpdateOne) Save(ctx context.Context) (*Note, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Note](ctx, &entbuilder.UpdateState[*NoteMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

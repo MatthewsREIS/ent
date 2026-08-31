@@ -27,20 +27,20 @@ var F = struct {
 	// ExpiredAt is the handle for the "expired_at" field.
 	ExpiredAt entfield.Time
 }{
-	ID:        entfield.NewNumber[int](FieldID),
-	Number:    entfield.NewString[string](FieldNumber),
-	Name:      entfield.NewString[string](FieldName),
-	CreatedAt: entfield.NewTime(FieldCreatedAt),
-	InHook:    entfield.NewString[string](FieldInHook),
-	ExpiredAt: entfield.NewTime(FieldExpiredAt),
+	ID:        entfield.NewNumber[int](FieldID, "id"),
+	Number:    entfield.NewString[string](FieldNumber, "number"),
+	Name:      entfield.NewString[string](FieldName, "name"),
+	CreatedAt: entfield.NewTime(FieldCreatedAt, "created_at"),
+	InHook:    entfield.NewString[string](FieldInHook, "in_hook"),
+	ExpiredAt: entfield.NewTime(FieldExpiredAt, "expired_at"),
 }
 
 // E holds typed edge handles for every edge of the Card type.
 var E = struct {
 	// Owner is the handle for the "owner" edge.
-	Owner entfield.Edge[predicate.User]
+	Owner entfield.Edge[predicate.User, int]
 }{
-	Owner: entfield.NewEdge[predicate.User](newOwnerStep),
+	Owner: entfield.NewEdge[predicate.User, int]("owner", newOwnerStep),
 }
 
 // And groups predicates with the AND operator between them.

@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // FileTypeUpdate is the builder for updating FileType entities.
 type FileTypeUpdate struct {
 	Config
+	err       error
 	hooks     []Hook
 	mutation  *FileTypeMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -37,51 +39,12 @@ func (_u *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *FileTypeUpdate) SetName(v string) *FileTypeUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *FileTypeUpdate) SetNillableName(v *string) *FileTypeUpdate {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the FileTypeUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *FileTypeUpdate) With(as ...entfield.Assignment) *FileTypeUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetType sets the "type" field.
-func (_u *FileTypeUpdate) SetType(v Type) *FileTypeUpdate {
-	_ = _u.mutation.SetField("type", v)
-	return _u
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *FileTypeUpdate) SetNillableType(v *Type) *FileTypeUpdate {
-	if v != nil {
-		_u.SetType(*v)
-	}
-	return _u
-}
-
-// SetState sets the "state" field.
-func (_u *FileTypeUpdate) SetState(v State) *FileTypeUpdate {
-	_ = _u.mutation.SetField("state", v)
-	return _u
-}
-
-// SetNillableState sets the "state" field if the given value is not nil.
-func (_u *FileTypeUpdate) SetNillableState(v *State) *FileTypeUpdate {
-	if v != nil {
-		_u.SetState(*v)
-	}
-	return _u
-}
-
-// AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_u *FileTypeUpdate) AddFileIDs(ids ...int) *FileTypeUpdate {
-	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -104,6 +67,9 @@ func (_u *FileTypeUpdate) RemoveFileIDs(ids ...int) *FileTypeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FileTypeUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*FileTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -233,6 +199,7 @@ func (_u *FileTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type FileTypeUpdateOne struct {
 	Config
 	fields    []string
+	err       error
 	hooks     []Hook
 	mutation  *FileTypeMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -243,51 +210,12 @@ func NewFileTypeUpdateOne(c Config, hooks []Hook, mutation *FileTypeMutation) *F
 	return &FileTypeUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_u *FileTypeUpdateOne) SetName(v string) *FileTypeUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *FileTypeUpdateOne) SetNillableName(v *string) *FileTypeUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the FileTypeUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *FileTypeUpdateOne) With(as ...entfield.Assignment) *FileTypeUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetType sets the "type" field.
-func (_u *FileTypeUpdateOne) SetType(v Type) *FileTypeUpdateOne {
-	_ = _u.mutation.SetField("type", v)
-	return _u
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *FileTypeUpdateOne) SetNillableType(v *Type) *FileTypeUpdateOne {
-	if v != nil {
-		_u.SetType(*v)
-	}
-	return _u
-}
-
-// SetState sets the "state" field.
-func (_u *FileTypeUpdateOne) SetState(v State) *FileTypeUpdateOne {
-	_ = _u.mutation.SetField("state", v)
-	return _u
-}
-
-// SetNillableState sets the "state" field if the given value is not nil.
-func (_u *FileTypeUpdateOne) SetNillableState(v *State) *FileTypeUpdateOne {
-	if v != nil {
-		_u.SetState(*v)
-	}
-	return _u
-}
-
-// AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_u *FileTypeUpdateOne) AddFileIDs(ids ...int) *FileTypeUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -323,6 +251,9 @@ func (_u *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeUpd
 
 // Save executes the query and returns the updated FileType entity.
 func (_u *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[FileType](ctx, &entbuilder.UpdateState[*FileTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

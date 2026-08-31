@@ -17,12 +17,14 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // RoleUpdate is the builder for updating Role entities.
 type RoleUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *RoleMutation
 }
@@ -38,37 +40,12 @@ func (_u *RoleUpdate) Where(ps ...predicate.Role) *RoleUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *RoleUpdate) SetName(v string) *RoleUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *RoleUpdate) SetNillableName(v *string) *RoleUpdate {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RoleUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *RoleUpdate) With(as ...entfield.Assignment) *RoleUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (_u *RoleUpdate) SetCreatedAt(v time.Time) *RoleUpdate {
-	_ = _u.mutation.SetField("created_at", v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *RoleUpdate) SetNillableCreatedAt(v *time.Time) *RoleUpdate {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
-	return _u
-}
-
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *RoleUpdate) AddUserIDs(ids ...int) *RoleUpdate {
-	_ = _u.mutation.AddEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -91,6 +68,9 @@ func (_u *RoleUpdate) RemoveUserIDs(ids ...int) *RoleUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RoleUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RoleMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -213,6 +193,7 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type RoleUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *RoleMutation
 }
@@ -222,37 +203,12 @@ func NewRoleUpdateOne(c Config, hooks []Hook, mutation *RoleMutation) *RoleUpdat
 	return &RoleUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_u *RoleUpdateOne) SetName(v string) *RoleUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *RoleUpdateOne) SetNillableName(v *string) *RoleUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RoleUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *RoleUpdateOne) With(as ...entfield.Assignment) *RoleUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (_u *RoleUpdateOne) SetCreatedAt(v time.Time) *RoleUpdateOne {
-	_ = _u.mutation.SetField("created_at", v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *RoleUpdateOne) SetNillableCreatedAt(v *time.Time) *RoleUpdateOne {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
-	return _u
-}
-
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *RoleUpdateOne) AddUserIDs(ids ...int) *RoleUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -288,6 +244,9 @@ func (_u *RoleUpdateOne) Select(field string, fields ...string) *RoleUpdateOne {
 
 // Save executes the query and returns the updated Role entity.
 func (_u *RoleUpdateOne) Save(ctx context.Context) (*Role, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Role](ctx, &entbuilder.UpdateState[*RoleMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

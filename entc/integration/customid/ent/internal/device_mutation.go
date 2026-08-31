@@ -26,9 +26,10 @@ type DeviceMutationOption = func(*DeviceMutation)
 // deviceDescriptor describes Device's fields and edges
 // for the generic mutation runtime.
 var deviceDescriptor = &entbuilder.Descriptor{
-	Name:   "Device",
-	IDType: reflect.TypeFor[schema.ID](),
-	Fields: map[string]entbuilder.FieldSpec{},
+	Name:    "Device",
+	IDType:  reflect.TypeFor[schema.ID](),
+	IDField: "id",
+	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"active_session": {
 			Cardinality:  entbuilder.O2OUnique,

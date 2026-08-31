@@ -17,25 +17,25 @@ import (
 var F = struct {
 	// CreatedAt is the handle for the "created_at" field.
 	CreatedAt entfield.Time
-	// BlobID is the handle for the "blob_id" field.
-	BlobID entfield.Value[uuid.UUID]
-	// LinkID is the handle for the "link_id" field.
-	LinkID entfield.Value[uuid.UUID]
+	// BlobID is the handle for the "blob_id" field (backs the "blob" edge).
+	BlobID entfield.EdgeField[uuid.UUID]
+	// LinkID is the handle for the "link_id" field (backs the "link" edge).
+	LinkID entfield.EdgeField[uuid.UUID]
 }{
-	CreatedAt: entfield.NewTime(FieldCreatedAt),
-	BlobID:    entfield.NewValue[uuid.UUID](FieldBlobID),
-	LinkID:    entfield.NewValue[uuid.UUID](FieldLinkID),
+	CreatedAt: entfield.NewTime(FieldCreatedAt, "created_at"),
+	BlobID:    entfield.NewEdgeField[uuid.UUID](FieldBlobID, "blob"),
+	LinkID:    entfield.NewEdgeField[uuid.UUID](FieldLinkID, "link"),
 }
 
 // E holds typed edge handles for every edge of the BlobLink type.
 var E = struct {
 	// Blob is the handle for the "blob" edge.
-	Blob entfield.Edge[predicate.Blob]
+	Blob entfield.Edge[predicate.Blob, uuid.UUID]
 	// Link is the handle for the "link" edge.
-	Link entfield.Edge[predicate.Blob]
+	Link entfield.Edge[predicate.Blob, uuid.UUID]
 }{
-	Blob: entfield.NewEdge[predicate.Blob](newBlobStep),
-	Link: entfield.NewEdge[predicate.Blob](newLinkStep),
+	Blob: entfield.NewEdge[predicate.Blob, uuid.UUID]("blob", newBlobStep),
+	Link: entfield.NewEdge[predicate.Blob, uuid.UUID]("link", newLinkStep),
 }
 
 // And groups predicates with the AND operator between them.

@@ -14,11 +14,13 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // PCUpdate is the builder for updating PC entities.
 type PCUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *PCMutation
 }
@@ -34,6 +36,15 @@ func (_u *PCUpdate) Where(ps ...predicate.PC) *PCUpdate {
 	return _u
 }
 
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PCUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *PCUpdate) With(as ...entfield.Assignment) *PCUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
+}
+
 // Mutation returns the PCMutation object of the builder.
 func (_u *PCUpdate) Mutation() *PCMutation {
 	return _u.mutation
@@ -41,6 +52,9 @@ func (_u *PCUpdate) Mutation() *PCMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PCUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
@@ -96,6 +110,7 @@ func (_u *PCUpdate) gremlin() *dsl.Traversal {
 type PCUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *PCMutation
 }
@@ -103,6 +118,15 @@ type PCUpdateOne struct {
 // NewPCUpdateOne returns a new PCUpdateOne initialized with the given config, hooks, and mutation.
 func NewPCUpdateOne(c Config, hooks []Hook, mutation *PCMutation) *PCUpdateOne {
 	return &PCUpdateOne{Config: c, hooks: hooks, mutation: mutation}
+}
+
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PCUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *PCUpdateOne) With(as ...entfield.Assignment) *PCUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
 }
 
 // Mutation returns the PCMutation object of the builder.
@@ -125,6 +149,9 @@ func (_u *PCUpdateOne) Select(field string, fields ...string) *PCUpdateOne {
 
 // Save executes the query and returns the updated PC entity.
 func (_u *PCUpdateOne) Save(ctx context.Context) (*PC, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 

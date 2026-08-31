@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserGroupUpdate is the builder for updating UserGroup entities.
 type UserGroupUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *UserGroupMutation
 }
@@ -37,44 +39,11 @@ func (_u *UserGroupUpdate) Where(ps ...predicate.UserGroup) *UserGroupUpdate {
 	return _u
 }
 
-// SetJoinedAt sets the "joined_at" field.
-func (_u *UserGroupUpdate) SetJoinedAt(v time.Time) *UserGroupUpdate {
-	_ = _u.mutation.SetField("joined_at", v)
-	return _u
-}
-
-// SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (_u *UserGroupUpdate) SetNillableJoinedAt(v *time.Time) *UserGroupUpdate {
-	if v != nil {
-		_u.SetJoinedAt(*v)
-	}
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *UserGroupUpdate) SetUserID(v int) *UserGroupUpdate {
-	_ = _u.mutation.SetEdgeID("user", v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserGroupUpdate) SetNillableUserID(v *int) *UserGroupUpdate {
-	if v != nil {
-		_u.SetUserID(*v)
-	}
-	return _u
-}
-
-// SetGroupID sets the "group_id" field.
-func (_u *UserGroupUpdate) SetGroupID(v int) *UserGroupUpdate {
-	_ = _u.mutation.SetEdgeID("group", v)
-	return _u
-}
-
-// SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (_u *UserGroupUpdate) SetNillableGroupID(v *int) *UserGroupUpdate {
-	if v != nil {
-		_u.SetGroupID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserGroupUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *UserGroupUpdate) With(as ...entfield.Assignment) *UserGroupUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -98,6 +67,9 @@ func (_u *UserGroupUpdate) ClearGroup() *UserGroupUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserGroupUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserGroupMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -223,6 +195,7 @@ func (_u *UserGroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type UserGroupUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *UserGroupMutation
 }
@@ -232,44 +205,11 @@ func NewUserGroupUpdateOne(c Config, hooks []Hook, mutation *UserGroupMutation) 
 	return &UserGroupUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetJoinedAt sets the "joined_at" field.
-func (_u *UserGroupUpdateOne) SetJoinedAt(v time.Time) *UserGroupUpdateOne {
-	_ = _u.mutation.SetField("joined_at", v)
-	return _u
-}
-
-// SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (_u *UserGroupUpdateOne) SetNillableJoinedAt(v *time.Time) *UserGroupUpdateOne {
-	if v != nil {
-		_u.SetJoinedAt(*v)
-	}
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *UserGroupUpdateOne) SetUserID(v int) *UserGroupUpdateOne {
-	_ = _u.mutation.SetEdgeID("user", v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserGroupUpdateOne) SetNillableUserID(v *int) *UserGroupUpdateOne {
-	if v != nil {
-		_u.SetUserID(*v)
-	}
-	return _u
-}
-
-// SetGroupID sets the "group_id" field.
-func (_u *UserGroupUpdateOne) SetGroupID(v int) *UserGroupUpdateOne {
-	_ = _u.mutation.SetEdgeID("group", v)
-	return _u
-}
-
-// SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (_u *UserGroupUpdateOne) SetNillableGroupID(v *int) *UserGroupUpdateOne {
-	if v != nil {
-		_u.SetGroupID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserGroupUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *UserGroupUpdateOne) With(as ...entfield.Assignment) *UserGroupUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -306,6 +246,9 @@ func (_u *UserGroupUpdateOne) Select(field string, fields ...string) *UserGroupU
 
 // Save executes the query and returns the updated UserGroup entity.
 func (_u *UserGroupUpdateOne) Save(ctx context.Context) (*UserGroup, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[UserGroup](ctx, &entbuilder.UpdateState[*UserGroupMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

@@ -7,6 +7,33 @@
 		"edges": {},
 		"noBareEQ": {
 			"Label": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/config/ent/user",
+		"setters": {
+			"ID": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Label": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	}
 }

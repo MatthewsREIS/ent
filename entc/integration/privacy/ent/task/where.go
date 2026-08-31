@@ -26,22 +26,22 @@ var F = struct {
 	// UUID is the handle for the "uuid" field.
 	UUID entfield.Value[uuid.UUID]
 }{
-	ID:          entfield.NewNumber[int](FieldID),
-	Title:       entfield.NewString[string](FieldTitle),
-	Description: entfield.NewString[string](FieldDescription),
-	Status:      entfield.NewEnum[Status](FieldStatus),
-	UUID:        entfield.NewValue[uuid.UUID](FieldUUID),
+	ID:          entfield.NewNumber[int](FieldID, "id"),
+	Title:       entfield.NewString[string](FieldTitle, "title"),
+	Description: entfield.NewString[string](FieldDescription, "description"),
+	Status:      entfield.NewEnum[Status](FieldStatus, "status"),
+	UUID:        entfield.NewValue[uuid.UUID](FieldUUID, "uuid"),
 }
 
 // E holds typed edge handles for every edge of the Task type.
 var E = struct {
 	// Teams is the handle for the "teams" edge.
-	Teams entfield.Edge[predicate.Team]
+	Teams entfield.Edge[predicate.Team, int]
 	// Owner is the handle for the "owner" edge.
-	Owner entfield.Edge[predicate.User]
+	Owner entfield.Edge[predicate.User, int]
 }{
-	Teams: entfield.NewEdge[predicate.Team](newTeamsStep),
-	Owner: entfield.NewEdge[predicate.User](newOwnerStep),
+	Teams: entfield.NewEdge[predicate.Team, int]("teams", newTeamsStep),
+	Owner: entfield.NewEdge[predicate.User, int]("owner", newOwnerStep),
 }
 
 // And groups predicates with the AND operator between them.

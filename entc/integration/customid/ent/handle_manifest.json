@@ -5,6 +5,33 @@
 		},
 		"edges": {
 			"Token": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/account",
+		"setters": {
+			"Email": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Token": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Token"
+			}
 		}
 	},
 	"blob": {
@@ -16,6 +43,49 @@
 			"BlobLinks": true,
 			"Links": true,
 			"Parent": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/blob",
+		"setters": {
+			"Count": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Links": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Link"
+			},
+			"Parent": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"UUID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"bloblink": {
@@ -27,6 +97,33 @@
 		"edges": {
 			"Blob": true,
 			"Link": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/bloblink",
+		"setters": {
+			"BlobID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"CreatedAt": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"LinkID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"car": {
@@ -37,6 +134,49 @@
 		},
 		"edges": {
 			"Owner": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/car",
+		"setters": {
+			"AfterID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"BeforeID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Model": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Owner": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			}
 		}
 	},
 	"device": {
@@ -44,6 +184,33 @@
 		"edges": {
 			"ActiveSession": true,
 			"Sessions": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/device",
+		"setters": {
+			"ActiveSession": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Sessions": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Session"
+			}
 		}
 	},
 	"doc": {
@@ -54,12 +221,74 @@
 			"Children": true,
 			"Parent": true,
 			"Related": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/doc",
+		"setters": {
+			"Children": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Child"
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Parent": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"Related": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Related"
+			},
+			"Text": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"group": {
 		"fields": {},
 		"edges": {
 			"Users": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/group",
+		"setters": {
+			"ID": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Users": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "User"
+			}
 		}
 	},
 	"intsid": {
@@ -67,18 +296,91 @@
 		"edges": {
 			"Children": true,
 			"Parent": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/intsid",
+		"setters": {
+			"Children": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Child"
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Parent": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			}
 		}
 	},
 	"link": {
 		"fields": {},
-		"edges": {}
+		"edges": {},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/link",
+		"setters": {
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"LinkInformation": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
+		}
 	},
 	"mixinid": {
 		"fields": {
 			"MixinField": true,
 			"SomeField": true
 		},
-		"edges": {}
+		"edges": {},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/mixinid",
+		"setters": {
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"MixinField": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"SomeField": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
+		}
 	},
 	"note": {
 		"fields": {
@@ -87,11 +389,57 @@
 		"edges": {
 			"Children": true,
 			"Parent": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/note",
+		"setters": {
+			"Children": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Child"
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Parent": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"Text": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"other": {
 		"fields": {},
-		"edges": {}
+		"edges": {},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/other",
+		"setters": {
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
+		}
 	},
 	"pet": {
 		"fields": {},
@@ -100,16 +448,89 @@
 			"Cars": true,
 			"Friends": true,
 			"Owner": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/pet",
+		"setters": {
+			"BestFriend": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"Cars": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Car"
+			},
+			"Friends": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Friend"
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Owner": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			}
 		}
 	},
 	"revision": {
 		"fields": {},
-		"edges": {}
+		"edges": {},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/revision",
+		"setters": {
+			"ID": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
+		}
 	},
 	"session": {
 		"fields": {},
 		"edges": {
 			"Device": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/session",
+		"setters": {
+			"Device": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"token": {
@@ -118,6 +539,33 @@
 		},
 		"edges": {
 			"Account": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/token",
+		"setters": {
+			"Account": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"Body": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"user": {
@@ -127,6 +575,49 @@
 			"Groups": true,
 			"Parent": true,
 			"Pets": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/customid/ent/user",
+		"setters": {
+			"Children": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Child"
+			},
+			"Groups": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Group"
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Parent": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"Pets": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Pet"
+			}
 		}
 	}
 }

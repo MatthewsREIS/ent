@@ -7,6 +7,7 @@
 package fieldtype
 
 import (
+	"net"
 	"net/http"
 	"time"
 
@@ -111,11 +112,11 @@ var F = struct {
 	// DeletedAt is the handle for the "deleted_at" field.
 	DeletedAt entfield.Value[*sql.NullTime]
 	// RawData is the handle for the "raw_data" field.
-	RawData entfield.Bytes
+	RawData entfield.Bytes[[]byte]
 	// Sensitive is the handle for the "sensitive" field.
-	Sensitive entfield.Bytes
+	Sensitive entfield.Bytes[[]byte]
 	// IP is the handle for the "ip" field.
-	IP entfield.Bytes
+	IP entfield.Bytes[net.IP]
 	// NullInt64 is the handle for the "null_int64" field.
 	NullInt64 entfield.Value[*sql.NullInt64]
 	// SchemaInt is the handle for the "schema_int" field.
@@ -138,6 +139,8 @@ var F = struct {
 	OptionalUUID entfield.Value[uuid.UUID]
 	// NillableUUID is the handle for the "nillable_uuid" field.
 	NillableUUID entfield.Value[uuid.UUID]
+	// Strings is the handle for the "strings" field.
+	Strings entfield.JSON[[]string]
 	// Pair is the handle for the "pair" field.
 	Pair entfield.Value[schema.Pair]
 	// NilPair is the handle for the "nil_pair" field.
@@ -151,71 +154,72 @@ var F = struct {
 	// PasswordOther is the handle for the "password_other" field.
 	PasswordOther entfield.Value[schema.Password]
 }{
-	ID:                    entfield.NewNumber[int](FieldID),
-	Int:                   entfield.NewNumber[int](FieldInt),
-	Int8:                  entfield.NewNumber[int8](FieldInt8),
-	Int16:                 entfield.NewNumber[int16](FieldInt16),
-	Int32:                 entfield.NewNumber[int32](FieldInt32),
-	Int64:                 entfield.NewNumber[int64](FieldInt64),
-	OptionalInt:           entfield.NewNumber[int](FieldOptionalInt),
-	OptionalInt8:          entfield.NewNumber[int8](FieldOptionalInt8),
-	OptionalInt16:         entfield.NewNumber[int16](FieldOptionalInt16),
-	OptionalInt32:         entfield.NewNumber[int32](FieldOptionalInt32),
-	OptionalInt64:         entfield.NewNumber[int64](FieldOptionalInt64),
-	NillableInt:           entfield.NewNumber[int](FieldNillableInt),
-	NillableInt8:          entfield.NewNumber[int8](FieldNillableInt8),
-	NillableInt16:         entfield.NewNumber[int16](FieldNillableInt16),
-	NillableInt32:         entfield.NewNumber[int32](FieldNillableInt32),
-	NillableInt64:         entfield.NewNumber[int64](FieldNillableInt64),
-	ValidateOptionalInt32: entfield.NewNumber[int32](FieldValidateOptionalInt32),
-	OptionalUint:          entfield.NewNumber[uint](FieldOptionalUint),
-	OptionalUint8:         entfield.NewNumber[uint8](FieldOptionalUint8),
-	OptionalUint16:        entfield.NewNumber[uint16](FieldOptionalUint16),
-	OptionalUint32:        entfield.NewNumber[uint32](FieldOptionalUint32),
-	OptionalUint64:        entfield.NewNumber[uint64](FieldOptionalUint64),
-	State:                 entfield.NewEnum[State](FieldState),
-	OptionalFloat:         entfield.NewNumber[float64](FieldOptionalFloat),
-	OptionalFloat32:       entfield.NewNumber[float32](FieldOptionalFloat32),
-	Text:                  entfield.NewString[string](FieldText),
-	Datetime:              entfield.NewTime(FieldDatetime),
-	Decimal:               entfield.NewNumber[float64](FieldDecimal),
-	LinkOther:             entfield.NewValue[*schema.Link](FieldLinkOther),
-	LinkOtherFunc:         entfield.NewValue[*schema.Link](FieldLinkOtherFunc),
-	MAC:                   entfield.NewValue[schema.MAC](FieldMAC),
-	StringArray:           entfield.NewValue[schema.Strings](FieldStringArray),
-	Password:              entfield.NewString[string](FieldPassword),
-	StringScanner:         entfield.NewString[schema.StringScanner](FieldStringScanner),
-	Duration:              entfield.NewNumber[time.Duration](FieldDuration),
-	Dir:                   entfield.NewString[http.Dir](FieldDir),
-	Ndir:                  entfield.NewString[http.Dir](FieldNdir),
-	Str:                   entfield.NewValue[sql.NullString](FieldStr),
-	NullStr:               entfield.NewValue[*sql.NullString](FieldNullStr),
-	Link:                  entfield.NewValue[schema.Link](FieldLink),
-	NullLink:              entfield.NewValue[*schema.Link](FieldNullLink),
-	Active:                entfield.NewBool[schema.Status](FieldActive),
-	NullActive:            entfield.NewBool[schema.Status](FieldNullActive),
-	Deleted:               entfield.NewValue[*sql.NullBool](FieldDeleted),
-	DeletedAt:             entfield.NewValue[*sql.NullTime](FieldDeletedAt),
-	RawData:               entfield.NewBytes(FieldRawData),
-	Sensitive:             entfield.NewBytes(FieldSensitive),
-	IP:                    entfield.NewBytes(FieldIP),
-	NullInt64:             entfield.NewValue[*sql.NullInt64](FieldNullInt64),
-	SchemaInt:             entfield.NewNumber[schema.Int](FieldSchemaInt),
-	SchemaInt8:            entfield.NewNumber[schema.Int8](FieldSchemaInt8),
-	SchemaInt64:           entfield.NewNumber[schema.Int64](FieldSchemaInt64),
-	SchemaFloat:           entfield.NewNumber[schema.Float64](FieldSchemaFloat),
-	SchemaFloat32:         entfield.NewNumber[schema.Float32](FieldSchemaFloat32),
-	NullFloat:             entfield.NewValue[*sql.NullFloat64](FieldNullFloat),
-	Role:                  entfield.NewEnum[role.Role](FieldRole),
-	Priority:              entfield.NewValue[role.Priority](FieldPriority),
-	OptionalUUID:          entfield.NewValue[uuid.UUID](FieldOptionalUUID),
-	NillableUUID:          entfield.NewValue[uuid.UUID](FieldNillableUUID),
-	Pair:                  entfield.NewValue[schema.Pair](FieldPair),
-	NilPair:               entfield.NewValue[*schema.Pair](FieldNilPair),
-	Vstring:               entfield.NewString[schema.VString](FieldVstring),
-	Triple:                entfield.NewValue[schema.Triple](FieldTriple),
-	BigInt:                entfield.NewValue[schema.BigInt](FieldBigInt),
-	PasswordOther:         entfield.NewValue[schema.Password](FieldPasswordOther),
+	ID:                    entfield.NewNumber[int](FieldID, "id"),
+	Int:                   entfield.NewNumber[int](FieldInt, "int"),
+	Int8:                  entfield.NewNumber[int8](FieldInt8, "int8"),
+	Int16:                 entfield.NewNumber[int16](FieldInt16, "int16"),
+	Int32:                 entfield.NewNumber[int32](FieldInt32, "int32"),
+	Int64:                 entfield.NewNumber[int64](FieldInt64, "int64"),
+	OptionalInt:           entfield.NewNumber[int](FieldOptionalInt, "optional_int"),
+	OptionalInt8:          entfield.NewNumber[int8](FieldOptionalInt8, "optional_int8"),
+	OptionalInt16:         entfield.NewNumber[int16](FieldOptionalInt16, "optional_int16"),
+	OptionalInt32:         entfield.NewNumber[int32](FieldOptionalInt32, "optional_int32"),
+	OptionalInt64:         entfield.NewNumber[int64](FieldOptionalInt64, "optional_int64"),
+	NillableInt:           entfield.NewNumber[int](FieldNillableInt, "nillable_int"),
+	NillableInt8:          entfield.NewNumber[int8](FieldNillableInt8, "nillable_int8"),
+	NillableInt16:         entfield.NewNumber[int16](FieldNillableInt16, "nillable_int16"),
+	NillableInt32:         entfield.NewNumber[int32](FieldNillableInt32, "nillable_int32"),
+	NillableInt64:         entfield.NewNumber[int64](FieldNillableInt64, "nillable_int64"),
+	ValidateOptionalInt32: entfield.NewNumber[int32](FieldValidateOptionalInt32, "validate_optional_int32"),
+	OptionalUint:          entfield.NewNumber[uint](FieldOptionalUint, "optional_uint"),
+	OptionalUint8:         entfield.NewNumber[uint8](FieldOptionalUint8, "optional_uint8"),
+	OptionalUint16:        entfield.NewNumber[uint16](FieldOptionalUint16, "optional_uint16"),
+	OptionalUint32:        entfield.NewNumber[uint32](FieldOptionalUint32, "optional_uint32"),
+	OptionalUint64:        entfield.NewNumber[uint64](FieldOptionalUint64, "optional_uint64"),
+	State:                 entfield.NewEnum[State](FieldState, "state"),
+	OptionalFloat:         entfield.NewNumber[float64](FieldOptionalFloat, "optional_float"),
+	OptionalFloat32:       entfield.NewNumber[float32](FieldOptionalFloat32, "optional_float32"),
+	Text:                  entfield.NewString[string](FieldText, "text"),
+	Datetime:              entfield.NewTime(FieldDatetime, "datetime"),
+	Decimal:               entfield.NewNumber[float64](FieldDecimal, "decimal"),
+	LinkOther:             entfield.NewValue[*schema.Link](FieldLinkOther, "link_other"),
+	LinkOtherFunc:         entfield.NewValue[*schema.Link](FieldLinkOtherFunc, "link_other_func"),
+	MAC:                   entfield.NewValue[schema.MAC](FieldMAC, "mac"),
+	StringArray:           entfield.NewValue[schema.Strings](FieldStringArray, "string_array"),
+	Password:              entfield.NewString[string](FieldPassword, "password"),
+	StringScanner:         entfield.NewString[schema.StringScanner](FieldStringScanner, "string_scanner"),
+	Duration:              entfield.NewNumber[time.Duration](FieldDuration, "duration"),
+	Dir:                   entfield.NewString[http.Dir](FieldDir, "dir"),
+	Ndir:                  entfield.NewString[http.Dir](FieldNdir, "ndir"),
+	Str:                   entfield.NewValue[sql.NullString](FieldStr, "str"),
+	NullStr:               entfield.NewValue[*sql.NullString](FieldNullStr, "null_str"),
+	Link:                  entfield.NewValue[schema.Link](FieldLink, "link"),
+	NullLink:              entfield.NewValue[*schema.Link](FieldNullLink, "null_link"),
+	Active:                entfield.NewBool[schema.Status](FieldActive, "active"),
+	NullActive:            entfield.NewBool[schema.Status](FieldNullActive, "null_active"),
+	Deleted:               entfield.NewValue[*sql.NullBool](FieldDeleted, "deleted"),
+	DeletedAt:             entfield.NewValue[*sql.NullTime](FieldDeletedAt, "deleted_at"),
+	RawData:               entfield.NewBytes[[]byte](FieldRawData, "raw_data"),
+	Sensitive:             entfield.NewBytes[[]byte](FieldSensitive, "sensitive"),
+	IP:                    entfield.NewBytes[net.IP](FieldIP, "ip"),
+	NullInt64:             entfield.NewValue[*sql.NullInt64](FieldNullInt64, "null_int64"),
+	SchemaInt:             entfield.NewNumber[schema.Int](FieldSchemaInt, "schema_int"),
+	SchemaInt8:            entfield.NewNumber[schema.Int8](FieldSchemaInt8, "schema_int8"),
+	SchemaInt64:           entfield.NewNumber[schema.Int64](FieldSchemaInt64, "schema_int64"),
+	SchemaFloat:           entfield.NewNumber[schema.Float64](FieldSchemaFloat, "schema_float"),
+	SchemaFloat32:         entfield.NewNumber[schema.Float32](FieldSchemaFloat32, "schema_float32"),
+	NullFloat:             entfield.NewValue[*sql.NullFloat64](FieldNullFloat, "null_float"),
+	Role:                  entfield.NewEnum[role.Role](FieldRole, "role"),
+	Priority:              entfield.NewValue[role.Priority](FieldPriority, "priority"),
+	OptionalUUID:          entfield.NewValue[uuid.UUID](FieldOptionalUUID, "optional_uuid"),
+	NillableUUID:          entfield.NewValue[uuid.UUID](FieldNillableUUID, "nillable_uuid"),
+	Strings:               entfield.NewJSON[[]string]("strings"),
+	Pair:                  entfield.NewValue[schema.Pair](FieldPair, "pair"),
+	NilPair:               entfield.NewValue[*schema.Pair](FieldNilPair, "nil_pair"),
+	Vstring:               entfield.NewString[schema.VString](FieldVstring, "vstring"),
+	Triple:                entfield.NewValue[schema.Triple](FieldTriple, "triple"),
+	BigInt:                entfield.NewValue[schema.BigInt](FieldBigInt, "big_int"),
+	PasswordOther:         entfield.NewValue[schema.Password](FieldPasswordOther, "password_other"),
 }
 
 // E holds typed edge handles for every edge of the FieldType type.

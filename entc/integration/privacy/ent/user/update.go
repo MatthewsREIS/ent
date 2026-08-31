@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -36,42 +38,12 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return _u
 }
 
-// SetAge sets the "age" field.
-func (_u *UserUpdate) SetAge(v uint) *UserUpdate {
-	_ = _u.mutation.ResetField("age")
-	_ = _u.mutation.SetField("age", v)
-	return _u
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAge(v *uint) *UserUpdate {
-	if v != nil {
-		_u.SetAge(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdate) With(as ...entfield.Assignment) *UserUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddAge adds value to the "age" field.
-func (_u *UserUpdate) AddAge(v int) *UserUpdate {
-	_ = _u.mutation.AddField("age", v)
-	return _u
-}
-
-// ClearAge clears the value of the "age" field.
-func (_u *UserUpdate) ClearAge() *UserUpdate {
-	_ = _u.mutation.ClearField("age")
-	return _u
-}
-
-// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (_u *UserUpdate) AddTeamIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("teams", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
-func (_u *UserUpdate) AddTaskIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("tasks", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -106,6 +78,9 @@ func (_u *UserUpdate) RemoveTaskIDs(ids ...int) *UserUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -144,7 +119,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(FieldAge, field.TypeUint, value)
 	}
 	if added, ok := _u.mutation.AddedField("age"); ok {
-		value := added.(int)
+		value := added.(uint)
 		_spec.AddField(FieldAge, field.TypeUint, value)
 	}
 	if _u.mutation.FieldCleared("age") {
@@ -256,6 +231,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type UserUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -265,42 +241,12 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 	return &UserUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetAge sets the "age" field.
-func (_u *UserUpdateOne) SetAge(v uint) *UserUpdateOne {
-	_ = _u.mutation.ResetField("age")
-	_ = _u.mutation.SetField("age", v)
-	return _u
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAge(v *uint) *UserUpdateOne {
-	if v != nil {
-		_u.SetAge(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdateOne) With(as ...entfield.Assignment) *UserUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddAge adds value to the "age" field.
-func (_u *UserUpdateOne) AddAge(v int) *UserUpdateOne {
-	_ = _u.mutation.AddField("age", v)
-	return _u
-}
-
-// ClearAge clears the value of the "age" field.
-func (_u *UserUpdateOne) ClearAge() *UserUpdateOne {
-	_ = _u.mutation.ClearField("age")
-	return _u
-}
-
-// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (_u *UserUpdateOne) AddTeamIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("teams", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
-func (_u *UserUpdateOne) AddTaskIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("tasks", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -348,6 +294,9 @@ func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
 
 // Save executes the query and returns the updated User entity.
 func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[User](ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -403,7 +352,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		_spec.SetField(FieldAge, field.TypeUint, value)
 	}
 	if added, ok := _u.mutation.AddedField("age"); ok {
-		value := added.(int)
+		value := added.(uint)
 		_spec.AddField(FieldAge, field.TypeUint, value)
 	}
 	if _u.mutation.FieldCleared("age") {

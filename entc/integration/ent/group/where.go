@@ -27,29 +27,29 @@ var F = struct {
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
 }{
-	ID:       entfield.NewNumber[int](FieldID),
-	Active:   entfield.NewBool[bool](FieldActive),
-	Expire:   entfield.NewTime(FieldExpire),
-	Type:     entfield.NewString[string](FieldType),
-	MaxUsers: entfield.NewNumber[int](FieldMaxUsers),
-	Name:     entfield.NewString[string](FieldName),
+	ID:       entfield.NewNumber[int](FieldID, "id"),
+	Active:   entfield.NewBool[bool](FieldActive, "active"),
+	Expire:   entfield.NewTime(FieldExpire, "expire"),
+	Type:     entfield.NewString[string](FieldType, "type"),
+	MaxUsers: entfield.NewNumber[int](FieldMaxUsers, "max_users"),
+	Name:     entfield.NewString[string](FieldName, "name"),
 }
 
 // E holds typed edge handles for every edge of the Group type.
 var E = struct {
 	// Files is the handle for the "files" edge.
-	Files entfield.Edge[predicate.File]
+	Files entfield.Edge[predicate.File, int]
 	// Blocked is the handle for the "blocked" edge.
-	Blocked entfield.Edge[predicate.User]
+	Blocked entfield.Edge[predicate.User, int]
 	// Users is the handle for the "users" edge.
-	Users entfield.Edge[predicate.User]
+	Users entfield.Edge[predicate.User, int]
 	// Info is the handle for the "info" edge.
-	Info entfield.Edge[predicate.GroupInfo]
+	Info entfield.Edge[predicate.GroupInfo, int]
 }{
-	Files:   entfield.NewEdge[predicate.File](newFilesStep),
-	Blocked: entfield.NewEdge[predicate.User](newBlockedStep),
-	Users:   entfield.NewEdge[predicate.User](newUsersStep),
-	Info:    entfield.NewEdge[predicate.GroupInfo](newInfoStep),
+	Files:   entfield.NewEdge[predicate.File, int]("files", newFilesStep),
+	Blocked: entfield.NewEdge[predicate.User, int]("blocked", newBlockedStep),
+	Users:   entfield.NewEdge[predicate.User, int]("users", newUsersStep),
+	Info:    entfield.NewEdge[predicate.GroupInfo, int]("info", newInfoStep),
 }
 
 // And groups predicates with the AND operator between them.

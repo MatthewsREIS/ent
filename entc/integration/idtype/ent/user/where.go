@@ -19,22 +19,22 @@ var F = struct {
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
 }{
-	ID:   entfield.NewNumber[uint64](FieldID),
-	Name: entfield.NewString[string](FieldName),
+	ID:   entfield.NewNumber[uint64](FieldID, "id"),
+	Name: entfield.NewString[string](FieldName, "name"),
 }
 
 // E holds typed edge handles for every edge of the User type.
 var E = struct {
 	// Spouse is the handle for the "spouse" edge.
-	Spouse entfield.Edge[predicate.User]
+	Spouse entfield.Edge[predicate.User, uint64]
 	// Followers is the handle for the "followers" edge.
-	Followers entfield.Edge[predicate.User]
+	Followers entfield.Edge[predicate.User, uint64]
 	// Following is the handle for the "following" edge.
-	Following entfield.Edge[predicate.User]
+	Following entfield.Edge[predicate.User, uint64]
 }{
-	Spouse:    entfield.NewEdge[predicate.User](newSpouseStep),
-	Followers: entfield.NewEdge[predicate.User](newFollowersStep),
-	Following: entfield.NewEdge[predicate.User](newFollowingStep),
+	Spouse:    entfield.NewEdge[predicate.User, uint64]("spouse", newSpouseStep),
+	Followers: entfield.NewEdge[predicate.User, uint64]("followers", newFollowersStep),
+	Following: entfield.NewEdge[predicate.User, uint64]("following", newFollowingStep),
 }
 
 // And groups predicates with the AND operator between them.

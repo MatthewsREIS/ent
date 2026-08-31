@@ -20,16 +20,16 @@ var F = struct {
 	// Email is the handle for the "email" field.
 	Email entfield.String[string]
 }{
-	ID:    entfield.NewValue[sid.ID](FieldID),
-	Email: entfield.NewString[string](FieldEmail),
+	ID:    entfield.NewValue[sid.ID](FieldID, "id"),
+	Email: entfield.NewString[string](FieldEmail, "email"),
 }
 
 // E holds typed edge handles for every edge of the Account type.
 var E = struct {
 	// Token is the handle for the "token" edge.
-	Token entfield.Edge[predicate.Token]
+	Token entfield.Edge[predicate.Token, sid.ID]
 }{
-	Token: entfield.NewEdge[predicate.Token](newTokenStep),
+	Token: entfield.NewEdge[predicate.Token, sid.ID]("token", newTokenStep),
 }
 
 // And groups predicates with the AND operator between them.

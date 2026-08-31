@@ -12,11 +12,13 @@ import (
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // PCCreate is the builder for creating a PC entity.
 type PCCreate struct {
 	Config
+	err      error
 	mutation *PCMutation
 	hooks    []Hook
 }
@@ -26,6 +28,15 @@ func NewPCCreate(c Config, hooks []Hook, mutation *PCMutation) *PCCreate {
 	return &PCCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PCCreate builder. The first error from as is recorded and returned by Save.
+func (_c *PCCreate) With(as ...entfield.Assignment) *PCCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
+	return _c
+}
+
 // Mutation returns the PCMutation object of the builder.
 func (_c *PCCreate) Mutation() *PCMutation {
 	return _c.mutation
@@ -33,6 +44,9 @@ func (_c *PCCreate) Mutation() *PCMutation {
 
 // Save creates the PC in the database.
 func (_c *PCCreate) Save(ctx context.Context) (*PC, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 

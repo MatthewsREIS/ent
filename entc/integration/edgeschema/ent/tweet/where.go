@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entfield"
+	"github.com/google/uuid"
 )
 
 // F holds typed predicate/order handles for every comparable field of the Tweet type.
@@ -19,31 +20,31 @@ var F = struct {
 	// Text is the handle for the "text" field.
 	Text entfield.String[string]
 }{
-	ID:   entfield.NewNumber[int](FieldID),
-	Text: entfield.NewString[string](FieldText),
+	ID:   entfield.NewNumber[int](FieldID, "id"),
+	Text: entfield.NewString[string](FieldText, "text"),
 }
 
 // E holds typed edge handles for every edge of the Tweet type.
 var E = struct {
 	// LikedUsers is the handle for the "liked_users" edge.
-	LikedUsers entfield.Edge[predicate.User]
+	LikedUsers entfield.Edge[predicate.User, int]
 	// User is the handle for the "user" edge.
-	User entfield.Edge[predicate.User]
+	User entfield.Edge[predicate.User, int]
 	// Tags is the handle for the "tags" edge.
-	Tags entfield.Edge[predicate.Tag]
+	Tags entfield.Edge[predicate.Tag, int]
 	// Likes is the handle for the "likes" edge.
-	Likes entfield.Edge[predicate.TweetLike]
+	Likes entfield.Edge[predicate.TweetLike, struct{}]
 	// TweetUser is the handle for the "tweet_user" edge.
-	TweetUser entfield.Edge[predicate.UserTweet]
+	TweetUser entfield.Edge[predicate.UserTweet, int]
 	// TweetTags is the handle for the "tweet_tags" edge.
-	TweetTags entfield.Edge[predicate.TweetTag]
+	TweetTags entfield.Edge[predicate.TweetTag, uuid.UUID]
 }{
-	LikedUsers: entfield.NewEdge[predicate.User](newLikedUsersStep),
-	User:       entfield.NewEdge[predicate.User](newUserStep),
-	Tags:       entfield.NewEdge[predicate.Tag](newTagsStep),
-	Likes:      entfield.NewEdge[predicate.TweetLike](newLikesStep),
-	TweetUser:  entfield.NewEdge[predicate.UserTweet](newTweetUserStep),
-	TweetTags:  entfield.NewEdge[predicate.TweetTag](newTweetTagsStep),
+	LikedUsers: entfield.NewEdge[predicate.User, int]("liked_users", newLikedUsersStep),
+	User:       entfield.NewEdge[predicate.User, int]("user", newUserStep),
+	Tags:       entfield.NewEdge[predicate.Tag, int]("tags", newTagsStep),
+	Likes:      entfield.NewEdge[predicate.TweetLike, struct{}]("likes", newLikesStep),
+	TweetUser:  entfield.NewEdge[predicate.UserTweet, int]("tweet_user", newTweetUserStep),
+	TweetTags:  entfield.NewEdge[predicate.TweetTag, uuid.UUID]("tweet_tags", newTweetTagsStep),
 }
 
 // And groups predicates with the AND operator between them.

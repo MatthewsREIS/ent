@@ -27,8 +27,9 @@ type TweetTagMutationOption = func(*TweetTagMutation)
 // tweettagDescriptor describes TweetTag's fields and edges
 // for the generic mutation runtime.
 var tweettagDescriptor = &entbuilder.Descriptor{
-	Name:   "TweetTag",
-	IDType: reflect.TypeFor[uuid.UUID](),
+	Name:    "TweetTag",
+	IDType:  reflect.TypeFor[uuid.UUID](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"added_at": {
 			Type:   reflect.TypeFor[time.Time](),

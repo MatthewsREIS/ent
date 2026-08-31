@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // GroupUpdate is the builder for updating Group entities.
 type GroupUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *GroupMutation
 }
@@ -36,9 +38,12 @@ func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	return _u
 }
 
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_u *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
-	_ = _u.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *GroupUpdate) With(as ...entfield.Assignment) *GroupUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -61,6 +66,9 @@ func (_u *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*GroupMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -156,6 +164,7 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type GroupUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *GroupMutation
 }
@@ -165,9 +174,12 @@ func NewGroupUpdateOne(c Config, hooks []Hook, mutation *GroupMutation) *GroupUp
 	return &GroupUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_u *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *GroupUpdateOne) With(as ...entfield.Assignment) *GroupUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -203,6 +215,9 @@ func (_u *GroupUpdateOne) Select(field string, fields ...string) *GroupUpdateOne
 
 // Save executes the query and returns the updated Group entity.
 func (_u *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Group](ctx, &entbuilder.UpdateState[*GroupMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

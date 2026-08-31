@@ -13,12 +13,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // SpecCreate is the builder for creating a Spec entity.
 type SpecCreate struct {
 	Config
+	err      error
 	mutation *SpecMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -29,9 +31,12 @@ func NewSpecCreate(c Config, hooks []Hook, mutation *SpecMutation) *SpecCreate {
 	return &SpecCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// AddCardIDs adds the "card" edge to the Card entity by IDs.
-func (_c *SpecCreate) AddCardIDs(ids ...int) *SpecCreate {
-	_ = _c.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the SpecCreate builder. The first error from as is recorded and returned by Save.
+func (_c *SpecCreate) With(as ...entfield.Assignment) *SpecCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -42,6 +47,9 @@ func (_c *SpecCreate) Mutation() *SpecMutation {
 
 // Save creates the Spec in the database.
 func (_c *SpecCreate) Save(ctx context.Context) (*Spec, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -204,6 +212,12 @@ func (_c *SpecCreateBulk) Save(ctx context.Context) ([]*Spec, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SpecMutation)
 				if !ok {

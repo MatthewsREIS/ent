@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // ItemUpdate is the builder for updating Item entities.
 type ItemUpdate struct {
 	Config
+	err       error
 	hooks     []Hook
 	mutation  *ItemMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -37,23 +39,12 @@ func (_u *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
 	return _u
 }
 
-// SetText sets the "text" field.
-func (_u *ItemUpdate) SetText(v string) *ItemUpdate {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *ItemUpdate) SetNillableText(v *string) *ItemUpdate {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ItemUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *ItemUpdate) With(as ...entfield.Assignment) *ItemUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearText clears the value of the "text" field.
-func (_u *ItemUpdate) ClearText() *ItemUpdate {
-	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -64,6 +55,9 @@ func (_u *ItemUpdate) Mutation() *ItemMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ItemUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*ItemMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -140,6 +134,7 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type ItemUpdateOne struct {
 	Config
 	fields    []string
+	err       error
 	hooks     []Hook
 	mutation  *ItemMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -150,23 +145,12 @@ func NewItemUpdateOne(c Config, hooks []Hook, mutation *ItemMutation) *ItemUpdat
 	return &ItemUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_u *ItemUpdateOne) SetText(v string) *ItemUpdateOne {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *ItemUpdateOne) SetNillableText(v *string) *ItemUpdateOne {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ItemUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *ItemUpdateOne) With(as ...entfield.Assignment) *ItemUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearText clears the value of the "text" field.
-func (_u *ItemUpdateOne) ClearText() *ItemUpdateOne {
-	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -190,6 +174,9 @@ func (_u *ItemUpdateOne) Select(field string, fields ...string) *ItemUpdateOne {
 
 // Save executes the query and returns the updated Item entity.
 func (_u *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Item](ctx, &entbuilder.UpdateState[*ItemMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

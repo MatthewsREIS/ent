@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // IntSIDUpdate is the builder for updating IntSID entities.
 type IntSIDUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *IntSIDMutation
 }
@@ -37,23 +39,12 @@ func (_u *IntSIDUpdate) Where(ps ...predicate.IntSID) *IntSIDUpdate {
 	return _u
 }
 
-// SetParentID sets the "parent" edge to the IntSID entity by ID.
-func (_u *IntSIDUpdate) SetParentID(id sid.ID) *IntSIDUpdate {
-	_ = _u.mutation.SetEdgeID("parent", id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the IntSID entity by ID if the given value is not nil.
-func (_u *IntSIDUpdate) SetNillableParentID(id *sid.ID) *IntSIDUpdate {
-	if id != nil {
-		_u = _u.SetParentID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the IntSIDUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *IntSIDUpdate) With(as ...entfield.Assignment) *IntSIDUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the IntSID entity by IDs.
-func (_u *IntSIDUpdate) AddChildIDs(ids ...sid.ID) *IntSIDUpdate {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -82,6 +73,9 @@ func (_u *IntSIDUpdate) RemoveChildIDs(ids ...sid.ID) *IntSIDUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *IntSIDUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*IntSIDMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -206,6 +200,7 @@ func (_u *IntSIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type IntSIDUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *IntSIDMutation
 }
@@ -215,23 +210,12 @@ func NewIntSIDUpdateOne(c Config, hooks []Hook, mutation *IntSIDMutation) *IntSI
 	return &IntSIDUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetParentID sets the "parent" edge to the IntSID entity by ID.
-func (_u *IntSIDUpdateOne) SetParentID(id sid.ID) *IntSIDUpdateOne {
-	_ = _u.mutation.SetEdgeID("parent", id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the IntSID entity by ID if the given value is not nil.
-func (_u *IntSIDUpdateOne) SetNillableParentID(id *sid.ID) *IntSIDUpdateOne {
-	if id != nil {
-		_u = _u.SetParentID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the IntSIDUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *IntSIDUpdateOne) With(as ...entfield.Assignment) *IntSIDUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the IntSID entity by IDs.
-func (_u *IntSIDUpdateOne) AddChildIDs(ids ...sid.ID) *IntSIDUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -273,6 +257,9 @@ func (_u *IntSIDUpdateOne) Select(field string, fields ...string) *IntSIDUpdateO
 
 // Save executes the query and returns the updated IntSID entity.
 func (_u *IntSIDUpdateOne) Save(ctx context.Context) (*IntSID, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[IntSID](ctx, &entbuilder.UpdateState[*IntSIDMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

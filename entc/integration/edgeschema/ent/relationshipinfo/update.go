@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // RelationshipInfoUpdate is the builder for updating RelationshipInfo entities.
 type RelationshipInfoUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *RelationshipInfoMutation
 }
@@ -36,16 +38,11 @@ func (_u *RelationshipInfoUpdate) Where(ps ...predicate.RelationshipInfo) *Relat
 	return _u
 }
 
-// SetText sets the "text" field.
-func (_u *RelationshipInfoUpdate) SetText(v string) *RelationshipInfoUpdate {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *RelationshipInfoUpdate) SetNillableText(v *string) *RelationshipInfoUpdate {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RelationshipInfoUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *RelationshipInfoUpdate) With(as ...entfield.Assignment) *RelationshipInfoUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -57,6 +54,9 @@ func (_u *RelationshipInfoUpdate) Mutation() *RelationshipInfoMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RelationshipInfoUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RelationshipInfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -110,6 +110,7 @@ func (_u *RelationshipInfoUpdate) sqlSave(ctx context.Context) (_node int, err e
 type RelationshipInfoUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *RelationshipInfoMutation
 }
@@ -119,16 +120,11 @@ func NewRelationshipInfoUpdateOne(c Config, hooks []Hook, mutation *Relationship
 	return &RelationshipInfoUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_u *RelationshipInfoUpdateOne) SetText(v string) *RelationshipInfoUpdateOne {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *RelationshipInfoUpdateOne) SetNillableText(v *string) *RelationshipInfoUpdateOne {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RelationshipInfoUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *RelationshipInfoUpdateOne) With(as ...entfield.Assignment) *RelationshipInfoUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -153,6 +149,9 @@ func (_u *RelationshipInfoUpdateOne) Select(field string, fields ...string) *Rel
 
 // Save executes the query and returns the updated RelationshipInfo entity.
 func (_u *RelationshipInfoUpdateOne) Save(ctx context.Context) (*RelationshipInfo, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[RelationshipInfo](ctx, &entbuilder.UpdateState[*RelationshipInfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

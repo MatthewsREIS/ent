@@ -20,20 +20,20 @@ var F = struct {
 	ID entfield.Number[int]
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
-	// OwnerID is the handle for the "owner_id" field.
-	OwnerID entfield.Number[int]
+	// OwnerID is the handle for the "owner_id" field (backs the "owner" edge).
+	OwnerID entfield.EdgeField[int]
 }{
-	ID:      entfield.NewNumber[int](FieldID),
-	Name:    entfield.NewString[string](FieldName),
-	OwnerID: entfield.NewNumber[int](FieldOwnerID),
+	ID:      entfield.NewNumber[int](FieldID, "id"),
+	Name:    entfield.NewString[string](FieldName, "name"),
+	OwnerID: entfield.NewEdgeField[int](FieldOwnerID, "owner"),
 }
 
 // E holds typed edge handles for every edge of the Pet type.
 var E = struct {
 	// Owner is the handle for the "owner" edge.
-	Owner entfield.Edge[predicate.User]
+	Owner entfield.Edge[predicate.User, int]
 }{
-	Owner: entfield.NewEdgeSteps[predicate.User](newOwnerStep, []func(*sql.Selector, *sqlgraph.Step){
+	Owner: entfield.NewEdgeSteps[predicate.User, int]("owner", newOwnerStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.User

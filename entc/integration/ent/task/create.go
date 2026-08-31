@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // TaskCreate is the builder for creating a Task entity.
 type TaskCreate struct {
 	Config
+	err      error
 	mutation *TaskMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -32,106 +34,11 @@ func NewTaskCreate(c Config, hooks []Hook, mutation *TaskMutation) *TaskCreate {
 	return &TaskCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetPriority sets the "priority" field.
-func (_c *TaskCreate) SetPriority(v task.Priority) *TaskCreate {
-	_ = _c.mutation.SetField("priority", v)
-	return _c
-}
-
-// SetNillablePriority sets the "priority" field if the given value is not nil.
-func (_c *TaskCreate) SetNillablePriority(v *task.Priority) *TaskCreate {
-	if v != nil {
-		_c.SetPriority(*v)
-	}
-	return _c
-}
-
-// SetPriorities sets the "priorities" field.
-func (_c *TaskCreate) SetPriorities(v map[string]task.Priority) *TaskCreate {
-	_ = _c.mutation.SetField("priorities", v)
-	return _c
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (_c *TaskCreate) SetCreatedAt(v time.Time) *TaskCreate {
-	_ = _c.mutation.SetField("created_at", v)
-	return _c
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableCreatedAt(v *time.Time) *TaskCreate {
-	if v != nil {
-		_c.SetCreatedAt(*v)
-	}
-	return _c
-}
-
-// SetName sets the "name" field.
-func (_c *TaskCreate) SetName(v string) *TaskCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableName(v *string) *TaskCreate {
-	if v != nil {
-		_c.SetName(*v)
-	}
-	return _c
-}
-
-// SetOwner sets the "owner" field.
-func (_c *TaskCreate) SetOwner(v string) *TaskCreate {
-	_ = _c.mutation.SetField("owner", v)
-	return _c
-}
-
-// SetNillableOwner sets the "owner" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableOwner(v *string) *TaskCreate {
-	if v != nil {
-		_c.SetOwner(*v)
-	}
-	return _c
-}
-
-// SetOrder sets the "order" field.
-func (_c *TaskCreate) SetOrder(v int) *TaskCreate {
-	_ = _c.mutation.SetField("order", v)
-	return _c
-}
-
-// SetNillableOrder sets the "order" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableOrder(v *int) *TaskCreate {
-	if v != nil {
-		_c.SetOrder(*v)
-	}
-	return _c
-}
-
-// SetOrderOption sets the "order_option" field.
-func (_c *TaskCreate) SetOrderOption(v int) *TaskCreate {
-	_ = _c.mutation.SetField("order_option", v)
-	return _c
-}
-
-// SetNillableOrderOption sets the "order_option" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableOrderOption(v *int) *TaskCreate {
-	if v != nil {
-		_c.SetOrderOption(*v)
-	}
-	return _c
-}
-
-// SetOp sets the "op" field.
-func (_c *TaskCreate) SetOp(v string) *TaskCreate {
-	_ = _c.mutation.SetField("op", v)
-	return _c
-}
-
-// SetNillableOp sets the "op" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableOp(v *string) *TaskCreate {
-	if v != nil {
-		_c.SetOp(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TaskCreate builder. The first error from as is recorded and returned by Save.
+func (_c *TaskCreate) With(as ...entfield.Assignment) *TaskCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -143,6 +50,9 @@ func (_c *TaskCreate) Mutation() *TaskMutation {
 
 // Save creates the Task in the database.
 func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -358,6 +268,12 @@ func (_c *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TaskMutation)

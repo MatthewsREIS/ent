@@ -113,7 +113,13 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 				}
 				{{- if $f.SupportsMutationAdd }}
 					if added, ok := {{ $mutation }}.AddedField({{ printf "%q" $f.Name }}); ok {
-						value := added.({{ trimPackage $f.SignedType.String $.Package }})
+						{{- /* entfield.Number[T].Add(v T) (see runtime/entfield) stores the
+						delta as the field's OWN type T, not SignedType — unlike the old
+						generated Add<F>(v SignedType) setter it replaces, it has no way to
+						accept a negative literal for an unsigned field (the type system
+						forbids it), so it never produces a SignedType-typed delta. Assert
+						against $f.Type to match what's actually stored. */}}
+						value := added.({{ trimPackage $f.Type.String $.Package }})
 						{{- if $f.HasValueScanner }}
 							vv, err := {{ trimPackage $f.ValueFunc $.Package }}(value)
 							if err != nil {

@@ -12,12 +12,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CustomTypeCreate is the builder for creating a CustomType entity.
 type CustomTypeCreate struct {
 	Config
+	err      error
 	mutation *CustomTypeMutation
 	hooks    []Hook
 }
@@ -27,16 +29,11 @@ func NewCustomTypeCreate(c Config, hooks []Hook, mutation *CustomTypeMutation) *
 	return &CustomTypeCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetCustom sets the "custom" field.
-func (_c *CustomTypeCreate) SetCustom(v string) *CustomTypeCreate {
-	_ = _c.mutation.SetField("custom", v)
-	return _c
-}
-
-// SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_c *CustomTypeCreate) SetNillableCustom(v *string) *CustomTypeCreate {
-	if v != nil {
-		_c.SetCustom(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CustomTypeCreate builder. The first error from as is recorded and returned by Save.
+func (_c *CustomTypeCreate) With(as ...entfield.Assignment) *CustomTypeCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -48,6 +45,9 @@ func (_c *CustomTypeCreate) Mutation() *CustomTypeMutation {
 
 // Save creates the CustomType in the database.
 func (_c *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -136,6 +136,12 @@ func (_c *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, error)
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CustomTypeMutation)
 				if !ok {

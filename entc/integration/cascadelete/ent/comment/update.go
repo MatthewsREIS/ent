@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CommentUpdate is the builder for updating Comment entities.
 type CommentUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *CommentMutation
 }
@@ -36,30 +38,11 @@ func (_u *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 	return _u
 }
 
-// SetText sets the "text" field.
-func (_u *CommentUpdate) SetText(v string) *CommentUpdate {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableText(v *string) *CommentUpdate {
-	if v != nil {
-		_u.SetText(*v)
-	}
-	return _u
-}
-
-// SetPostID sets the "post_id" field.
-func (_u *CommentUpdate) SetPostID(v int) *CommentUpdate {
-	_ = _u.mutation.SetEdgeID("post", v)
-	return _u
-}
-
-// SetNillablePostID sets the "post_id" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillablePostID(v *int) *CommentUpdate {
-	if v != nil {
-		_u.SetPostID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CommentUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *CommentUpdate) With(as ...entfield.Assignment) *CommentUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -77,6 +60,9 @@ func (_u *CommentUpdate) ClearPost() *CommentUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CommentUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CommentMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -170,6 +156,7 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type CommentUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *CommentMutation
 }
@@ -179,30 +166,11 @@ func NewCommentUpdateOne(c Config, hooks []Hook, mutation *CommentMutation) *Com
 	return &CommentUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_u *CommentUpdateOne) SetText(v string) *CommentUpdateOne {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableText(v *string) *CommentUpdateOne {
-	if v != nil {
-		_u.SetText(*v)
-	}
-	return _u
-}
-
-// SetPostID sets the "post_id" field.
-func (_u *CommentUpdateOne) SetPostID(v int) *CommentUpdateOne {
-	_ = _u.mutation.SetEdgeID("post", v)
-	return _u
-}
-
-// SetNillablePostID sets the "post_id" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillablePostID(v *int) *CommentUpdateOne {
-	if v != nil {
-		_u.SetPostID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CommentUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *CommentUpdateOne) With(as ...entfield.Assignment) *CommentUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -233,6 +201,9 @@ func (_u *CommentUpdateOne) Select(field string, fields ...string) *CommentUpdat
 
 // Save executes the query and returns the updated Comment entity.
 func (_u *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Comment](ctx, &entbuilder.UpdateState[*CommentMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

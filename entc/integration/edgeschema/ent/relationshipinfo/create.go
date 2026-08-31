@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // RelationshipInfoCreate is the builder for creating a RelationshipInfo entity.
 type RelationshipInfoCreate struct {
 	Config
+	err      error
 	mutation *RelationshipInfoMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,9 +32,12 @@ func NewRelationshipInfoCreate(c Config, hooks []Hook, mutation *RelationshipInf
 	return &RelationshipInfoCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_c *RelationshipInfoCreate) SetText(v string) *RelationshipInfoCreate {
-	_ = _c.mutation.SetField("text", v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RelationshipInfoCreate builder. The first error from as is recorded and returned by Save.
+func (_c *RelationshipInfoCreate) With(as ...entfield.Assignment) *RelationshipInfoCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -43,6 +48,9 @@ func (_c *RelationshipInfoCreate) Mutation() *RelationshipInfoMutation {
 
 // Save creates the RelationshipInfo in the database.
 func (_c *RelationshipInfoCreate) Save(ctx context.Context) (*RelationshipInfo, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -196,6 +204,12 @@ func (_c *RelationshipInfoCreateBulk) Save(ctx context.Context) ([]*Relationship
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RelationshipInfoMutation)
 				if !ok {

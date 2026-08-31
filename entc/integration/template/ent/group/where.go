@@ -19,8 +19,8 @@ var F = struct {
 	// MaxUsers is the handle for the "max_users" field.
 	MaxUsers entfield.Number[int]
 }{
-	ID:       entfield.NewNumber[int](FieldID),
-	MaxUsers: entfield.NewNumber[int](FieldMaxUsers),
+	ID:       entfield.NewNumber[int](FieldID, "id"),
+	MaxUsers: entfield.NewNumber[int](FieldMaxUsers, "max_users"),
 }
 
 // E holds typed edge handles for every edge of the Group type.

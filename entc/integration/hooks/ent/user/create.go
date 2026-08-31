@@ -13,12 +13,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	Config
+	err      error
 	mutation *UserMutation
 	hooks    []Hook
 }
@@ -28,96 +30,11 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 	return &UserCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetVersion sets the "version" field.
-func (_c *UserCreate) SetVersion(v int) *UserCreate {
-	_ = _c.mutation.SetField("version", v)
-	return _c
-}
-
-// SetNillableVersion sets the "version" field if the given value is not nil.
-func (_c *UserCreate) SetNillableVersion(v *int) *UserCreate {
-	if v != nil {
-		_c.SetVersion(*v)
-	}
-	return _c
-}
-
-// SetName sets the "name" field.
-func (_c *UserCreate) SetName(v string) *UserCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetWorth sets the "worth" field.
-func (_c *UserCreate) SetWorth(v uint) *UserCreate {
-	_ = _c.mutation.SetField("worth", v)
-	return _c
-}
-
-// SetNillableWorth sets the "worth" field if the given value is not nil.
-func (_c *UserCreate) SetNillableWorth(v *uint) *UserCreate {
-	if v != nil {
-		_c.SetWorth(*v)
-	}
-	return _c
-}
-
-// SetPassword sets the "password" field.
-func (_c *UserCreate) SetPassword(v string) *UserCreate {
-	_ = _c.mutation.SetField("password", v)
-	return _c
-}
-
-// SetNillablePassword sets the "password" field if the given value is not nil.
-func (_c *UserCreate) SetNillablePassword(v *string) *UserCreate {
-	if v != nil {
-		_c.SetPassword(*v)
-	}
-	return _c
-}
-
-// SetActive sets the "active" field.
-func (_c *UserCreate) SetActive(v bool) *UserCreate {
-	_ = _c.mutation.SetField("active", v)
-	return _c
-}
-
-// SetNillableActive sets the "active" field if the given value is not nil.
-func (_c *UserCreate) SetNillableActive(v *bool) *UserCreate {
-	if v != nil {
-		_c.SetActive(*v)
-	}
-	return _c
-}
-
-// AddCardIDs adds the "cards" edge to the Card entity by IDs.
-func (_c *UserCreate) AddCardIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("cards", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_c *UserCreate) AddPetIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddFriendIDs adds the "friends" edge to the User entity by IDs.
-func (_c *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// SetBestFriendID sets the "best_friend" edge to the User entity by ID.
-func (_c *UserCreate) SetBestFriendID(id int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("best_friend", id)
-	return _c
-}
-
-// SetNillableBestFriendID sets the "best_friend" edge to the User entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableBestFriendID(id *int) *UserCreate {
-	if id != nil {
-		_c = _c.SetBestFriendID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserCreate builder. The first error from as is recorded and returned by Save.
+func (_c *UserCreate) With(as ...entfield.Assignment) *UserCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -129,6 +46,9 @@ func (_c *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	if err := _c.defaults(); err != nil {
 		return nil, err
 	}
@@ -322,6 +242,12 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserMutation)

@@ -19,13 +19,13 @@ func petsStep() *sqlgraph.Step {
 }
 
 func TestEdgeHas(t *testing.T) {
-	e := entfield.NewEdge[entfield.P](petsStep)
+	e := entfield.NewEdge[entfield.P, int]("pets", petsStep)
 	q, _ := render(t, e.Has())
 	require.Contains(t, q, `EXISTS (SELECT "pets"."owner_id" FROM "pets" WHERE "users"."id" = "pets"."owner_id")`)
 }
 
 func TestEdgeHasWith(t *testing.T) {
-	e := entfield.NewEdge[entfield.P](petsStep)
+	e := entfield.NewEdge[entfield.P, int]("pets", petsStep)
 	inner := sql.FieldEQ("name", "fido")
 	q, args := render(t, e.HasWith(inner))
 	require.Contains(t, q, `EXISTS (SELECT "pets"."owner_id" FROM "pets" WHERE "users"."id" = "pets"."owner_id" AND "pets"."name" = $1)`)
@@ -34,7 +34,7 @@ func TestEdgeHasWith(t *testing.T) {
 
 func TestEdgeHasWithNeighborFilter(t *testing.T) {
 	filter := sql.FieldIsNull("deleted_at")
-	e := entfield.NewEdge[entfield.P](petsStep, filter)
+	e := entfield.NewEdge[entfield.P, int]("pets", petsStep, filter)
 	inner := sql.FieldEQ("name", "fido")
 	q, args := render(t, e.HasWith(inner))
 	require.Contains(t, q, `"pets"."name" = $1`)
@@ -47,7 +47,7 @@ func TestEdgeStepModsHas(t *testing.T) {
 		step.To.Schema = "alt_schema"
 		step.Edge.Schema = "alt_schema"
 	}
-	e := entfield.NewEdgeSteps[entfield.P](petsStep, []func(*sql.Selector, *sqlgraph.Step){mod})
+	e := entfield.NewEdgeSteps[entfield.P, int]("pets", petsStep, []func(*sql.Selector, *sqlgraph.Step){mod})
 	q, _ := render(t, e.Has())
 	require.Contains(t, q, `"alt_schema"."pets"`)
 }
@@ -57,21 +57,21 @@ func TestEdgeStepModsHasWith(t *testing.T) {
 		step.To.Schema = "alt_schema"
 		step.Edge.Schema = "alt_schema"
 	}
-	e := entfield.NewEdgeSteps[entfield.P](petsStep, []func(*sql.Selector, *sqlgraph.Step){mod})
+	e := entfield.NewEdgeSteps[entfield.P, int]("pets", petsStep, []func(*sql.Selector, *sqlgraph.Step){mod})
 	inner := sql.FieldEQ("name", "fido")
 	q, _ := render(t, e.HasWith(inner))
 	require.Contains(t, q, `"alt_schema"."pets"`)
 }
 
 func TestEdgeOrderByCount(t *testing.T) {
-	e := entfield.NewEdge[entfield.P](petsStep)
+	e := entfield.NewEdge[entfield.P, int]("pets", petsStep)
 	q, _ := render(t, e.OrderByCount())
 	require.Contains(t, q, `COUNT(*) AS "count_pets"`)
 	require.Contains(t, q, `ORDER BY "t1"."count_pets"`)
 }
 
 func TestEdgeOrderBy(t *testing.T) {
-	e := entfield.NewEdge[entfield.P](petsStep)
+	e := entfield.NewEdge[entfield.P, int]("pets", petsStep)
 	q, _ := render(t, e.OrderBy(sql.OrderByField("name")))
 	require.Contains(t, q, `SELECT "pets"."owner_id", "pets"."name" FROM "pets"`)
 	require.Contains(t, q, `ORDER BY "t1"."name"`)

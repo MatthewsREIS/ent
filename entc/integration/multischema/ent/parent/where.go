@@ -20,32 +20,32 @@ var F = struct {
 	ID entfield.Number[int]
 	// ByAdoption is the handle for the "by_adoption" field.
 	ByAdoption entfield.Bool[bool]
-	// UserID is the handle for the "user_id" field.
-	UserID entfield.Number[int]
-	// ParentID is the handle for the "parent_id" field.
-	ParentID entfield.Number[int]
+	// UserID is the handle for the "user_id" field (backs the "child" edge).
+	UserID entfield.EdgeField[int]
+	// ParentID is the handle for the "parent_id" field (backs the "parent" edge).
+	ParentID entfield.EdgeField[int]
 }{
-	ID:         entfield.NewNumber[int](FieldID),
-	ByAdoption: entfield.NewBool[bool](FieldByAdoption),
-	UserID:     entfield.NewNumber[int](FieldUserID),
-	ParentID:   entfield.NewNumber[int](FieldParentID),
+	ID:         entfield.NewNumber[int](FieldID, "id"),
+	ByAdoption: entfield.NewBool[bool](FieldByAdoption, "by_adoption"),
+	UserID:     entfield.NewEdgeField[int](FieldUserID, "child"),
+	ParentID:   entfield.NewEdgeField[int](FieldParentID, "parent"),
 }
 
 // E holds typed edge handles for every edge of the Parent type.
 var E = struct {
 	// Child is the handle for the "child" edge.
-	Child entfield.Edge[predicate.User]
+	Child entfield.Edge[predicate.User, int]
 	// Parent is the handle for the "parent" edge.
-	Parent entfield.Edge[predicate.User]
+	Parent entfield.Edge[predicate.User, int]
 }{
-	Child: entfield.NewEdgeSteps[predicate.User](newChildStep, []func(*sql.Selector, *sqlgraph.Step){
+	Child: entfield.NewEdgeSteps[predicate.User, int]("child", newChildStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.User
 			step.Edge.Schema = schemaConfig.Parent
 		},
 	}),
-	Parent: entfield.NewEdgeSteps[predicate.User](newParentStep, []func(*sql.Selector, *sqlgraph.Step){
+	Parent: entfield.NewEdgeSteps[predicate.User, int]("parent", newParentStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.User

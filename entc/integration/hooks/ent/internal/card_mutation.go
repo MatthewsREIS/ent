@@ -30,8 +30,9 @@ var cardDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"number": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Number",
+			Type:      reflect.TypeFor[string](),
+			GoName:    "Number",
+			Immutable: true,
 		},
 		"name": {
 			Type:     reflect.TypeFor[string](),

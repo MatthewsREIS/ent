@@ -30,8 +30,9 @@ var cardDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"create_time": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "CreateTime",
+			Type:      reflect.TypeFor[time.Time](),
+			GoName:    "CreateTime",
+			Immutable: true,
 		},
 		"update_time": {
 			Type:   reflect.TypeFor[time.Time](),
@@ -43,8 +44,9 @@ var cardDescriptor = &entbuilder.Descriptor{
 			Numeric: true,
 		},
 		"number": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Number",
+			Type:      reflect.TypeFor[string](),
+			GoName:    "Number",
+			Immutable: true,
 		},
 		"name": {
 			Type:     reflect.TypeFor[string](),

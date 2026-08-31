@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // AccountCreate is the builder for creating a Account entity.
 type AccountCreate struct {
 	Config
+	err      error
 	mutation *AccountMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -31,29 +33,12 @@ func NewAccountCreate(c Config, hooks []Hook, mutation *AccountMutation) *Accoun
 	return &AccountCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetEmail sets the "email" field.
-func (_c *AccountCreate) SetEmail(v string) *AccountCreate {
-	_ = _c.mutation.SetField("email", v)
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *AccountCreate) SetID(v sid.ID) *AccountCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *AccountCreate) SetNillableID(v *sid.ID) *AccountCreate {
-	if v != nil {
-		_c.SetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the AccountCreate builder. The first error from as is recorded and returned by Save.
+func (_c *AccountCreate) With(as ...entfield.Assignment) *AccountCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// AddTokenIDs adds the "token" edge to the Token entity by IDs.
-func (_c *AccountCreate) AddTokenIDs(ids ...sid.ID) *AccountCreate {
-	_ = _c.mutation.AddEdgeIDs("token", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -64,6 +49,9 @@ func (_c *AccountCreate) Mutation() *AccountMutation {
 
 // Save creates the Account in the database.
 func (_c *AccountCreate) Save(ctx context.Context) (*Account, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -260,6 +248,12 @@ func (_c *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AccountMutation)

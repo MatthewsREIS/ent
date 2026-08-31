@@ -19,49 +19,49 @@ var F = struct {
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
 }{
-	ID:   entfield.NewNumber[int](FieldID),
-	Name: entfield.NewString[string](FieldName),
+	ID:   entfield.NewNumber[int](FieldID, "id"),
+	Name: entfield.NewString[string](FieldName, "name"),
 }
 
 // E holds typed edge handles for every edge of the User type.
 var E = struct {
 	// Groups is the handle for the "groups" edge.
-	Groups entfield.Edge[predicate.Group]
+	Groups entfield.Edge[predicate.Group, int]
 	// Friends is the handle for the "friends" edge.
-	Friends entfield.Edge[predicate.User]
+	Friends entfield.Edge[predicate.User, int]
 	// Relatives is the handle for the "relatives" edge.
-	Relatives entfield.Edge[predicate.User]
+	Relatives entfield.Edge[predicate.User, int]
 	// LikedTweets is the handle for the "liked_tweets" edge.
-	LikedTweets entfield.Edge[predicate.Tweet]
+	LikedTweets entfield.Edge[predicate.Tweet, int]
 	// Tweets is the handle for the "tweets" edge.
-	Tweets entfield.Edge[predicate.Tweet]
+	Tweets entfield.Edge[predicate.Tweet, int]
 	// Roles is the handle for the "roles" edge.
-	Roles entfield.Edge[predicate.Role]
+	Roles entfield.Edge[predicate.Role, int]
 	// JoinedGroups is the handle for the "joined_groups" edge.
-	JoinedGroups entfield.Edge[predicate.UserGroup]
+	JoinedGroups entfield.Edge[predicate.UserGroup, int]
 	// Friendships is the handle for the "friendships" edge.
-	Friendships entfield.Edge[predicate.Friendship]
+	Friendships entfield.Edge[predicate.Friendship, int]
 	// Relationship is the handle for the "relationship" edge.
-	Relationship entfield.Edge[predicate.Relationship]
+	Relationship entfield.Edge[predicate.Relationship, struct{}]
 	// Likes is the handle for the "likes" edge.
-	Likes entfield.Edge[predicate.TweetLike]
+	Likes entfield.Edge[predicate.TweetLike, struct{}]
 	// UserTweets is the handle for the "user_tweets" edge.
-	UserTweets entfield.Edge[predicate.UserTweet]
+	UserTweets entfield.Edge[predicate.UserTweet, int]
 	// RolesUsers is the handle for the "roles_users" edge.
-	RolesUsers entfield.Edge[predicate.RoleUser]
+	RolesUsers entfield.Edge[predicate.RoleUser, struct{}]
 }{
-	Groups:       entfield.NewEdge[predicate.Group](newGroupsStep),
-	Friends:      entfield.NewEdge[predicate.User](newFriendsStep),
-	Relatives:    entfield.NewEdge[predicate.User](newRelativesStep),
-	LikedTweets:  entfield.NewEdge[predicate.Tweet](newLikedTweetsStep),
-	Tweets:       entfield.NewEdge[predicate.Tweet](newTweetsStep),
-	Roles:        entfield.NewEdge[predicate.Role](newRolesStep),
-	JoinedGroups: entfield.NewEdge[predicate.UserGroup](newJoinedGroupsStep),
-	Friendships:  entfield.NewEdge[predicate.Friendship](newFriendshipsStep),
-	Relationship: entfield.NewEdge[predicate.Relationship](newRelationshipStep),
-	Likes:        entfield.NewEdge[predicate.TweetLike](newLikesStep),
-	UserTweets:   entfield.NewEdge[predicate.UserTweet](newUserTweetsStep),
-	RolesUsers:   entfield.NewEdge[predicate.RoleUser](newRolesUsersStep),
+	Groups:       entfield.NewEdge[predicate.Group, int]("groups", newGroupsStep),
+	Friends:      entfield.NewEdge[predicate.User, int]("friends", newFriendsStep),
+	Relatives:    entfield.NewEdge[predicate.User, int]("relatives", newRelativesStep),
+	LikedTweets:  entfield.NewEdge[predicate.Tweet, int]("liked_tweets", newLikedTweetsStep),
+	Tweets:       entfield.NewEdge[predicate.Tweet, int]("tweets", newTweetsStep),
+	Roles:        entfield.NewEdge[predicate.Role, int]("roles", newRolesStep),
+	JoinedGroups: entfield.NewEdge[predicate.UserGroup, int]("joined_groups", newJoinedGroupsStep),
+	Friendships:  entfield.NewEdge[predicate.Friendship, int]("friendships", newFriendshipsStep),
+	Relationship: entfield.NewEdge[predicate.Relationship, struct{}]("relationship", newRelationshipStep),
+	Likes:        entfield.NewEdge[predicate.TweetLike, struct{}]("likes", newLikesStep),
+	UserTweets:   entfield.NewEdge[predicate.UserTweet, int]("user_tweets", newUserTweetsStep),
+	RolesUsers:   entfield.NewEdge[predicate.RoleUser, struct{}]("roles_users", newRolesUsersStep),
 }
 
 // And groups predicates with the AND operator between them.

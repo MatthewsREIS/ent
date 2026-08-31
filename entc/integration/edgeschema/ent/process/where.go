@@ -17,18 +17,18 @@ var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 }{
-	ID: entfield.NewNumber[int](FieldID),
+	ID: entfield.NewNumber[int](FieldID, "id"),
 }
 
 // E holds typed edge handles for every edge of the Process type.
 var E = struct {
 	// Files is the handle for the "files" edge.
-	Files entfield.Edge[predicate.File]
+	Files entfield.Edge[predicate.File, int]
 	// AttachedFiles is the handle for the "attached_files" edge.
-	AttachedFiles entfield.Edge[predicate.AttachedFile]
+	AttachedFiles entfield.Edge[predicate.AttachedFile, int]
 }{
-	Files:         entfield.NewEdge[predicate.File](newFilesStep),
-	AttachedFiles: entfield.NewEdge[predicate.AttachedFile](newAttachedFilesStep),
+	Files:         entfield.NewEdge[predicate.File, int]("files", newFilesStep),
+	AttachedFiles: entfield.NewEdge[predicate.AttachedFile, int]("attached_files", newAttachedFilesStep),
 }
 
 // And groups predicates with the AND operator between them.

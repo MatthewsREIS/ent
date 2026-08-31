@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -36,75 +38,12 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return _u
 }
 
-// SetSpouseID sets the "spouse_id" field.
-func (_u *UserUpdate) SetSpouseID(v int) *UserUpdate {
-	_ = _u.mutation.SetEdgeID("spouse", v)
-	return _u
-}
-
-// SetNillableSpouseID sets the "spouse_id" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableSpouseID(v *int) *UserUpdate {
-	if v != nil {
-		_u.SetSpouseID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdate) With(as ...entfield.Assignment) *UserUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearSpouseID clears the value of the "spouse_id" field.
-func (_u *UserUpdate) ClearSpouseID() *UserUpdate {
-	_ = _u.mutation.ClearEdge("spouse")
-	return _u
-}
-
-// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_u *UserUpdate) AddPetIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// SetCardID sets the "card" edge to the Card entity by ID.
-func (_u *UserUpdate) SetCardID(id int) *UserUpdate {
-	_ = _u.mutation.SetEdgeID("card", id)
-	return _u
-}
-
-// SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
-func (_u *UserUpdate) SetNillableCardID(id *int) *UserUpdate {
-	if id != nil {
-		_u = _u.SetCardID(*id)
-	}
-	return _u
-}
-
-// SetMetadataID sets the "metadata" edge to the Metadata entity by ID.
-func (_u *UserUpdate) SetMetadataID(id int) *UserUpdate {
-	_ = _u.mutation.SetEdgeID("metadata", id)
-	return _u
-}
-
-// SetNillableMetadataID sets the "metadata" edge to the Metadata entity by ID if the given value is not nil.
-func (_u *UserUpdate) SetNillableMetadataID(id *int) *UserUpdate {
-	if id != nil {
-		_u = _u.SetMetadataID(*id)
-	}
-	return _u
-}
-
-// AddInfoIDs adds the "info" edge to the Info entity by IDs.
-func (_u *UserUpdate) AddInfoIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("info", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
-func (_u *UserUpdate) AddRentalIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -181,6 +120,9 @@ func (_u *UserUpdate) RemoveRentalIDs(ids ...int) *UserUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -498,6 +440,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type UserUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -507,75 +450,12 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 	return &UserUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetSpouseID sets the "spouse_id" field.
-func (_u *UserUpdateOne) SetSpouseID(v int) *UserUpdateOne {
-	_ = _u.mutation.SetEdgeID("spouse", v)
-	return _u
-}
-
-// SetNillableSpouseID sets the "spouse_id" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableSpouseID(v *int) *UserUpdateOne {
-	if v != nil {
-		_u.SetSpouseID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdateOne) With(as ...entfield.Assignment) *UserUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearSpouseID clears the value of the "spouse_id" field.
-func (_u *UserUpdateOne) ClearSpouseID() *UserUpdateOne {
-	_ = _u.mutation.ClearEdge("spouse")
-	return _u
-}
-
-// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_u *UserUpdateOne) AddPetIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_u *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// SetCardID sets the "card" edge to the Card entity by ID.
-func (_u *UserUpdateOne) SetCardID(id int) *UserUpdateOne {
-	_ = _u.mutation.SetEdgeID("card", id)
-	return _u
-}
-
-// SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableCardID(id *int) *UserUpdateOne {
-	if id != nil {
-		_u = _u.SetCardID(*id)
-	}
-	return _u
-}
-
-// SetMetadataID sets the "metadata" edge to the Metadata entity by ID.
-func (_u *UserUpdateOne) SetMetadataID(id int) *UserUpdateOne {
-	_ = _u.mutation.SetEdgeID("metadata", id)
-	return _u
-}
-
-// SetNillableMetadataID sets the "metadata" edge to the Metadata entity by ID if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableMetadataID(id *int) *UserUpdateOne {
-	if id != nil {
-		_u = _u.SetMetadataID(*id)
-	}
-	return _u
-}
-
-// AddInfoIDs adds the "info" edge to the Info entity by IDs.
-func (_u *UserUpdateOne) AddInfoIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("info", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
-func (_u *UserUpdateOne) AddRentalIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -665,6 +545,9 @@ func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
 
 // Save executes the query and returns the updated User entity.
 func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[User](ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

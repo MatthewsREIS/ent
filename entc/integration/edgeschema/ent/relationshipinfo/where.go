@@ -19,8 +19,8 @@ var F = struct {
 	// Text is the handle for the "text" field.
 	Text entfield.String[string]
 }{
-	ID:   entfield.NewNumber[int](FieldID),
-	Text: entfield.NewString[string](FieldText),
+	ID:   entfield.NewNumber[int](FieldID, "id"),
+	Text: entfield.NewString[string](FieldText, "text"),
 }
 
 // E holds typed edge handles for every edge of the RelationshipInfo type.

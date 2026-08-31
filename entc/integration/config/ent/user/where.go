@@ -21,9 +21,9 @@ var F = struct {
 	// Label is the handle for the "label" field.
 	Label entfield.String[string]
 }{
-	ID:    entfield.NewNumber[int](FieldID),
-	Name:  entfield.NewString[string](FieldName),
-	Label: entfield.NewString[string](FieldLabel),
+	ID:    entfield.NewNumber[int](FieldID, "id"),
+	Name:  entfield.NewString[string](FieldName, "name"),
+	Label: entfield.NewString[string](FieldLabel, "label"),
 }
 
 // E holds typed edge handles for every edge of the User type.

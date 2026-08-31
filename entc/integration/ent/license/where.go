@@ -21,9 +21,9 @@ var F = struct {
 	// UpdateTime is the handle for the "update_time" field.
 	UpdateTime entfield.Time
 }{
-	ID:         entfield.NewNumber[int](FieldID),
-	CreateTime: entfield.NewTime(FieldCreateTime),
-	UpdateTime: entfield.NewTime(FieldUpdateTime),
+	ID:         entfield.NewNumber[int](FieldID, "id"),
+	CreateTime: entfield.NewTime(FieldCreateTime, "create_time"),
+	UpdateTime: entfield.NewTime(FieldUpdateTime, "update_time"),
 }
 
 // E holds typed edge handles for every edge of the License type.

@@ -7,8 +7,13 @@
 package user
 
 import (
+	"encoding/json"
+	"net/http"
+	"net/url"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/json/ent/predicate"
+	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/runtime/entfield"
 )
 
@@ -16,8 +21,47 @@ import (
 var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
+	// T is the handle for the "t" field.
+	T entfield.JSON[*schema.T]
+	// URL is the handle for the "url" field.
+	URL entfield.JSON[*url.URL]
+	// URLs is the handle for the "URLs" field.
+	URLs entfield.JSON[[]*url.URL]
+	// Raw is the handle for the "raw" field.
+	Raw entfield.JSON[json.RawMessage]
+	// Dirs is the handle for the "dirs" field.
+	Dirs entfield.JSON[[]http.Dir]
+	// Ints is the handle for the "ints" field.
+	Ints entfield.JSON[[]int]
+	// Floats is the handle for the "floats" field.
+	Floats entfield.JSON[[]float64]
+	// Strings is the handle for the "strings" field.
+	Strings entfield.JSON[[]string]
+	// IntsValidate is the handle for the "ints_validate" field.
+	IntsValidate entfield.JSON[[]int]
+	// FloatsValidate is the handle for the "floats_validate" field.
+	FloatsValidate entfield.JSON[[]float64]
+	// StringsValidate is the handle for the "strings_validate" field.
+	StringsValidate entfield.JSON[[]string]
+	// Addr is the handle for the "addr" field.
+	Addr entfield.JSON[schema.Addr]
+	// Unknown is the handle for the "unknown" field.
+	Unknown entfield.JSON[any]
 }{
-	ID: entfield.NewNumber[int](FieldID),
+	ID:              entfield.NewNumber[int](FieldID, "id"),
+	T:               entfield.NewJSON[*schema.T]("t"),
+	URL:             entfield.NewJSON[*url.URL]("url"),
+	URLs:            entfield.NewJSON[[]*url.URL]("URLs"),
+	Raw:             entfield.NewJSON[json.RawMessage]("raw"),
+	Dirs:            entfield.NewJSON[[]http.Dir]("dirs"),
+	Ints:            entfield.NewJSON[[]int]("ints"),
+	Floats:          entfield.NewJSON[[]float64]("floats"),
+	Strings:         entfield.NewJSON[[]string]("strings"),
+	IntsValidate:    entfield.NewJSON[[]int]("ints_validate"),
+	FloatsValidate:  entfield.NewJSON[[]float64]("floats_validate"),
+	StringsValidate: entfield.NewJSON[[]string]("strings_validate"),
+	Addr:            entfield.NewJSON[schema.Addr]("addr"),
+	Unknown:         entfield.NewJSON[any]("unknown"),
 }
 
 // E holds typed edge handles for every edge of the User type.

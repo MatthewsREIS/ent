@@ -12,11 +12,13 @@ import (
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // APICreate is the builder for creating a Api entity.
 type APICreate struct {
 	Config
+	err      error
 	mutation *APIMutation
 	hooks    []Hook
 }
@@ -26,6 +28,15 @@ func NewAPICreate(c Config, hooks []Hook, mutation *APIMutation) *APICreate {
 	return &APICreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the APICreate builder. The first error from as is recorded and returned by Save.
+func (_c *APICreate) With(as ...entfield.Assignment) *APICreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
+	return _c
+}
+
 // Mutation returns the APIMutation object of the builder.
 func (_c *APICreate) Mutation() *APIMutation {
 	return _c.mutation
@@ -33,6 +44,9 @@ func (_c *APICreate) Mutation() *APIMutation {
 
 // Save creates the Api in the database.
 func (_c *APICreate) Save(ctx context.Context) (*Api, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 

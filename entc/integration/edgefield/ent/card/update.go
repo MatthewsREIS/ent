@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CardUpdate is the builder for updating Card entities.
 type CardUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *CardMutation
 }
@@ -36,43 +38,12 @@ func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	return _u
 }
 
-// SetNumber sets the "number" field.
-func (_u *CardUpdate) SetNumber(v string) *CardUpdate {
-	_ = _u.mutation.SetField("number", v)
-	return _u
-}
-
-// SetNillableNumber sets the "number" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableNumber(v *string) *CardUpdate {
-	if v != nil {
-		_u.SetNumber(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CardUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *CardUpdate) With(as ...entfield.Assignment) *CardUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearNumber clears the value of the "number" field.
-func (_u *CardUpdate) ClearNumber() *CardUpdate {
-	_ = _u.mutation.ClearField("number")
-	return _u
-}
-
-// SetOwnerID sets the "owner_id" field.
-func (_u *CardUpdate) SetOwnerID(v int) *CardUpdate {
-	_ = _u.mutation.SetEdgeID("owner", v)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableOwnerID(v *int) *CardUpdate {
-	if v != nil {
-		_u.SetOwnerID(*v)
-	}
-	return _u
-}
-
-// ClearOwnerID clears the value of the "owner_id" field.
-func (_u *CardUpdate) ClearOwnerID() *CardUpdate {
-	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
@@ -89,6 +60,9 @@ func (_u *CardUpdate) ClearOwner() *CardUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CardUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CardMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -174,6 +148,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type CardUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *CardMutation
 }
@@ -183,43 +158,12 @@ func NewCardUpdateOne(c Config, hooks []Hook, mutation *CardMutation) *CardUpdat
 	return &CardUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetNumber sets the "number" field.
-func (_u *CardUpdateOne) SetNumber(v string) *CardUpdateOne {
-	_ = _u.mutation.SetField("number", v)
-	return _u
-}
-
-// SetNillableNumber sets the "number" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableNumber(v *string) *CardUpdateOne {
-	if v != nil {
-		_u.SetNumber(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CardUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *CardUpdateOne) With(as ...entfield.Assignment) *CardUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearNumber clears the value of the "number" field.
-func (_u *CardUpdateOne) ClearNumber() *CardUpdateOne {
-	_ = _u.mutation.ClearField("number")
-	return _u
-}
-
-// SetOwnerID sets the "owner_id" field.
-func (_u *CardUpdateOne) SetOwnerID(v int) *CardUpdateOne {
-	_ = _u.mutation.SetEdgeID("owner", v)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableOwnerID(v *int) *CardUpdateOne {
-	if v != nil {
-		_u.SetOwnerID(*v)
-	}
-	return _u
-}
-
-// ClearOwnerID clears the value of the "owner_id" field.
-func (_u *CardUpdateOne) ClearOwnerID() *CardUpdateOne {
-	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
@@ -249,6 +193,9 @@ func (_u *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne {
 
 // Save executes the query and returns the updated Card entity.
 func (_u *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Card](ctx, &entbuilder.UpdateState[*CardMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

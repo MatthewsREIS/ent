@@ -19,26 +19,26 @@ var F = struct {
 	ID entfield.Number[int]
 	// Date is the handle for the "date" field.
 	Date entfield.Time
-	// UserID is the handle for the "user_id" field.
-	UserID entfield.Number[int]
-	// CarID is the handle for the "car_id" field.
-	CarID entfield.Value[uuid.UUID]
+	// UserID is the handle for the "user_id" field (backs the "user" edge).
+	UserID entfield.EdgeField[int]
+	// CarID is the handle for the "car_id" field (backs the "car" edge).
+	CarID entfield.EdgeField[uuid.UUID]
 }{
-	ID:     entfield.NewNumber[int](FieldID),
-	Date:   entfield.NewTime(FieldDate),
-	UserID: entfield.NewNumber[int](FieldUserID),
-	CarID:  entfield.NewValue[uuid.UUID](FieldCarID),
+	ID:     entfield.NewNumber[int](FieldID, "id"),
+	Date:   entfield.NewTime(FieldDate, "date"),
+	UserID: entfield.NewEdgeField[int](FieldUserID, "user"),
+	CarID:  entfield.NewEdgeField[uuid.UUID](FieldCarID, "car"),
 }
 
 // E holds typed edge handles for every edge of the Rental type.
 var E = struct {
 	// User is the handle for the "user" edge.
-	User entfield.Edge[predicate.User]
+	User entfield.Edge[predicate.User, int]
 	// Car is the handle for the "car" edge.
-	Car entfield.Edge[predicate.Car]
+	Car entfield.Edge[predicate.Car, uuid.UUID]
 }{
-	User: entfield.NewEdge[predicate.User](newUserStep),
-	Car:  entfield.NewEdge[predicate.Car](newCarStep),
+	User: entfield.NewEdge[predicate.User, int]("user", newUserStep),
+	Car:  entfield.NewEdge[predicate.Car, uuid.UUID]("car", newCarStep),
 }
 
 // And groups predicates with the AND operator between them.

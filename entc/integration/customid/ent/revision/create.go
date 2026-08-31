@@ -13,12 +13,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // RevisionCreate is the builder for creating a Revision entity.
 type RevisionCreate struct {
 	Config
+	err      error
 	mutation *RevisionMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -29,9 +31,12 @@ func NewRevisionCreate(c Config, hooks []Hook, mutation *RevisionMutation) *Revi
 	return &RevisionCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetID sets the "id" field.
-func (_c *RevisionCreate) SetID(v string) *RevisionCreate {
-	_c.mutation.SetID(v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RevisionCreate builder. The first error from as is recorded and returned by Save.
+func (_c *RevisionCreate) With(as ...entfield.Assignment) *RevisionCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -42,6 +47,9 @@ func (_c *RevisionCreate) Mutation() *RevisionMutation {
 
 // Save creates the Revision in the database.
 func (_c *RevisionCreate) Save(ctx context.Context) (*Revision, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -201,6 +209,12 @@ func (_c *RevisionCreateBulk) Save(ctx context.Context) ([]*Revision, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RevisionMutation)
 				if !ok {

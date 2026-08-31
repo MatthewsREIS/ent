@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserGroupCreate is the builder for creating a UserGroup entity.
 type UserGroupCreate struct {
 	Config
+	err      error
 	mutation *UserGroupMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -31,29 +33,12 @@ func NewUserGroupCreate(c Config, hooks []Hook, mutation *UserGroupMutation) *Us
 	return &UserGroupCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetJoinedAt sets the "joined_at" field.
-func (_c *UserGroupCreate) SetJoinedAt(v time.Time) *UserGroupCreate {
-	_ = _c.mutation.SetField("joined_at", v)
-	return _c
-}
-
-// SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (_c *UserGroupCreate) SetNillableJoinedAt(v *time.Time) *UserGroupCreate {
-	if v != nil {
-		_c.SetJoinedAt(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserGroupCreate builder. The first error from as is recorded and returned by Save.
+func (_c *UserGroupCreate) With(as ...entfield.Assignment) *UserGroupCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetUserID sets the "user_id" field.
-func (_c *UserGroupCreate) SetUserID(v int) *UserGroupCreate {
-	_ = _c.mutation.SetEdgeID("user", v)
-	return _c
-}
-
-// SetGroupID sets the "group_id" field.
-func (_c *UserGroupCreate) SetGroupID(v int) *UserGroupCreate {
-	_ = _c.mutation.SetEdgeID("group", v)
 	return _c
 }
 
@@ -64,6 +49,9 @@ func (_c *UserGroupCreate) Mutation() *UserGroupMutation {
 
 // Save creates the UserGroup in the database.
 func (_c *UserGroupCreate) Save(ctx context.Context) (*UserGroup, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -276,6 +264,12 @@ func (_c *UserGroupCreateBulk) Save(ctx context.Context) ([]*UserGroup, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserGroupMutation)

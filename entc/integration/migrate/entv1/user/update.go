@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -36,265 +38,11 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return _u
 }
 
-// SetAge sets the "age" field.
-func (_u *UserUpdate) SetAge(v int32) *UserUpdate {
-	_ = _u.mutation.ResetField("age")
-	_ = _u.mutation.SetField("age", v)
-	return _u
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAge(v *int32) *UserUpdate {
-	if v != nil {
-		_u.SetAge(*v)
-	}
-	return _u
-}
-
-// AddAge adds value to the "age" field.
-func (_u *UserUpdate) AddAge(v int32) *UserUpdate {
-	_ = _u.mutation.AddField("age", v)
-	return _u
-}
-
-// SetName sets the "name" field.
-func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetName(*v)
-	}
-	return _u
-}
-
-// SetDescription sets the "description" field.
-func (_u *UserUpdate) SetDescription(v string) *UserUpdate {
-	_ = _u.mutation.SetField("description", v)
-	return _u
-}
-
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableDescription(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetDescription(*v)
-	}
-	return _u
-}
-
-// ClearDescription clears the value of the "description" field.
-func (_u *UserUpdate) ClearDescription() *UserUpdate {
-	_ = _u.mutation.ClearField("description")
-	return _u
-}
-
-// SetNickname sets the "nickname" field.
-func (_u *UserUpdate) SetNickname(v string) *UserUpdate {
-	_ = _u.mutation.SetField("nickname", v)
-	return _u
-}
-
-// SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableNickname(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetNickname(*v)
-	}
-	return _u
-}
-
-// SetAddress sets the "address" field.
-func (_u *UserUpdate) SetAddress(v string) *UserUpdate {
-	_ = _u.mutation.SetField("address", v)
-	return _u
-}
-
-// SetNillableAddress sets the "address" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAddress(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetAddress(*v)
-	}
-	return _u
-}
-
-// ClearAddress clears the value of the "address" field.
-func (_u *UserUpdate) ClearAddress() *UserUpdate {
-	_ = _u.mutation.ClearField("address")
-	return _u
-}
-
-// SetRenamed sets the "renamed" field.
-func (_u *UserUpdate) SetRenamed(v string) *UserUpdate {
-	_ = _u.mutation.SetField("renamed", v)
-	return _u
-}
-
-// SetNillableRenamed sets the "renamed" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableRenamed(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetRenamed(*v)
-	}
-	return _u
-}
-
-// ClearRenamed clears the value of the "renamed" field.
-func (_u *UserUpdate) ClearRenamed() *UserUpdate {
-	_ = _u.mutation.ClearField("renamed")
-	return _u
-}
-
-// SetOldToken sets the "old_token" field.
-func (_u *UserUpdate) SetOldToken(v string) *UserUpdate {
-	_ = _u.mutation.SetField("old_token", v)
-	return _u
-}
-
-// SetNillableOldToken sets the "old_token" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableOldToken(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetOldToken(*v)
-	}
-	return _u
-}
-
-// SetBlob sets the "blob" field.
-func (_u *UserUpdate) SetBlob(v []byte) *UserUpdate {
-	_ = _u.mutation.SetField("blob", v)
-	return _u
-}
-
-// ClearBlob clears the value of the "blob" field.
-func (_u *UserUpdate) ClearBlob() *UserUpdate {
-	_ = _u.mutation.ClearField("blob")
-	return _u
-}
-
-// SetState sets the "state" field.
-func (_u *UserUpdate) SetState(v State) *UserUpdate {
-	_ = _u.mutation.SetField("state", v)
-	return _u
-}
-
-// SetNillableState sets the "state" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableState(v *State) *UserUpdate {
-	if v != nil {
-		_u.SetState(*v)
-	}
-	return _u
-}
-
-// ClearState clears the value of the "state" field.
-func (_u *UserUpdate) ClearState() *UserUpdate {
-	_ = _u.mutation.ClearField("state")
-	return _u
-}
-
-// SetStatus sets the "status" field.
-func (_u *UserUpdate) SetStatus(v string) *UserUpdate {
-	_ = _u.mutation.SetField("status", v)
-	return _u
-}
-
-// SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableStatus(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetStatus(*v)
-	}
-	return _u
-}
-
-// ClearStatus clears the value of the "status" field.
-func (_u *UserUpdate) ClearStatus() *UserUpdate {
-	_ = _u.mutation.ClearField("status")
-	return _u
-}
-
-// SetWorkplace sets the "workplace" field.
-func (_u *UserUpdate) SetWorkplace(v string) *UserUpdate {
-	_ = _u.mutation.SetField("workplace", v)
-	return _u
-}
-
-// SetNillableWorkplace sets the "workplace" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableWorkplace(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetWorkplace(*v)
-	}
-	return _u
-}
-
-// ClearWorkplace clears the value of the "workplace" field.
-func (_u *UserUpdate) ClearWorkplace() *UserUpdate {
-	_ = _u.mutation.ClearField("workplace")
-	return _u
-}
-
-// SetDropOptional sets the "drop_optional" field.
-func (_u *UserUpdate) SetDropOptional(v string) *UserUpdate {
-	_ = _u.mutation.SetField("drop_optional", v)
-	return _u
-}
-
-// SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableDropOptional(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetDropOptional(*v)
-	}
-	return _u
-}
-
-// ClearDropOptional clears the value of the "drop_optional" field.
-func (_u *UserUpdate) ClearDropOptional() *UserUpdate {
-	_ = _u.mutation.ClearField("drop_optional")
-	return _u
-}
-
-// SetParentID sets the "parent" edge to the User entity by ID.
-func (_u *UserUpdate) SetParentID(id int) *UserUpdate {
-	_ = _u.mutation.SetEdgeID("parent", id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
-func (_u *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
-	if id != nil {
-		_u = _u.SetParentID(*id)
-	}
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// SetSpouseID sets the "spouse" edge to the User entity by ID.
-func (_u *UserUpdate) SetSpouseID(id int) *UserUpdate {
-	_ = _u.mutation.SetEdgeID("spouse", id)
-	return _u
-}
-
-// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
-func (_u *UserUpdate) SetNillableSpouseID(id *int) *UserUpdate {
-	if id != nil {
-		_u = _u.SetSpouseID(*id)
-	}
-	return _u
-}
-
-// SetCarID sets the "car" edge to the Car entity by ID.
-func (_u *UserUpdate) SetCarID(id int) *UserUpdate {
-	_ = _u.mutation.SetEdgeID("car", id)
-	return _u
-}
-
-// SetNillableCarID sets the "car" edge to the Car entity by ID if the given value is not nil.
-func (_u *UserUpdate) SetNillableCarID(id *int) *UserUpdate {
-	if id != nil {
-		_u = _u.SetCarID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdate) With(as ...entfield.Assignment) *UserUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -336,6 +84,9 @@ func (_u *UserUpdate) ClearCar() *UserUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -610,6 +361,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type UserUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -619,265 +371,11 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 	return &UserUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetAge sets the "age" field.
-func (_u *UserUpdateOne) SetAge(v int32) *UserUpdateOne {
-	_ = _u.mutation.ResetField("age")
-	_ = _u.mutation.SetField("age", v)
-	return _u
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAge(v *int32) *UserUpdateOne {
-	if v != nil {
-		_u.SetAge(*v)
-	}
-	return _u
-}
-
-// AddAge adds value to the "age" field.
-func (_u *UserUpdateOne) AddAge(v int32) *UserUpdateOne {
-	_ = _u.mutation.AddField("age", v)
-	return _u
-}
-
-// SetName sets the "name" field.
-func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
-	}
-	return _u
-}
-
-// SetDescription sets the "description" field.
-func (_u *UserUpdateOne) SetDescription(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("description", v)
-	return _u
-}
-
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableDescription(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetDescription(*v)
-	}
-	return _u
-}
-
-// ClearDescription clears the value of the "description" field.
-func (_u *UserUpdateOne) ClearDescription() *UserUpdateOne {
-	_ = _u.mutation.ClearField("description")
-	return _u
-}
-
-// SetNickname sets the "nickname" field.
-func (_u *UserUpdateOne) SetNickname(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("nickname", v)
-	return _u
-}
-
-// SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableNickname(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetNickname(*v)
-	}
-	return _u
-}
-
-// SetAddress sets the "address" field.
-func (_u *UserUpdateOne) SetAddress(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("address", v)
-	return _u
-}
-
-// SetNillableAddress sets the "address" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAddress(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetAddress(*v)
-	}
-	return _u
-}
-
-// ClearAddress clears the value of the "address" field.
-func (_u *UserUpdateOne) ClearAddress() *UserUpdateOne {
-	_ = _u.mutation.ClearField("address")
-	return _u
-}
-
-// SetRenamed sets the "renamed" field.
-func (_u *UserUpdateOne) SetRenamed(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("renamed", v)
-	return _u
-}
-
-// SetNillableRenamed sets the "renamed" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableRenamed(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetRenamed(*v)
-	}
-	return _u
-}
-
-// ClearRenamed clears the value of the "renamed" field.
-func (_u *UserUpdateOne) ClearRenamed() *UserUpdateOne {
-	_ = _u.mutation.ClearField("renamed")
-	return _u
-}
-
-// SetOldToken sets the "old_token" field.
-func (_u *UserUpdateOne) SetOldToken(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("old_token", v)
-	return _u
-}
-
-// SetNillableOldToken sets the "old_token" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableOldToken(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetOldToken(*v)
-	}
-	return _u
-}
-
-// SetBlob sets the "blob" field.
-func (_u *UserUpdateOne) SetBlob(v []byte) *UserUpdateOne {
-	_ = _u.mutation.SetField("blob", v)
-	return _u
-}
-
-// ClearBlob clears the value of the "blob" field.
-func (_u *UserUpdateOne) ClearBlob() *UserUpdateOne {
-	_ = _u.mutation.ClearField("blob")
-	return _u
-}
-
-// SetState sets the "state" field.
-func (_u *UserUpdateOne) SetState(v State) *UserUpdateOne {
-	_ = _u.mutation.SetField("state", v)
-	return _u
-}
-
-// SetNillableState sets the "state" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableState(v *State) *UserUpdateOne {
-	if v != nil {
-		_u.SetState(*v)
-	}
-	return _u
-}
-
-// ClearState clears the value of the "state" field.
-func (_u *UserUpdateOne) ClearState() *UserUpdateOne {
-	_ = _u.mutation.ClearField("state")
-	return _u
-}
-
-// SetStatus sets the "status" field.
-func (_u *UserUpdateOne) SetStatus(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("status", v)
-	return _u
-}
-
-// SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableStatus(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetStatus(*v)
-	}
-	return _u
-}
-
-// ClearStatus clears the value of the "status" field.
-func (_u *UserUpdateOne) ClearStatus() *UserUpdateOne {
-	_ = _u.mutation.ClearField("status")
-	return _u
-}
-
-// SetWorkplace sets the "workplace" field.
-func (_u *UserUpdateOne) SetWorkplace(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("workplace", v)
-	return _u
-}
-
-// SetNillableWorkplace sets the "workplace" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableWorkplace(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetWorkplace(*v)
-	}
-	return _u
-}
-
-// ClearWorkplace clears the value of the "workplace" field.
-func (_u *UserUpdateOne) ClearWorkplace() *UserUpdateOne {
-	_ = _u.mutation.ClearField("workplace")
-	return _u
-}
-
-// SetDropOptional sets the "drop_optional" field.
-func (_u *UserUpdateOne) SetDropOptional(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("drop_optional", v)
-	return _u
-}
-
-// SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableDropOptional(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetDropOptional(*v)
-	}
-	return _u
-}
-
-// ClearDropOptional clears the value of the "drop_optional" field.
-func (_u *UserUpdateOne) ClearDropOptional() *UserUpdateOne {
-	_ = _u.mutation.ClearField("drop_optional")
-	return _u
-}
-
-// SetParentID sets the "parent" edge to the User entity by ID.
-func (_u *UserUpdateOne) SetParentID(id int) *UserUpdateOne {
-	_ = _u.mutation.SetEdgeID("parent", id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableParentID(id *int) *UserUpdateOne {
-	if id != nil {
-		_u = _u.SetParentID(*id)
-	}
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_u *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// SetSpouseID sets the "spouse" edge to the User entity by ID.
-func (_u *UserUpdateOne) SetSpouseID(id int) *UserUpdateOne {
-	_ = _u.mutation.SetEdgeID("spouse", id)
-	return _u
-}
-
-// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableSpouseID(id *int) *UserUpdateOne {
-	if id != nil {
-		_u = _u.SetSpouseID(*id)
-	}
-	return _u
-}
-
-// SetCarID sets the "car" edge to the Car entity by ID.
-func (_u *UserUpdateOne) SetCarID(id int) *UserUpdateOne {
-	_ = _u.mutation.SetEdgeID("car", id)
-	return _u
-}
-
-// SetNillableCarID sets the "car" edge to the Car entity by ID if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableCarID(id *int) *UserUpdateOne {
-	if id != nil {
-		_u = _u.SetCarID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdateOne) With(as ...entfield.Assignment) *UserUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -932,6 +430,9 @@ func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
 
 // Save executes the query and returns the updated User entity.
 func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[User](ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

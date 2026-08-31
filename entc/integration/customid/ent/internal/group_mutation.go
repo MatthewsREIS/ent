@@ -25,9 +25,10 @@ type GroupMutationOption = func(*GroupMutation)
 // groupDescriptor describes Group's fields and edges
 // for the generic mutation runtime.
 var groupDescriptor = &entbuilder.Descriptor{
-	Name:   "Group",
-	IDType: reflect.TypeFor[int](),
-	Fields: map[string]entbuilder.FieldSpec{},
+	Name:    "Group",
+	IDType:  reflect.TypeFor[int](),
+	IDField: "id",
+	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"users": {
 			Cardinality:  entbuilder.M2M,

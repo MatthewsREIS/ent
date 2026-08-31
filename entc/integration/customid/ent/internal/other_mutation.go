@@ -26,10 +26,11 @@ type OtherMutationOption = func(*OtherMutation)
 // otherDescriptor describes Other's fields and edges
 // for the generic mutation runtime.
 var otherDescriptor = &entbuilder.Descriptor{
-	Name:   "Other",
-	IDType: reflect.TypeFor[sid.ID](),
-	Fields: map[string]entbuilder.FieldSpec{},
-	Edges:  map[string]entbuilder.EdgeSpec{}}
+	Name:    "Other",
+	IDType:  reflect.TypeFor[sid.ID](),
+	IDField: "id",
+	Fields:  map[string]entbuilder.FieldSpec{},
+	Edges:   map[string]entbuilder.EdgeSpec{}}
 
 // NewOtherMutation creates a new mutation for the Other entity.
 func NewOtherMutation(c Config, op Op, opts ...OtherMutationOption) *OtherMutation {

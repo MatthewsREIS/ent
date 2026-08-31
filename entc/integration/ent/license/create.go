@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // LicenseCreate is the builder for creating a License entity.
 type LicenseCreate struct {
 	Config
+	err      error
 	mutation *LicenseMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -31,37 +33,12 @@ func NewLicenseCreate(c Config, hooks []Hook, mutation *LicenseMutation) *Licens
 	return &LicenseCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetCreateTime sets the "create_time" field.
-func (_c *LicenseCreate) SetCreateTime(v time.Time) *LicenseCreate {
-	_ = _c.mutation.SetField("create_time", v)
-	return _c
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (_c *LicenseCreate) SetNillableCreateTime(v *time.Time) *LicenseCreate {
-	if v != nil {
-		_c.SetCreateTime(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the LicenseCreate builder. The first error from as is recorded and returned by Save.
+func (_c *LicenseCreate) With(as ...entfield.Assignment) *LicenseCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (_c *LicenseCreate) SetUpdateTime(v time.Time) *LicenseCreate {
-	_ = _c.mutation.SetField("update_time", v)
-	return _c
-}
-
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (_c *LicenseCreate) SetNillableUpdateTime(v *time.Time) *LicenseCreate {
-	if v != nil {
-		_c.SetUpdateTime(*v)
-	}
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *LicenseCreate) SetID(v int) *LicenseCreate {
-	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -72,6 +49,9 @@ func (_c *LicenseCreate) Mutation() *LicenseMutation {
 
 // Save creates the License in the database.
 func (_c *LicenseCreate) Save(ctx context.Context) (*License, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -256,6 +236,12 @@ func (_c *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*LicenseMutation)

@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -21,6 +22,7 @@ import (
 // RentalCreate is the builder for creating a Rental entity.
 type RentalCreate struct {
 	Config
+	err      error
 	mutation *RentalMutation
 	hooks    []Hook
 }
@@ -30,29 +32,12 @@ func NewRentalCreate(c Config, hooks []Hook, mutation *RentalMutation) *RentalCr
 	return &RentalCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetDate sets the "date" field.
-func (_c *RentalCreate) SetDate(v time.Time) *RentalCreate {
-	_ = _c.mutation.SetField("date", v)
-	return _c
-}
-
-// SetNillableDate sets the "date" field if the given value is not nil.
-func (_c *RentalCreate) SetNillableDate(v *time.Time) *RentalCreate {
-	if v != nil {
-		_c.SetDate(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RentalCreate builder. The first error from as is recorded and returned by Save.
+func (_c *RentalCreate) With(as ...entfield.Assignment) *RentalCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetUserID sets the "user_id" field.
-func (_c *RentalCreate) SetUserID(v int) *RentalCreate {
-	_ = _c.mutation.SetEdgeID("user", v)
-	return _c
-}
-
-// SetCarID sets the "car_id" field.
-func (_c *RentalCreate) SetCarID(v uuid.UUID) *RentalCreate {
-	_ = _c.mutation.SetEdgeID("car", v)
 	return _c
 }
 
@@ -63,6 +48,9 @@ func (_c *RentalCreate) Mutation() *RentalMutation {
 
 // Save creates the Rental in the database.
 func (_c *RentalCreate) Save(ctx context.Context) (*Rental, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -203,6 +191,12 @@ func (_c *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RentalMutation)

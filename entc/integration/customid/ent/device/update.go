@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // DeviceUpdate is the builder for updating Device entities.
 type DeviceUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *DeviceMutation
 }
@@ -37,23 +39,12 @@ func (_u *DeviceUpdate) Where(ps ...predicate.Device) *DeviceUpdate {
 	return _u
 }
 
-// SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
-func (_u *DeviceUpdate) SetActiveSessionID(id schema.ID) *DeviceUpdate {
-	_ = _u.mutation.SetEdgeID("active_session", id)
-	return _u
-}
-
-// SetNillableActiveSessionID sets the "active_session" edge to the Session entity by ID if the given value is not nil.
-func (_u *DeviceUpdate) SetNillableActiveSessionID(id *schema.ID) *DeviceUpdate {
-	if id != nil {
-		_u = _u.SetActiveSessionID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the DeviceUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *DeviceUpdate) With(as ...entfield.Assignment) *DeviceUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (_u *DeviceUpdate) AddSessionIDs(ids ...schema.ID) *DeviceUpdate {
-	_ = _u.mutation.AddEdgeIDs("sessions", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -82,6 +73,9 @@ func (_u *DeviceUpdate) RemoveSessionIDs(ids ...schema.ID) *DeviceUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *DeviceUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*DeviceMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -206,6 +200,7 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type DeviceUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *DeviceMutation
 }
@@ -215,23 +210,12 @@ func NewDeviceUpdateOne(c Config, hooks []Hook, mutation *DeviceMutation) *Devic
 	return &DeviceUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
-func (_u *DeviceUpdateOne) SetActiveSessionID(id schema.ID) *DeviceUpdateOne {
-	_ = _u.mutation.SetEdgeID("active_session", id)
-	return _u
-}
-
-// SetNillableActiveSessionID sets the "active_session" edge to the Session entity by ID if the given value is not nil.
-func (_u *DeviceUpdateOne) SetNillableActiveSessionID(id *schema.ID) *DeviceUpdateOne {
-	if id != nil {
-		_u = _u.SetActiveSessionID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the DeviceUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *DeviceUpdateOne) With(as ...entfield.Assignment) *DeviceUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (_u *DeviceUpdateOne) AddSessionIDs(ids ...schema.ID) *DeviceUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("sessions", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -273,6 +257,9 @@ func (_u *DeviceUpdateOne) Select(field string, fields ...string) *DeviceUpdateO
 
 // Save executes the query and returns the updated Device entity.
 func (_u *DeviceUpdateOne) Save(ctx context.Context) (*Device, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Device](ctx, &entbuilder.UpdateState[*DeviceMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

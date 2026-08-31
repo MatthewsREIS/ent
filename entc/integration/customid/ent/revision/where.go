@@ -17,7 +17,7 @@ var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.String[string]
 }{
-	ID: entfield.NewString[string](FieldID),
+	ID: entfield.NewString[string](FieldID, "id"),
 }
 
 // E holds typed edge handles for every edge of the Revision type.

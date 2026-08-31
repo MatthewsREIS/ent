@@ -14,11 +14,13 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // BuilderUpdate is the builder for updating Builder entities.
 type BuilderUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *BuilderMutation
 }
@@ -34,6 +36,15 @@ func (_u *BuilderUpdate) Where(ps ...predicate.Builder) *BuilderUpdate {
 	return _u
 }
 
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the BuilderUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *BuilderUpdate) With(as ...entfield.Assignment) *BuilderUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
+}
+
 // Mutation returns the BuilderMutation object of the builder.
 func (_u *BuilderUpdate) Mutation() *BuilderMutation {
 	return _u.mutation
@@ -41,6 +52,9 @@ func (_u *BuilderUpdate) Mutation() *BuilderMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *BuilderUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
@@ -96,6 +110,7 @@ func (_u *BuilderUpdate) gremlin() *dsl.Traversal {
 type BuilderUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *BuilderMutation
 }
@@ -103,6 +118,15 @@ type BuilderUpdateOne struct {
 // NewBuilderUpdateOne returns a new BuilderUpdateOne initialized with the given config, hooks, and mutation.
 func NewBuilderUpdateOne(c Config, hooks []Hook, mutation *BuilderMutation) *BuilderUpdateOne {
 	return &BuilderUpdateOne{Config: c, hooks: hooks, mutation: mutation}
+}
+
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the BuilderUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *BuilderUpdateOne) With(as ...entfield.Assignment) *BuilderUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
 }
 
 // Mutation returns the BuilderMutation object of the builder.
@@ -125,6 +149,9 @@ func (_u *BuilderUpdateOne) Select(field string, fields ...string) *BuilderUpdat
 
 // Save executes the query and returns the updated Builder entity.
 func (_u *BuilderUpdateOne) Save(ctx context.Context) (*Builder, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 

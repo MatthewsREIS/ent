@@ -19,19 +19,19 @@ var F = struct {
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
 }{
-	ID:   entfield.NewNumber[int](FieldID),
-	Name: entfield.NewString[string](FieldName),
+	ID:   entfield.NewNumber[int](FieldID, "id"),
+	Name: entfield.NewString[string](FieldName, "name"),
 }
 
 // E holds typed edge handles for every edge of the Team type.
 var E = struct {
 	// Tasks is the handle for the "tasks" edge.
-	Tasks entfield.Edge[predicate.Task]
+	Tasks entfield.Edge[predicate.Task, int]
 	// Users is the handle for the "users" edge.
-	Users entfield.Edge[predicate.User]
+	Users entfield.Edge[predicate.User, int]
 }{
-	Tasks: entfield.NewEdge[predicate.Task](newTasksStep),
-	Users: entfield.NewEdge[predicate.User](newUsersStep),
+	Tasks: entfield.NewEdge[predicate.Task, int]("tasks", newTasksStep),
+	Users: entfield.NewEdge[predicate.User, int]("users", newUsersStep),
 }
 
 // And groups predicates with the AND operator between them.

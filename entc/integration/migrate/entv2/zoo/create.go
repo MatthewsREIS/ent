@@ -11,12 +11,14 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // ZooCreate is the builder for creating a Zoo entity.
 type ZooCreate struct {
 	Config
+	err      error
 	mutation *ZooMutation
 	hooks    []Hook
 }
@@ -26,9 +28,12 @@ func NewZooCreate(c Config, hooks []Hook, mutation *ZooMutation) *ZooCreate {
 	return &ZooCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetID sets the "id" field.
-func (_c *ZooCreate) SetID(v int) *ZooCreate {
-	_c.mutation.SetID(v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ZooCreate builder. The first error from as is recorded and returned by Save.
+func (_c *ZooCreate) With(as ...entfield.Assignment) *ZooCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -39,6 +44,9 @@ func (_c *ZooCreate) Mutation() *ZooMutation {
 
 // Save creates the Zoo in the database.
 func (_c *ZooCreate) Save(ctx context.Context) (*Zoo, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -129,6 +137,12 @@ func (_c *ZooCreateBulk) Save(ctx context.Context) ([]*Zoo, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ZooMutation)
 				if !ok {

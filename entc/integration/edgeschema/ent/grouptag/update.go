@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // GroupTagUpdate is the builder for updating GroupTag entities.
 type GroupTagUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *GroupTagMutation
 }
@@ -36,30 +38,11 @@ func (_u *GroupTagUpdate) Where(ps ...predicate.GroupTag) *GroupTagUpdate {
 	return _u
 }
 
-// SetTagID sets the "tag_id" field.
-func (_u *GroupTagUpdate) SetTagID(v int) *GroupTagUpdate {
-	_ = _u.mutation.SetEdgeID("tag", v)
-	return _u
-}
-
-// SetNillableTagID sets the "tag_id" field if the given value is not nil.
-func (_u *GroupTagUpdate) SetNillableTagID(v *int) *GroupTagUpdate {
-	if v != nil {
-		_u.SetTagID(*v)
-	}
-	return _u
-}
-
-// SetGroupID sets the "group_id" field.
-func (_u *GroupTagUpdate) SetGroupID(v int) *GroupTagUpdate {
-	_ = _u.mutation.SetEdgeID("group", v)
-	return _u
-}
-
-// SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (_u *GroupTagUpdate) SetNillableGroupID(v *int) *GroupTagUpdate {
-	if v != nil {
-		_u.SetGroupID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupTagUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *GroupTagUpdate) With(as ...entfield.Assignment) *GroupTagUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -83,6 +66,9 @@ func (_u *GroupTagUpdate) ClearGroup() *GroupTagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupTagUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*GroupTagMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -205,6 +191,7 @@ func (_u *GroupTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type GroupTagUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *GroupTagMutation
 }
@@ -214,30 +201,11 @@ func NewGroupTagUpdateOne(c Config, hooks []Hook, mutation *GroupTagMutation) *G
 	return &GroupTagUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetTagID sets the "tag_id" field.
-func (_u *GroupTagUpdateOne) SetTagID(v int) *GroupTagUpdateOne {
-	_ = _u.mutation.SetEdgeID("tag", v)
-	return _u
-}
-
-// SetNillableTagID sets the "tag_id" field if the given value is not nil.
-func (_u *GroupTagUpdateOne) SetNillableTagID(v *int) *GroupTagUpdateOne {
-	if v != nil {
-		_u.SetTagID(*v)
-	}
-	return _u
-}
-
-// SetGroupID sets the "group_id" field.
-func (_u *GroupTagUpdateOne) SetGroupID(v int) *GroupTagUpdateOne {
-	_ = _u.mutation.SetEdgeID("group", v)
-	return _u
-}
-
-// SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (_u *GroupTagUpdateOne) SetNillableGroupID(v *int) *GroupTagUpdateOne {
-	if v != nil {
-		_u.SetGroupID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupTagUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *GroupTagUpdateOne) With(as ...entfield.Assignment) *GroupTagUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -274,6 +242,9 @@ func (_u *GroupTagUpdateOne) Select(field string, fields ...string) *GroupTagUpd
 
 // Save executes the query and returns the updated GroupTag entity.
 func (_u *GroupTagUpdateOne) Save(ctx context.Context) (*GroupTag, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[GroupTag](ctx, &entbuilder.UpdateState[*GroupTagMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

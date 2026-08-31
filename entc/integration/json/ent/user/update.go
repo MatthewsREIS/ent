@@ -20,12 +20,14 @@ import (
 	"entgo.io/ent/entc/integration/json/ent/predicate"
 	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	Config
+	err       error
 	hooks     []Hook
 	mutation  *UserMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -42,215 +44,12 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return _u
 }
 
-// SetT sets the "t" field.
-func (_u *UserUpdate) SetT(v *schema.T) *UserUpdate {
-	_ = _u.mutation.SetField("t", v)
-	return _u
-}
-
-// ClearT clears the value of the "t" field.
-func (_u *UserUpdate) ClearT() *UserUpdate {
-	_ = _u.mutation.ClearField("t")
-	return _u
-}
-
-// SetURL sets the "url" field.
-func (_u *UserUpdate) SetURL(v *url.URL) *UserUpdate {
-	_ = _u.mutation.SetField("url", v)
-	return _u
-}
-
-// ClearURL clears the value of the "url" field.
-func (_u *UserUpdate) ClearURL() *UserUpdate {
-	_ = _u.mutation.ClearField("url")
-	return _u
-}
-
-// SetURLs sets the "URLs" field.
-func (_u *UserUpdate) SetURLs(v []*url.URL) *UserUpdate {
-	_ = _u.mutation.SetField("URLs", v)
-	return _u
-}
-
-// AppendURLs appends value to the "URLs" field.
-func (_u *UserUpdate) AppendURLs(v []*url.URL) *UserUpdate {
-	_ = _u.mutation.AppendField("URLs", v)
-	return _u
-}
-
-// ClearURLs clears the value of the "URLs" field.
-func (_u *UserUpdate) ClearURLs() *UserUpdate {
-	_ = _u.mutation.ClearField("URLs")
-	return _u
-}
-
-// SetRaw sets the "raw" field.
-func (_u *UserUpdate) SetRaw(v json.RawMessage) *UserUpdate {
-	_ = _u.mutation.SetField("raw", v)
-	return _u
-}
-
-// AppendRaw appends value to the "raw" field.
-func (_u *UserUpdate) AppendRaw(v json.RawMessage) *UserUpdate {
-	_ = _u.mutation.AppendField("raw", v)
-	return _u
-}
-
-// ClearRaw clears the value of the "raw" field.
-func (_u *UserUpdate) ClearRaw() *UserUpdate {
-	_ = _u.mutation.ClearField("raw")
-	return _u
-}
-
-// SetDirs sets the "dirs" field.
-func (_u *UserUpdate) SetDirs(v []http.Dir) *UserUpdate {
-	_ = _u.mutation.SetField("dirs", v)
-	return _u
-}
-
-// AppendDirs appends value to the "dirs" field.
-func (_u *UserUpdate) AppendDirs(v []http.Dir) *UserUpdate {
-	_ = _u.mutation.AppendField("dirs", v)
-	return _u
-}
-
-// SetInts sets the "ints" field.
-func (_u *UserUpdate) SetInts(v []int) *UserUpdate {
-	_ = _u.mutation.SetField("ints", v)
-	return _u
-}
-
-// AppendInts appends value to the "ints" field.
-func (_u *UserUpdate) AppendInts(v []int) *UserUpdate {
-	_ = _u.mutation.AppendField("ints", v)
-	return _u
-}
-
-// ClearInts clears the value of the "ints" field.
-func (_u *UserUpdate) ClearInts() *UserUpdate {
-	_ = _u.mutation.ClearField("ints")
-	return _u
-}
-
-// SetFloats sets the "floats" field.
-func (_u *UserUpdate) SetFloats(v []float64) *UserUpdate {
-	_ = _u.mutation.SetField("floats", v)
-	return _u
-}
-
-// AppendFloats appends value to the "floats" field.
-func (_u *UserUpdate) AppendFloats(v []float64) *UserUpdate {
-	_ = _u.mutation.AppendField("floats", v)
-	return _u
-}
-
-// ClearFloats clears the value of the "floats" field.
-func (_u *UserUpdate) ClearFloats() *UserUpdate {
-	_ = _u.mutation.ClearField("floats")
-	return _u
-}
-
-// SetStrings sets the "strings" field.
-func (_u *UserUpdate) SetStrings(v []string) *UserUpdate {
-	_ = _u.mutation.SetField("strings", v)
-	return _u
-}
-
-// AppendStrings appends value to the "strings" field.
-func (_u *UserUpdate) AppendStrings(v []string) *UserUpdate {
-	_ = _u.mutation.AppendField("strings", v)
-	return _u
-}
-
-// ClearStrings clears the value of the "strings" field.
-func (_u *UserUpdate) ClearStrings() *UserUpdate {
-	_ = _u.mutation.ClearField("strings")
-	return _u
-}
-
-// SetIntsValidate sets the "ints_validate" field.
-func (_u *UserUpdate) SetIntsValidate(v []int) *UserUpdate {
-	_ = _u.mutation.SetField("ints_validate", v)
-	return _u
-}
-
-// AppendIntsValidate appends value to the "ints_validate" field.
-func (_u *UserUpdate) AppendIntsValidate(v []int) *UserUpdate {
-	_ = _u.mutation.AppendField("ints_validate", v)
-	return _u
-}
-
-// ClearIntsValidate clears the value of the "ints_validate" field.
-func (_u *UserUpdate) ClearIntsValidate() *UserUpdate {
-	_ = _u.mutation.ClearField("ints_validate")
-	return _u
-}
-
-// SetFloatsValidate sets the "floats_validate" field.
-func (_u *UserUpdate) SetFloatsValidate(v []float64) *UserUpdate {
-	_ = _u.mutation.SetField("floats_validate", v)
-	return _u
-}
-
-// AppendFloatsValidate appends value to the "floats_validate" field.
-func (_u *UserUpdate) AppendFloatsValidate(v []float64) *UserUpdate {
-	_ = _u.mutation.AppendField("floats_validate", v)
-	return _u
-}
-
-// ClearFloatsValidate clears the value of the "floats_validate" field.
-func (_u *UserUpdate) ClearFloatsValidate() *UserUpdate {
-	_ = _u.mutation.ClearField("floats_validate")
-	return _u
-}
-
-// SetStringsValidate sets the "strings_validate" field.
-func (_u *UserUpdate) SetStringsValidate(v []string) *UserUpdate {
-	_ = _u.mutation.SetField("strings_validate", v)
-	return _u
-}
-
-// AppendStringsValidate appends value to the "strings_validate" field.
-func (_u *UserUpdate) AppendStringsValidate(v []string) *UserUpdate {
-	_ = _u.mutation.AppendField("strings_validate", v)
-	return _u
-}
-
-// ClearStringsValidate clears the value of the "strings_validate" field.
-func (_u *UserUpdate) ClearStringsValidate() *UserUpdate {
-	_ = _u.mutation.ClearField("strings_validate")
-	return _u
-}
-
-// SetAddr sets the "addr" field.
-func (_u *UserUpdate) SetAddr(v schema.Addr) *UserUpdate {
-	_ = _u.mutation.SetField("addr", v)
-	return _u
-}
-
-// SetNillableAddr sets the "addr" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAddr(v *schema.Addr) *UserUpdate {
-	if v != nil {
-		_u.SetAddr(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdate) With(as ...entfield.Assignment) *UserUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearAddr clears the value of the "addr" field.
-func (_u *UserUpdate) ClearAddr() *UserUpdate {
-	_ = _u.mutation.ClearField("addr")
-	return _u
-}
-
-// SetUnknown sets the "unknown" field.
-func (_u *UserUpdate) SetUnknown(v any) *UserUpdate {
-	_ = _u.mutation.SetField("unknown", v)
-	return _u
-}
-
-// ClearUnknown clears the value of the "unknown" field.
-func (_u *UserUpdate) ClearUnknown() *UserUpdate {
-	_ = _u.mutation.ClearField("unknown")
 	return _u
 }
 
@@ -261,6 +60,9 @@ func (_u *UserUpdate) Mutation() *UserMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -461,6 +263,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type UserUpdateOne struct {
 	Config
 	fields    []string
+	err       error
 	hooks     []Hook
 	mutation  *UserMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -471,215 +274,12 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 	return &UserUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetT sets the "t" field.
-func (_u *UserUpdateOne) SetT(v *schema.T) *UserUpdateOne {
-	_ = _u.mutation.SetField("t", v)
-	return _u
-}
-
-// ClearT clears the value of the "t" field.
-func (_u *UserUpdateOne) ClearT() *UserUpdateOne {
-	_ = _u.mutation.ClearField("t")
-	return _u
-}
-
-// SetURL sets the "url" field.
-func (_u *UserUpdateOne) SetURL(v *url.URL) *UserUpdateOne {
-	_ = _u.mutation.SetField("url", v)
-	return _u
-}
-
-// ClearURL clears the value of the "url" field.
-func (_u *UserUpdateOne) ClearURL() *UserUpdateOne {
-	_ = _u.mutation.ClearField("url")
-	return _u
-}
-
-// SetURLs sets the "URLs" field.
-func (_u *UserUpdateOne) SetURLs(v []*url.URL) *UserUpdateOne {
-	_ = _u.mutation.SetField("URLs", v)
-	return _u
-}
-
-// AppendURLs appends value to the "URLs" field.
-func (_u *UserUpdateOne) AppendURLs(v []*url.URL) *UserUpdateOne {
-	_ = _u.mutation.AppendField("URLs", v)
-	return _u
-}
-
-// ClearURLs clears the value of the "URLs" field.
-func (_u *UserUpdateOne) ClearURLs() *UserUpdateOne {
-	_ = _u.mutation.ClearField("URLs")
-	return _u
-}
-
-// SetRaw sets the "raw" field.
-func (_u *UserUpdateOne) SetRaw(v json.RawMessage) *UserUpdateOne {
-	_ = _u.mutation.SetField("raw", v)
-	return _u
-}
-
-// AppendRaw appends value to the "raw" field.
-func (_u *UserUpdateOne) AppendRaw(v json.RawMessage) *UserUpdateOne {
-	_ = _u.mutation.AppendField("raw", v)
-	return _u
-}
-
-// ClearRaw clears the value of the "raw" field.
-func (_u *UserUpdateOne) ClearRaw() *UserUpdateOne {
-	_ = _u.mutation.ClearField("raw")
-	return _u
-}
-
-// SetDirs sets the "dirs" field.
-func (_u *UserUpdateOne) SetDirs(v []http.Dir) *UserUpdateOne {
-	_ = _u.mutation.SetField("dirs", v)
-	return _u
-}
-
-// AppendDirs appends value to the "dirs" field.
-func (_u *UserUpdateOne) AppendDirs(v []http.Dir) *UserUpdateOne {
-	_ = _u.mutation.AppendField("dirs", v)
-	return _u
-}
-
-// SetInts sets the "ints" field.
-func (_u *UserUpdateOne) SetInts(v []int) *UserUpdateOne {
-	_ = _u.mutation.SetField("ints", v)
-	return _u
-}
-
-// AppendInts appends value to the "ints" field.
-func (_u *UserUpdateOne) AppendInts(v []int) *UserUpdateOne {
-	_ = _u.mutation.AppendField("ints", v)
-	return _u
-}
-
-// ClearInts clears the value of the "ints" field.
-func (_u *UserUpdateOne) ClearInts() *UserUpdateOne {
-	_ = _u.mutation.ClearField("ints")
-	return _u
-}
-
-// SetFloats sets the "floats" field.
-func (_u *UserUpdateOne) SetFloats(v []float64) *UserUpdateOne {
-	_ = _u.mutation.SetField("floats", v)
-	return _u
-}
-
-// AppendFloats appends value to the "floats" field.
-func (_u *UserUpdateOne) AppendFloats(v []float64) *UserUpdateOne {
-	_ = _u.mutation.AppendField("floats", v)
-	return _u
-}
-
-// ClearFloats clears the value of the "floats" field.
-func (_u *UserUpdateOne) ClearFloats() *UserUpdateOne {
-	_ = _u.mutation.ClearField("floats")
-	return _u
-}
-
-// SetStrings sets the "strings" field.
-func (_u *UserUpdateOne) SetStrings(v []string) *UserUpdateOne {
-	_ = _u.mutation.SetField("strings", v)
-	return _u
-}
-
-// AppendStrings appends value to the "strings" field.
-func (_u *UserUpdateOne) AppendStrings(v []string) *UserUpdateOne {
-	_ = _u.mutation.AppendField("strings", v)
-	return _u
-}
-
-// ClearStrings clears the value of the "strings" field.
-func (_u *UserUpdateOne) ClearStrings() *UserUpdateOne {
-	_ = _u.mutation.ClearField("strings")
-	return _u
-}
-
-// SetIntsValidate sets the "ints_validate" field.
-func (_u *UserUpdateOne) SetIntsValidate(v []int) *UserUpdateOne {
-	_ = _u.mutation.SetField("ints_validate", v)
-	return _u
-}
-
-// AppendIntsValidate appends value to the "ints_validate" field.
-func (_u *UserUpdateOne) AppendIntsValidate(v []int) *UserUpdateOne {
-	_ = _u.mutation.AppendField("ints_validate", v)
-	return _u
-}
-
-// ClearIntsValidate clears the value of the "ints_validate" field.
-func (_u *UserUpdateOne) ClearIntsValidate() *UserUpdateOne {
-	_ = _u.mutation.ClearField("ints_validate")
-	return _u
-}
-
-// SetFloatsValidate sets the "floats_validate" field.
-func (_u *UserUpdateOne) SetFloatsValidate(v []float64) *UserUpdateOne {
-	_ = _u.mutation.SetField("floats_validate", v)
-	return _u
-}
-
-// AppendFloatsValidate appends value to the "floats_validate" field.
-func (_u *UserUpdateOne) AppendFloatsValidate(v []float64) *UserUpdateOne {
-	_ = _u.mutation.AppendField("floats_validate", v)
-	return _u
-}
-
-// ClearFloatsValidate clears the value of the "floats_validate" field.
-func (_u *UserUpdateOne) ClearFloatsValidate() *UserUpdateOne {
-	_ = _u.mutation.ClearField("floats_validate")
-	return _u
-}
-
-// SetStringsValidate sets the "strings_validate" field.
-func (_u *UserUpdateOne) SetStringsValidate(v []string) *UserUpdateOne {
-	_ = _u.mutation.SetField("strings_validate", v)
-	return _u
-}
-
-// AppendStringsValidate appends value to the "strings_validate" field.
-func (_u *UserUpdateOne) AppendStringsValidate(v []string) *UserUpdateOne {
-	_ = _u.mutation.AppendField("strings_validate", v)
-	return _u
-}
-
-// ClearStringsValidate clears the value of the "strings_validate" field.
-func (_u *UserUpdateOne) ClearStringsValidate() *UserUpdateOne {
-	_ = _u.mutation.ClearField("strings_validate")
-	return _u
-}
-
-// SetAddr sets the "addr" field.
-func (_u *UserUpdateOne) SetAddr(v schema.Addr) *UserUpdateOne {
-	_ = _u.mutation.SetField("addr", v)
-	return _u
-}
-
-// SetNillableAddr sets the "addr" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAddr(v *schema.Addr) *UserUpdateOne {
-	if v != nil {
-		_u.SetAddr(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdateOne) With(as ...entfield.Assignment) *UserUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearAddr clears the value of the "addr" field.
-func (_u *UserUpdateOne) ClearAddr() *UserUpdateOne {
-	_ = _u.mutation.ClearField("addr")
-	return _u
-}
-
-// SetUnknown sets the "unknown" field.
-func (_u *UserUpdateOne) SetUnknown(v any) *UserUpdateOne {
-	_ = _u.mutation.SetField("unknown", v)
-	return _u
-}
-
-// ClearUnknown clears the value of the "unknown" field.
-func (_u *UserUpdateOne) ClearUnknown() *UserUpdateOne {
-	_ = _u.mutation.ClearField("unknown")
 	return _u
 }
 
@@ -703,6 +303,9 @@ func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
 
 // Save executes the query and returns the updated User entity.
 func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[User](ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

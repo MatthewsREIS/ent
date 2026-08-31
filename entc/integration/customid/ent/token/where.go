@@ -20,16 +20,16 @@ var F = struct {
 	// Body is the handle for the "body" field.
 	Body entfield.String[string]
 }{
-	ID:   entfield.NewValue[sid.ID](FieldID),
-	Body: entfield.NewString[string](FieldBody),
+	ID:   entfield.NewValue[sid.ID](FieldID, "id"),
+	Body: entfield.NewString[string](FieldBody, "body"),
 }
 
 // E holds typed edge handles for every edge of the Token type.
 var E = struct {
 	// Account is the handle for the "account" edge.
-	Account entfield.Edge[predicate.Account]
+	Account entfield.Edge[predicate.Account, sid.ID]
 }{
-	Account: entfield.NewEdge[predicate.Account](newAccountStep),
+	Account: entfield.NewEdge[predicate.Account, sid.ID]("account", newAccountStep),
 }
 
 // And groups predicates with the AND operator between them.

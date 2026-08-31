@@ -20,16 +20,16 @@ var F = struct {
 	// Number is the handle for the "number" field.
 	Number entfield.String[string]
 }{
-	ID:     entfield.NewValue[uuid.UUID](FieldID),
-	Number: entfield.NewString[string](FieldNumber),
+	ID:     entfield.NewValue[uuid.UUID](FieldID, "id"),
+	Number: entfield.NewString[string](FieldNumber, "number"),
 }
 
 // E holds typed edge handles for every edge of the Car type.
 var E = struct {
 	// Rentals is the handle for the "rentals" edge.
-	Rentals entfield.Edge[predicate.Rental]
+	Rentals entfield.Edge[predicate.Rental, int]
 }{
-	Rentals: entfield.NewEdge[predicate.Rental](newRentalsStep),
+	Rentals: entfield.NewEdge[predicate.Rental, int]("rentals", newRentalsStep),
 }
 
 // And groups predicates with the AND operator between them.

@@ -16,31 +16,31 @@ import (
 var F = struct {
 	// Weight is the handle for the "weight" field.
 	Weight entfield.Number[int]
-	// UserID is the handle for the "user_id" field.
-	UserID entfield.Number[int]
-	// RelativeID is the handle for the "relative_id" field.
-	RelativeID entfield.Number[int]
-	// InfoID is the handle for the "info_id" field.
-	InfoID entfield.Number[int]
+	// UserID is the handle for the "user_id" field (backs the "user" edge).
+	UserID entfield.EdgeField[int]
+	// RelativeID is the handle for the "relative_id" field (backs the "relative" edge).
+	RelativeID entfield.EdgeField[int]
+	// InfoID is the handle for the "info_id" field (backs the "info" edge).
+	InfoID entfield.EdgeField[int]
 }{
-	Weight:     entfield.NewNumber[int](FieldWeight),
-	UserID:     entfield.NewNumber[int](FieldUserID),
-	RelativeID: entfield.NewNumber[int](FieldRelativeID),
-	InfoID:     entfield.NewNumber[int](FieldInfoID),
+	Weight:     entfield.NewNumber[int](FieldWeight, "weight"),
+	UserID:     entfield.NewEdgeField[int](FieldUserID, "user"),
+	RelativeID: entfield.NewEdgeField[int](FieldRelativeID, "relative"),
+	InfoID:     entfield.NewEdgeField[int](FieldInfoID, "info"),
 }
 
 // E holds typed edge handles for every edge of the Relationship type.
 var E = struct {
 	// User is the handle for the "user" edge.
-	User entfield.Edge[predicate.User]
+	User entfield.Edge[predicate.User, int]
 	// Relative is the handle for the "relative" edge.
-	Relative entfield.Edge[predicate.User]
+	Relative entfield.Edge[predicate.User, int]
 	// Info is the handle for the "info" edge.
-	Info entfield.Edge[predicate.RelationshipInfo]
+	Info entfield.Edge[predicate.RelationshipInfo, int]
 }{
-	User:     entfield.NewEdge[predicate.User](newUserStep),
-	Relative: entfield.NewEdge[predicate.User](newRelativeStep),
-	Info:     entfield.NewEdge[predicate.RelationshipInfo](newInfoStep),
+	User:     entfield.NewEdge[predicate.User, int]("user", newUserStep),
+	Relative: entfield.NewEdge[predicate.User, int]("relative", newRelativeStep),
+	Info:     entfield.NewEdge[predicate.RelationshipInfo, int]("info", newInfoStep),
 }
 
 // And groups predicates with the AND operator between them.

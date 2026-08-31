@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // TweetLikeCreate is the builder for creating a TweetLike entity.
 type TweetLikeCreate struct {
 	Config
+	err      error
 	mutation *TweetLikeMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -31,29 +33,12 @@ func NewTweetLikeCreate(c Config, hooks []Hook, mutation *TweetLikeMutation) *Tw
 	return &TweetLikeCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetLikedAt sets the "liked_at" field.
-func (_c *TweetLikeCreate) SetLikedAt(v time.Time) *TweetLikeCreate {
-	_ = _c.mutation.SetField("liked_at", v)
-	return _c
-}
-
-// SetNillableLikedAt sets the "liked_at" field if the given value is not nil.
-func (_c *TweetLikeCreate) SetNillableLikedAt(v *time.Time) *TweetLikeCreate {
-	if v != nil {
-		_c.SetLikedAt(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TweetLikeCreate builder. The first error from as is recorded and returned by Save.
+func (_c *TweetLikeCreate) With(as ...entfield.Assignment) *TweetLikeCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetUserID sets the "user_id" field.
-func (_c *TweetLikeCreate) SetUserID(v int) *TweetLikeCreate {
-	_ = _c.mutation.SetEdgeID("user", v)
-	return _c
-}
-
-// SetTweetID sets the "tweet_id" field.
-func (_c *TweetLikeCreate) SetTweetID(v int) *TweetLikeCreate {
-	_ = _c.mutation.SetEdgeID("tweet", v)
 	return _c
 }
 
@@ -64,6 +49,9 @@ func (_c *TweetLikeCreate) Mutation() *TweetLikeMutation {
 
 // Save creates the TweetLike in the database.
 func (_c *TweetLikeCreate) Save(ctx context.Context) (*TweetLike, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	if err := _c.defaults(); err != nil {
 		return nil, err
 	}
@@ -267,6 +255,12 @@ func (_c *TweetLikeCreateBulk) Save(ctx context.Context) ([]*TweetLike, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TweetLikeMutation)

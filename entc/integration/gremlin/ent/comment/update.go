@@ -16,13 +16,14 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
-	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // CommentUpdate is the builder for updating Comment entities.
 type CommentUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *CommentMutation
 }
@@ -38,132 +39,12 @@ func (_u *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 	return _u
 }
 
-// SetUniqueInt sets the "unique_int" field.
-func (_u *CommentUpdate) SetUniqueInt(v int) *CommentUpdate {
-	_ = _u.mutation.ResetField("unique_int")
-	_ = _u.mutation.SetField("unique_int", v)
-	return _u
-}
-
-// SetNillableUniqueInt sets the "unique_int" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableUniqueInt(v *int) *CommentUpdate {
-	if v != nil {
-		_u.SetUniqueInt(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CommentUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *CommentUpdate) With(as ...entfield.Assignment) *CommentUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddUniqueInt adds value to the "unique_int" field.
-func (_u *CommentUpdate) AddUniqueInt(v int) *CommentUpdate {
-	_ = _u.mutation.AddField("unique_int", v)
-	return _u
-}
-
-// SetUniqueFloat sets the "unique_float" field.
-func (_u *CommentUpdate) SetUniqueFloat(v float64) *CommentUpdate {
-	_ = _u.mutation.ResetField("unique_float")
-	_ = _u.mutation.SetField("unique_float", v)
-	return _u
-}
-
-// SetNillableUniqueFloat sets the "unique_float" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableUniqueFloat(v *float64) *CommentUpdate {
-	if v != nil {
-		_u.SetUniqueFloat(*v)
-	}
-	return _u
-}
-
-// AddUniqueFloat adds value to the "unique_float" field.
-func (_u *CommentUpdate) AddUniqueFloat(v float64) *CommentUpdate {
-	_ = _u.mutation.AddField("unique_float", v)
-	return _u
-}
-
-// SetNillableInt sets the "nillable_int" field.
-func (_u *CommentUpdate) SetNillableInt(v int) *CommentUpdate {
-	_ = _u.mutation.ResetField("nillable_int")
-	_ = _u.mutation.SetField("nillable_int", v)
-	return _u
-}
-
-// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableNillableInt(v *int) *CommentUpdate {
-	if v != nil {
-		_u.SetNillableInt(*v)
-	}
-	return _u
-}
-
-// AddNillableInt adds value to the "nillable_int" field.
-func (_u *CommentUpdate) AddNillableInt(v int) *CommentUpdate {
-	_ = _u.mutation.AddField("nillable_int", v)
-	return _u
-}
-
-// ClearNillableInt clears the value of the "nillable_int" field.
-func (_u *CommentUpdate) ClearNillableInt() *CommentUpdate {
-	_ = _u.mutation.ClearField("nillable_int")
-	return _u
-}
-
-// SetTable sets the "table" field.
-func (_u *CommentUpdate) SetTable(v string) *CommentUpdate {
-	_ = _u.mutation.SetField("table", v)
-	return _u
-}
-
-// SetNillableTable sets the "table" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableTable(v *string) *CommentUpdate {
-	if v != nil {
-		_u.SetTable(*v)
-	}
-	return _u
-}
-
-// ClearTable clears the value of the "table" field.
-func (_u *CommentUpdate) ClearTable() *CommentUpdate {
-	_ = _u.mutation.ClearField("table")
-	return _u
-}
-
-// SetDir sets the "dir" field.
-func (_u *CommentUpdate) SetDir(v schemadir.Dir) *CommentUpdate {
-	_ = _u.mutation.SetField("dir", v)
-	return _u
-}
-
-// SetNillableDir sets the "dir" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableDir(v *schemadir.Dir) *CommentUpdate {
-	if v != nil {
-		_u.SetDir(*v)
-	}
-	return _u
-}
-
-// ClearDir clears the value of the "dir" field.
-func (_u *CommentUpdate) ClearDir() *CommentUpdate {
-	_ = _u.mutation.ClearField("dir")
-	return _u
-}
-
-// SetClient sets the "client" field.
-func (_u *CommentUpdate) SetClient(v string) *CommentUpdate {
-	_ = _u.mutation.SetField("client", v)
-	return _u
-}
-
-// SetNillableClient sets the "client" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableClient(v *string) *CommentUpdate {
-	if v != nil {
-		_u.SetClient(*v)
-	}
-	return _u
-}
-
-// ClearClient clears the value of the "client" field.
-func (_u *CommentUpdate) ClearClient() *CommentUpdate {
-	_ = _u.mutation.ClearField("client")
 	return _u
 }
 
@@ -174,6 +55,9 @@ func (_u *CommentUpdate) Mutation() *CommentMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CommentUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
@@ -308,6 +192,7 @@ func (_u *CommentUpdate) gremlin() *dsl.Traversal {
 type CommentUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *CommentMutation
 }
@@ -317,132 +202,12 @@ func NewCommentUpdateOne(c Config, hooks []Hook, mutation *CommentMutation) *Com
 	return &CommentUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetUniqueInt sets the "unique_int" field.
-func (_u *CommentUpdateOne) SetUniqueInt(v int) *CommentUpdateOne {
-	_ = _u.mutation.ResetField("unique_int")
-	_ = _u.mutation.SetField("unique_int", v)
-	return _u
-}
-
-// SetNillableUniqueInt sets the "unique_int" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableUniqueInt(v *int) *CommentUpdateOne {
-	if v != nil {
-		_u.SetUniqueInt(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CommentUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *CommentUpdateOne) With(as ...entfield.Assignment) *CommentUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddUniqueInt adds value to the "unique_int" field.
-func (_u *CommentUpdateOne) AddUniqueInt(v int) *CommentUpdateOne {
-	_ = _u.mutation.AddField("unique_int", v)
-	return _u
-}
-
-// SetUniqueFloat sets the "unique_float" field.
-func (_u *CommentUpdateOne) SetUniqueFloat(v float64) *CommentUpdateOne {
-	_ = _u.mutation.ResetField("unique_float")
-	_ = _u.mutation.SetField("unique_float", v)
-	return _u
-}
-
-// SetNillableUniqueFloat sets the "unique_float" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableUniqueFloat(v *float64) *CommentUpdateOne {
-	if v != nil {
-		_u.SetUniqueFloat(*v)
-	}
-	return _u
-}
-
-// AddUniqueFloat adds value to the "unique_float" field.
-func (_u *CommentUpdateOne) AddUniqueFloat(v float64) *CommentUpdateOne {
-	_ = _u.mutation.AddField("unique_float", v)
-	return _u
-}
-
-// SetNillableInt sets the "nillable_int" field.
-func (_u *CommentUpdateOne) SetNillableInt(v int) *CommentUpdateOne {
-	_ = _u.mutation.ResetField("nillable_int")
-	_ = _u.mutation.SetField("nillable_int", v)
-	return _u
-}
-
-// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableNillableInt(v *int) *CommentUpdateOne {
-	if v != nil {
-		_u.SetNillableInt(*v)
-	}
-	return _u
-}
-
-// AddNillableInt adds value to the "nillable_int" field.
-func (_u *CommentUpdateOne) AddNillableInt(v int) *CommentUpdateOne {
-	_ = _u.mutation.AddField("nillable_int", v)
-	return _u
-}
-
-// ClearNillableInt clears the value of the "nillable_int" field.
-func (_u *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
-	_ = _u.mutation.ClearField("nillable_int")
-	return _u
-}
-
-// SetTable sets the "table" field.
-func (_u *CommentUpdateOne) SetTable(v string) *CommentUpdateOne {
-	_ = _u.mutation.SetField("table", v)
-	return _u
-}
-
-// SetNillableTable sets the "table" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableTable(v *string) *CommentUpdateOne {
-	if v != nil {
-		_u.SetTable(*v)
-	}
-	return _u
-}
-
-// ClearTable clears the value of the "table" field.
-func (_u *CommentUpdateOne) ClearTable() *CommentUpdateOne {
-	_ = _u.mutation.ClearField("table")
-	return _u
-}
-
-// SetDir sets the "dir" field.
-func (_u *CommentUpdateOne) SetDir(v schemadir.Dir) *CommentUpdateOne {
-	_ = _u.mutation.SetField("dir", v)
-	return _u
-}
-
-// SetNillableDir sets the "dir" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableDir(v *schemadir.Dir) *CommentUpdateOne {
-	if v != nil {
-		_u.SetDir(*v)
-	}
-	return _u
-}
-
-// ClearDir clears the value of the "dir" field.
-func (_u *CommentUpdateOne) ClearDir() *CommentUpdateOne {
-	_ = _u.mutation.ClearField("dir")
-	return _u
-}
-
-// SetClient sets the "client" field.
-func (_u *CommentUpdateOne) SetClient(v string) *CommentUpdateOne {
-	_ = _u.mutation.SetField("client", v)
-	return _u
-}
-
-// SetNillableClient sets the "client" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableClient(v *string) *CommentUpdateOne {
-	if v != nil {
-		_u.SetClient(*v)
-	}
-	return _u
-}
-
-// ClearClient clears the value of the "client" field.
-func (_u *CommentUpdateOne) ClearClient() *CommentUpdateOne {
-	_ = _u.mutation.ClearField("client")
 	return _u
 }
 
@@ -466,6 +231,9 @@ func (_u *CommentUpdateOne) Select(field string, fields ...string) *CommentUpdat
 
 // Save executes the query and returns the updated Comment entity.
 func (_u *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 

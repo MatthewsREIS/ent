@@ -25,10 +25,11 @@ type RevisionMutationOption = func(*RevisionMutation)
 // revisionDescriptor describes Revision's fields and edges
 // for the generic mutation runtime.
 var revisionDescriptor = &entbuilder.Descriptor{
-	Name:   "Revision",
-	IDType: reflect.TypeFor[string](),
-	Fields: map[string]entbuilder.FieldSpec{},
-	Edges:  map[string]entbuilder.EdgeSpec{}}
+	Name:    "Revision",
+	IDType:  reflect.TypeFor[string](),
+	IDField: "id",
+	Fields:  map[string]entbuilder.FieldSpec{},
+	Edges:   map[string]entbuilder.EdgeSpec{}}
 
 // NewRevisionMutation creates a new mutation for the Revision entity.
 func NewRevisionMutation(c Config, op Op, opts ...RevisionMutationOption) *RevisionMutation {

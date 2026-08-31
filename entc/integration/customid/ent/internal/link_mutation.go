@@ -27,8 +27,9 @@ type LinkMutationOption = func(*LinkMutation)
 // linkDescriptor describes Link's fields and edges
 // for the generic mutation runtime.
 var linkDescriptor = &entbuilder.Descriptor{
-	Name:   "Link",
-	IDType: reflect.TypeFor[uuidc.UUIDC](),
+	Name:    "Link",
+	IDType:  reflect.TypeFor[uuidc.UUIDC](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"link_information": {
 			Type:   reflect.TypeFor[map[string]schema.LinkInformation](),

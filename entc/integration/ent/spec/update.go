@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // SpecUpdate is the builder for updating Spec entities.
 type SpecUpdate struct {
 	Config
+	err       error
 	hooks     []Hook
 	mutation  *SpecMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -37,9 +39,12 @@ func (_u *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
 	return _u
 }
 
-// AddCardIDs adds the "card" edge to the Card entity by IDs.
-func (_u *SpecUpdate) AddCardIDs(ids ...int) *SpecUpdate {
-	_ = _u.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the SpecUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *SpecUpdate) With(as ...entfield.Assignment) *SpecUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -62,6 +67,9 @@ func (_u *SpecUpdate) RemoveCardIDs(ids ...int) *SpecUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *SpecUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*SpecMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -164,6 +172,7 @@ func (_u *SpecUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type SpecUpdateOne struct {
 	Config
 	fields    []string
+	err       error
 	hooks     []Hook
 	mutation  *SpecMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -174,9 +183,12 @@ func NewSpecUpdateOne(c Config, hooks []Hook, mutation *SpecMutation) *SpecUpdat
 	return &SpecUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// AddCardIDs adds the "card" edge to the Card entity by IDs.
-func (_u *SpecUpdateOne) AddCardIDs(ids ...int) *SpecUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the SpecUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *SpecUpdateOne) With(as ...entfield.Assignment) *SpecUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -212,6 +224,9 @@ func (_u *SpecUpdateOne) Select(field string, fields ...string) *SpecUpdateOne {
 
 // Save executes the query and returns the updated Spec entity.
 func (_u *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Spec](ctx, &entbuilder.UpdateState[*SpecMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

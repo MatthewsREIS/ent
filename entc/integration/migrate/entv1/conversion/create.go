@@ -12,12 +12,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // ConversionCreate is the builder for creating a Conversion entity.
 type ConversionCreate struct {
 	Config
+	err      error
 	mutation *ConversionMutation
 	hooks    []Hook
 }
@@ -27,128 +29,11 @@ func NewConversionCreate(c Config, hooks []Hook, mutation *ConversionMutation) *
 	return &ConversionCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_c *ConversionCreate) SetName(v string) *ConversionCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableName(v *string) *ConversionCreate {
-	if v != nil {
-		_c.SetName(*v)
-	}
-	return _c
-}
-
-// SetInt8ToString sets the "int8_to_string" field.
-func (_c *ConversionCreate) SetInt8ToString(v int8) *ConversionCreate {
-	_ = _c.mutation.SetField("int8_to_string", v)
-	return _c
-}
-
-// SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableInt8ToString(v *int8) *ConversionCreate {
-	if v != nil {
-		_c.SetInt8ToString(*v)
-	}
-	return _c
-}
-
-// SetUint8ToString sets the "uint8_to_string" field.
-func (_c *ConversionCreate) SetUint8ToString(v uint8) *ConversionCreate {
-	_ = _c.mutation.SetField("uint8_to_string", v)
-	return _c
-}
-
-// SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableUint8ToString(v *uint8) *ConversionCreate {
-	if v != nil {
-		_c.SetUint8ToString(*v)
-	}
-	return _c
-}
-
-// SetInt16ToString sets the "int16_to_string" field.
-func (_c *ConversionCreate) SetInt16ToString(v int16) *ConversionCreate {
-	_ = _c.mutation.SetField("int16_to_string", v)
-	return _c
-}
-
-// SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableInt16ToString(v *int16) *ConversionCreate {
-	if v != nil {
-		_c.SetInt16ToString(*v)
-	}
-	return _c
-}
-
-// SetUint16ToString sets the "uint16_to_string" field.
-func (_c *ConversionCreate) SetUint16ToString(v uint16) *ConversionCreate {
-	_ = _c.mutation.SetField("uint16_to_string", v)
-	return _c
-}
-
-// SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableUint16ToString(v *uint16) *ConversionCreate {
-	if v != nil {
-		_c.SetUint16ToString(*v)
-	}
-	return _c
-}
-
-// SetInt32ToString sets the "int32_to_string" field.
-func (_c *ConversionCreate) SetInt32ToString(v int32) *ConversionCreate {
-	_ = _c.mutation.SetField("int32_to_string", v)
-	return _c
-}
-
-// SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableInt32ToString(v *int32) *ConversionCreate {
-	if v != nil {
-		_c.SetInt32ToString(*v)
-	}
-	return _c
-}
-
-// SetUint32ToString sets the "uint32_to_string" field.
-func (_c *ConversionCreate) SetUint32ToString(v uint32) *ConversionCreate {
-	_ = _c.mutation.SetField("uint32_to_string", v)
-	return _c
-}
-
-// SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableUint32ToString(v *uint32) *ConversionCreate {
-	if v != nil {
-		_c.SetUint32ToString(*v)
-	}
-	return _c
-}
-
-// SetInt64ToString sets the "int64_to_string" field.
-func (_c *ConversionCreate) SetInt64ToString(v int64) *ConversionCreate {
-	_ = _c.mutation.SetField("int64_to_string", v)
-	return _c
-}
-
-// SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableInt64ToString(v *int64) *ConversionCreate {
-	if v != nil {
-		_c.SetInt64ToString(*v)
-	}
-	return _c
-}
-
-// SetUint64ToString sets the "uint64_to_string" field.
-func (_c *ConversionCreate) SetUint64ToString(v uint64) *ConversionCreate {
-	_ = _c.mutation.SetField("uint64_to_string", v)
-	return _c
-}
-
-// SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableUint64ToString(v *uint64) *ConversionCreate {
-	if v != nil {
-		_c.SetUint64ToString(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ConversionCreate builder. The first error from as is recorded and returned by Save.
+func (_c *ConversionCreate) With(as ...entfield.Assignment) *ConversionCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -160,6 +45,9 @@ func (_c *ConversionCreate) Mutation() *ConversionMutation {
 
 // Save creates the Conversion in the database.
 func (_c *ConversionCreate) Save(ctx context.Context) (*Conversion, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -280,6 +168,12 @@ func (_c *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error)
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ConversionMutation)
 				if !ok {

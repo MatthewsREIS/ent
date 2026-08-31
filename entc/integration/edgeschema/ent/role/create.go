@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // RoleCreate is the builder for creating a Role entity.
 type RoleCreate struct {
 	Config
+	err      error
 	mutation *RoleMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -32,29 +34,12 @@ func NewRoleCreate(c Config, hooks []Hook, mutation *RoleMutation) *RoleCreate {
 	return &RoleCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_c *RoleCreate) SetName(v string) *RoleCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (_c *RoleCreate) SetCreatedAt(v time.Time) *RoleCreate {
-	_ = _c.mutation.SetField("created_at", v)
-	return _c
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *RoleCreate) SetNillableCreatedAt(v *time.Time) *RoleCreate {
-	if v != nil {
-		_c.SetCreatedAt(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RoleCreate builder. The first error from as is recorded and returned by Save.
+func (_c *RoleCreate) With(as ...entfield.Assignment) *RoleCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *RoleCreate) AddUserIDs(ids ...int) *RoleCreate {
-	_ = _c.mutation.AddEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -65,6 +50,9 @@ func (_c *RoleCreate) Mutation() *RoleMutation {
 
 // Save creates the Role in the database.
 func (_c *RoleCreate) Save(ctx context.Context) (*Role, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -257,6 +245,12 @@ func (_c *RoleCreateBulk) Save(ctx context.Context) ([]*Role, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RoleMutation)

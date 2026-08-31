@@ -16,43 +16,43 @@ import (
 var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
-	// ParentID is the handle for the "parent_id" field.
-	ParentID entfield.Number[int]
-	// SpouseID is the handle for the "spouse_id" field.
-	SpouseID entfield.Number[int]
+	// ParentID is the handle for the "parent_id" field (backs the "parent" edge).
+	ParentID entfield.EdgeField[int]
+	// SpouseID is the handle for the "spouse_id" field (backs the "spouse" edge).
+	SpouseID entfield.EdgeField[int]
 }{
-	ID:       entfield.NewNumber[int](FieldID),
-	ParentID: entfield.NewNumber[int](FieldParentID),
-	SpouseID: entfield.NewNumber[int](FieldSpouseID),
+	ID:       entfield.NewNumber[int](FieldID, "id"),
+	ParentID: entfield.NewEdgeField[int](FieldParentID, "parent"),
+	SpouseID: entfield.NewEdgeField[int](FieldSpouseID, "spouse"),
 }
 
 // E holds typed edge handles for every edge of the User type.
 var E = struct {
 	// Pets is the handle for the "pets" edge.
-	Pets entfield.Edge[predicate.Pet]
+	Pets entfield.Edge[predicate.Pet, int]
 	// Parent is the handle for the "parent" edge.
-	Parent entfield.Edge[predicate.User]
+	Parent entfield.Edge[predicate.User, int]
 	// Children is the handle for the "children" edge.
-	Children entfield.Edge[predicate.User]
+	Children entfield.Edge[predicate.User, int]
 	// Spouse is the handle for the "spouse" edge.
-	Spouse entfield.Edge[predicate.User]
+	Spouse entfield.Edge[predicate.User, int]
 	// Card is the handle for the "card" edge.
-	Card entfield.Edge[predicate.Card]
+	Card entfield.Edge[predicate.Card, int]
 	// Metadata is the handle for the "metadata" edge.
-	Metadata entfield.Edge[predicate.Metadata]
+	Metadata entfield.Edge[predicate.Metadata, int]
 	// Info is the handle for the "info" edge.
-	Info entfield.Edge[predicate.Info]
+	Info entfield.Edge[predicate.Info, int]
 	// Rentals is the handle for the "rentals" edge.
-	Rentals entfield.Edge[predicate.Rental]
+	Rentals entfield.Edge[predicate.Rental, int]
 }{
-	Pets:     entfield.NewEdge[predicate.Pet](newPetsStep),
-	Parent:   entfield.NewEdge[predicate.User](newParentStep),
-	Children: entfield.NewEdge[predicate.User](newChildrenStep),
-	Spouse:   entfield.NewEdge[predicate.User](newSpouseStep),
-	Card:     entfield.NewEdge[predicate.Card](newCardStep),
-	Metadata: entfield.NewEdge[predicate.Metadata](newMetadataStep),
-	Info:     entfield.NewEdge[predicate.Info](newInfoStep),
-	Rentals:  entfield.NewEdge[predicate.Rental](newRentalsStep),
+	Pets:     entfield.NewEdge[predicate.Pet, int]("pets", newPetsStep),
+	Parent:   entfield.NewEdge[predicate.User, int]("parent", newParentStep),
+	Children: entfield.NewEdge[predicate.User, int]("children", newChildrenStep),
+	Spouse:   entfield.NewEdge[predicate.User, int]("spouse", newSpouseStep),
+	Card:     entfield.NewEdge[predicate.Card, int]("card", newCardStep),
+	Metadata: entfield.NewEdge[predicate.Metadata, int]("metadata", newMetadataStep),
+	Info:     entfield.NewEdge[predicate.Info, int]("info", newInfoStep),
+	Rentals:  entfield.NewEdge[predicate.Rental, int]("rentals", newRentalsStep),
 }
 
 // And groups predicates with the AND operator between them.

@@ -18,7 +18,7 @@ var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Value[sid.ID]
 }{
-	ID: entfield.NewValue[sid.ID](FieldID),
+	ID: entfield.NewValue[sid.ID](FieldID, "id"),
 }
 
 // E holds typed edge handles for every edge of the Other type.

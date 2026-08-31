@@ -1,6 +1,113 @@
 {
 	"user": {
 		"fields": {},
-		"edges": {}
+		"edges": {},
+		"importPath": "entgo.io/ent/entc/integration/json/ent/user",
+		"setters": {
+			"Addr": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Dirs": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": true,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Floats": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": true,
+				"unique": false,
+				"methodBase": ""
+			},
+			"FloatsValidate": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": true,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Ints": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": true,
+				"unique": false,
+				"methodBase": ""
+			},
+			"IntsValidate": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": true,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Raw": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": true,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Strings": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": true,
+				"unique": false,
+				"methodBase": ""
+			},
+			"StringsValidate": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": true,
+				"unique": false,
+				"methodBase": ""
+			},
+			"T": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"URL": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"URLs": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": true,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Unknown": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
+		}
 	}
 }

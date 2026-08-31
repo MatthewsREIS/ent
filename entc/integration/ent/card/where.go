@@ -27,23 +27,23 @@ var F = struct {
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
 }{
-	ID:         entfield.NewNumber[int](FieldID),
-	CreateTime: entfield.NewTime(FieldCreateTime),
-	UpdateTime: entfield.NewTime(FieldUpdateTime),
-	Balance:    entfield.NewNumber[float64](FieldBalance),
-	Number:     entfield.NewString[string](FieldNumber),
-	Name:       entfield.NewString[string](FieldName),
+	ID:         entfield.NewNumber[int](FieldID, "id"),
+	CreateTime: entfield.NewTime(FieldCreateTime, "create_time"),
+	UpdateTime: entfield.NewTime(FieldUpdateTime, "update_time"),
+	Balance:    entfield.NewNumber[float64](FieldBalance, "balance"),
+	Number:     entfield.NewString[string](FieldNumber, "number"),
+	Name:       entfield.NewString[string](FieldName, "name"),
 }
 
 // E holds typed edge handles for every edge of the Card type.
 var E = struct {
 	// Owner is the handle for the "owner" edge.
-	Owner entfield.Edge[predicate.User]
+	Owner entfield.Edge[predicate.User, int]
 	// Spec is the handle for the "spec" edge.
-	Spec entfield.Edge[predicate.Spec]
+	Spec entfield.Edge[predicate.Spec, int]
 }{
-	Owner: entfield.NewEdge[predicate.User](newOwnerStep),
-	Spec:  entfield.NewEdge[predicate.Spec](newSpecStep),
+	Owner: entfield.NewEdge[predicate.User, int]("owner", newOwnerStep),
+	Spec:  entfield.NewEdge[predicate.Spec, int]("spec", newSpecStep),
 }
 
 // And groups predicates with the AND operator between them.

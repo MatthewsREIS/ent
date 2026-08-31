@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // DeviceCreate is the builder for creating a Device entity.
 type DeviceCreate struct {
 	Config
+	err      error
 	mutation *DeviceMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,37 +32,12 @@ func NewDeviceCreate(c Config, hooks []Hook, mutation *DeviceMutation) *DeviceCr
 	return &DeviceCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetID sets the "id" field.
-func (_c *DeviceCreate) SetID(v schema.ID) *DeviceCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *DeviceCreate) SetNillableID(v *schema.ID) *DeviceCreate {
-	if v != nil {
-		_c.SetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the DeviceCreate builder. The first error from as is recorded and returned by Save.
+func (_c *DeviceCreate) With(as ...entfield.Assignment) *DeviceCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
-func (_c *DeviceCreate) SetActiveSessionID(id schema.ID) *DeviceCreate {
-	_ = _c.mutation.SetEdgeID("active_session", id)
-	return _c
-}
-
-// SetNillableActiveSessionID sets the "active_session" edge to the Session entity by ID if the given value is not nil.
-func (_c *DeviceCreate) SetNillableActiveSessionID(id *schema.ID) *DeviceCreate {
-	if id != nil {
-		_c = _c.SetActiveSessionID(*id)
-	}
-	return _c
-}
-
-// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (_c *DeviceCreate) AddSessionIDs(ids ...schema.ID) *DeviceCreate {
-	_ = _c.mutation.AddEdgeIDs("sessions", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -71,6 +48,9 @@ func (_c *DeviceCreate) Mutation() *DeviceMutation {
 
 // Save creates the Device in the database.
 func (_c *DeviceCreate) Save(ctx context.Context) (*Device, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -276,6 +256,12 @@ func (_c *DeviceCreateBulk) Save(ctx context.Context) ([]*Device, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DeviceMutation)

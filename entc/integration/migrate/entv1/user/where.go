@@ -31,7 +31,7 @@ var F = struct {
 	// OldToken is the handle for the "old_token" field.
 	OldToken entfield.String[string]
 	// Blob is the handle for the "blob" field.
-	Blob entfield.Bytes
+	Blob entfield.Bytes[[]byte]
 	// State is the handle for the "state" field.
 	State entfield.Enum[State]
 	// Status is the handle for the "status" field.
@@ -41,36 +41,36 @@ var F = struct {
 	// DropOptional is the handle for the "drop_optional" field.
 	DropOptional entfield.String[string]
 }{
-	ID:           entfield.NewNumber[int](FieldID),
-	Age:          entfield.NewNumber[int32](FieldAge),
-	Name:         entfield.NewString[string](FieldName),
-	Description:  entfield.NewString[string](FieldDescription),
-	Nickname:     entfield.NewString[string](FieldNickname),
-	Address:      entfield.NewString[string](FieldAddress),
-	Renamed:      entfield.NewString[string](FieldRenamed),
-	OldToken:     entfield.NewString[string](FieldOldToken),
-	Blob:         entfield.NewBytes(FieldBlob),
-	State:        entfield.NewEnum[State](FieldState),
-	Status:       entfield.NewString[string](FieldStatus),
-	Workplace:    entfield.NewString[string](FieldWorkplace),
-	DropOptional: entfield.NewString[string](FieldDropOptional),
+	ID:           entfield.NewNumber[int](FieldID, "id"),
+	Age:          entfield.NewNumber[int32](FieldAge, "age"),
+	Name:         entfield.NewString[string](FieldName, "name"),
+	Description:  entfield.NewString[string](FieldDescription, "description"),
+	Nickname:     entfield.NewString[string](FieldNickname, "nickname"),
+	Address:      entfield.NewString[string](FieldAddress, "address"),
+	Renamed:      entfield.NewString[string](FieldRenamed, "renamed"),
+	OldToken:     entfield.NewString[string](FieldOldToken, "old_token"),
+	Blob:         entfield.NewBytes[[]byte](FieldBlob, "blob"),
+	State:        entfield.NewEnum[State](FieldState, "state"),
+	Status:       entfield.NewString[string](FieldStatus, "status"),
+	Workplace:    entfield.NewString[string](FieldWorkplace, "workplace"),
+	DropOptional: entfield.NewString[string](FieldDropOptional, "drop_optional"),
 }
 
 // E holds typed edge handles for every edge of the User type.
 var E = struct {
 	// Parent is the handle for the "parent" edge.
-	Parent entfield.Edge[predicate.User]
+	Parent entfield.Edge[predicate.User, int]
 	// Children is the handle for the "children" edge.
-	Children entfield.Edge[predicate.User]
+	Children entfield.Edge[predicate.User, int]
 	// Spouse is the handle for the "spouse" edge.
-	Spouse entfield.Edge[predicate.User]
+	Spouse entfield.Edge[predicate.User, int]
 	// Car is the handle for the "car" edge.
-	Car entfield.Edge[predicate.Car]
+	Car entfield.Edge[predicate.Car, int]
 }{
-	Parent:   entfield.NewEdge[predicate.User](newParentStep),
-	Children: entfield.NewEdge[predicate.User](newChildrenStep),
-	Spouse:   entfield.NewEdge[predicate.User](newSpouseStep),
-	Car:      entfield.NewEdge[predicate.Car](newCarStep),
+	Parent:   entfield.NewEdge[predicate.User, int]("parent", newParentStep),
+	Children: entfield.NewEdge[predicate.User, int]("children", newChildrenStep),
+	Spouse:   entfield.NewEdge[predicate.User, int]("spouse", newSpouseStep),
+	Car:      entfield.NewEdge[predicate.Car, int]("car", newCarStep),
 }
 
 // And groups predicates with the AND operator between them.

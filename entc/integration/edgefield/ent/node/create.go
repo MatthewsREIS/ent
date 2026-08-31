@@ -13,12 +13,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // NodeCreate is the builder for creating a Node entity.
 type NodeCreate struct {
 	Config
+	err      error
 	mutation *NodeMutation
 	hooks    []Hook
 }
@@ -28,44 +30,11 @@ func NewNodeCreate(c Config, hooks []Hook, mutation *NodeMutation) *NodeCreate {
 	return &NodeCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetValue sets the "value" field.
-func (_c *NodeCreate) SetValue(v int) *NodeCreate {
-	_ = _c.mutation.SetField("value", v)
-	return _c
-}
-
-// SetNillableValue sets the "value" field if the given value is not nil.
-func (_c *NodeCreate) SetNillableValue(v *int) *NodeCreate {
-	if v != nil {
-		_c.SetValue(*v)
-	}
-	return _c
-}
-
-// SetPrevID sets the "prev_id" field.
-func (_c *NodeCreate) SetPrevID(v int) *NodeCreate {
-	_ = _c.mutation.SetEdgeID("prev", v)
-	return _c
-}
-
-// SetNillablePrevID sets the "prev_id" field if the given value is not nil.
-func (_c *NodeCreate) SetNillablePrevID(v *int) *NodeCreate {
-	if v != nil {
-		_c.SetPrevID(*v)
-	}
-	return _c
-}
-
-// SetNextID sets the "next" edge to the Node entity by ID.
-func (_c *NodeCreate) SetNextID(id int) *NodeCreate {
-	_ = _c.mutation.SetEdgeID("next", id)
-	return _c
-}
-
-// SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
-func (_c *NodeCreate) SetNillableNextID(id *int) *NodeCreate {
-	if id != nil {
-		_c = _c.SetNextID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the NodeCreate builder. The first error from as is recorded and returned by Save.
+func (_c *NodeCreate) With(as ...entfield.Assignment) *NodeCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -77,6 +46,9 @@ func (_c *NodeCreate) Mutation() *NodeMutation {
 
 // Save creates the Node in the database.
 func (_c *NodeCreate) Save(ctx context.Context) (*Node, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -210,6 +182,12 @@ func (_c *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*NodeMutation)

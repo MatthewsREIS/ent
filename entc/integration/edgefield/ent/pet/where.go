@@ -16,19 +16,19 @@ import (
 var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
-	// OwnerID is the handle for the "owner_id" field.
-	OwnerID entfield.Number[int]
+	// OwnerID is the handle for the "owner_id" field (backs the "owner" edge).
+	OwnerID entfield.EdgeField[int]
 }{
-	ID:      entfield.NewNumber[int](FieldID),
-	OwnerID: entfield.NewNumber[int](FieldOwnerID),
+	ID:      entfield.NewNumber[int](FieldID, "id"),
+	OwnerID: entfield.NewEdgeField[int](FieldOwnerID, "owner"),
 }
 
 // E holds typed edge handles for every edge of the Pet type.
 var E = struct {
 	// Owner is the handle for the "owner" edge.
-	Owner entfield.Edge[predicate.User]
+	Owner entfield.Edge[predicate.User, int]
 }{
-	Owner: entfield.NewEdge[predicate.User](newOwnerStep),
+	Owner: entfield.NewEdge[predicate.User, int]("owner", newOwnerStep),
 }
 
 // And groups predicates with the AND operator between them.

@@ -21,17 +21,17 @@ var F = struct {
 	// LicensedAt is the handle for the "licensed_at" field.
 	LicensedAt entfield.Time
 }{
-	ID:         entfield.NewNumber[int](FieldID),
-	Age:        entfield.NewNumber[int](FieldAge),
-	LicensedAt: entfield.NewTime(FieldLicensedAt),
+	ID:         entfield.NewNumber[int](FieldID, "id"),
+	Age:        entfield.NewNumber[int](FieldAge, "age"),
+	LicensedAt: entfield.NewTime(FieldLicensedAt, "licensed_at"),
 }
 
 // E holds typed edge handles for every edge of the Pet type.
 var E = struct {
 	// Owner is the handle for the "owner" edge.
-	Owner entfield.Edge[predicate.User]
+	Owner entfield.Edge[predicate.User, int]
 }{
-	Owner: entfield.NewEdge[predicate.User](newOwnerStep),
+	Owner: entfield.NewEdge[predicate.User, int]("owner", newOwnerStep),
 }
 
 // And groups predicates with the AND operator between them.

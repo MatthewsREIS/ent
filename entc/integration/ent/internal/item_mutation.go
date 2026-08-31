@@ -25,8 +25,9 @@ type ItemMutationOption = func(*ItemMutation)
 // itemDescriptor describes Item's fields and edges
 // for the generic mutation runtime.
 var itemDescriptor = &entbuilder.Descriptor{
-	Name:   "Item",
-	IDType: reflect.TypeFor[string](),
+	Name:    "Item",
+	IDType:  reflect.TypeFor[string](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"text": {
 			Type:     reflect.TypeFor[string](),

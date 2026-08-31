@@ -33,6 +33,46 @@ type PkgEntry struct {
 	// with another package-level identifier (Label, Table, ...). A bare
 	// pkg.Name reference for one of these is never a rewriteable call.
 	NoBareEQ map[string]bool `json:"noBareEQ"`
+
+	// ImportPath is the entity package's full import path (e.g.
+	// "example.com/gen/escrow"), used by -chains mode to insert the
+	// import when emitting a F/E handle reference. Unused in v1 (syntax)
+	// mode, which resolves packages via the consumer file's own imports.
+	ImportPath string `json:"importPath"`
+	// Setters describes the assignment-side (Set/Add/Append/Clear) API for
+	// each field/edge, keyed by its PascalCase struct-field name (matching
+	// Fields/Edges). Used only by -chains mode. Unused in v1 mode.
+	Setters map[string]SetterEntry `json:"setters"`
+}
+
+// SetterEntry describes one field or edge's assignment-side API, as
+// produced by codegen into the manifest JSON's "setters" table. It governs
+// which old setter method names (Set<F>, Add<F>, Set<E>ID, ...) a -chains
+// mode call site may decompose into.
+type SetterEntry struct {
+	// Kind is "field" (F.<Name>.Set/...), "edgefield" (F.<Name>.Set/... but
+	// the assignment routes through an edge), or "edge" (E.<Name>.SetID/...).
+	Kind string `json:"kind"`
+	// Nillable reports whether SetNillable<Name>(/ID) exists (field or
+	// unique edge).
+	Nillable bool `json:"nillable"`
+	// CanAdd reports whether Add<Name>(v) exists (kind=field only).
+	CanAdd bool `json:"canAdd"`
+	// CanAppend reports whether Append<Name>(v) exists (kind=field only).
+	CanAppend bool `json:"canAppend"`
+	// Unique governs which edge assignment shape applies (kind=edge only):
+	// true selects Set<Name>ID/SetNillable<Name>ID, false selects
+	// Add<Name>IDs/Remove<Name>IDs.
+	Unique bool `json:"unique"`
+	// MethodBase is the base token real entc codegen uses in the old
+	// Add<MethodBase>IDs/Remove<MethodBase>IDs method names for a
+	// non-unique edge (kind=edge, unique=false only) — the edge's
+	// StructField *singularized* (e.g. edge "Parcels" -> MethodBase
+	// "Parcel" -> "AddParcelIDs"), per entc/gen's Edge.MutationAdd/
+	// MutationRemove. Required for a real (Task-3-emitted) manifest;
+	// Set<Name>ID/SetNillable<Name>ID/Clear<Name> never singularize and so
+	// don't need it — they use Name (this entry's key) as-is.
+	MethodBase string `json:"methodBase"`
 }
 
 // Manifest maps an entity package's import name (e.g. "escrow") to its

@@ -26,9 +26,10 @@ type SessionMutationOption = func(*SessionMutation)
 // sessionDescriptor describes Session's fields and edges
 // for the generic mutation runtime.
 var sessionDescriptor = &entbuilder.Descriptor{
-	Name:   "Session",
-	IDType: reflect.TypeFor[schema.ID](),
-	Fields: map[string]entbuilder.FieldSpec{},
+	Name:    "Session",
+	IDType:  reflect.TypeFor[schema.ID](),
+	IDField: "id",
+	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"device": {
 			Cardinality:  entbuilder.O2OUnique,

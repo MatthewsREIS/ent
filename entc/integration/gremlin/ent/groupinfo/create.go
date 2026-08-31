@@ -17,11 +17,13 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
 type GroupInfoCreate struct {
 	Config
+	err      error
 	mutation *GroupInfoMutation
 	hooks    []Hook
 }
@@ -31,29 +33,12 @@ func NewGroupInfoCreate(c Config, hooks []Hook, mutation *GroupInfoMutation) *Gr
 	return &GroupInfoCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetDesc sets the "desc" field.
-func (_c *GroupInfoCreate) SetDesc(v string) *GroupInfoCreate {
-	_ = _c.mutation.SetField("desc", v)
-	return _c
-}
-
-// SetMaxUsers sets the "max_users" field.
-func (_c *GroupInfoCreate) SetMaxUsers(v int) *GroupInfoCreate {
-	_ = _c.mutation.SetField("max_users", v)
-	return _c
-}
-
-// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_c *GroupInfoCreate) SetNillableMaxUsers(v *int) *GroupInfoCreate {
-	if v != nil {
-		_c.SetMaxUsers(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupInfoCreate builder. The first error from as is recorded and returned by Save.
+func (_c *GroupInfoCreate) With(as ...entfield.Assignment) *GroupInfoCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_c *GroupInfoCreate) AddGroupIDs(ids ...string) *GroupInfoCreate {
-	_ = _c.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -64,6 +49,9 @@ func (_c *GroupInfoCreate) Mutation() *GroupInfoMutation {
 
 // Save creates the GroupInfo in the database.
 func (_c *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }

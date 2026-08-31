@@ -26,8 +26,9 @@ type BlobMutationOption = func(*BlobMutation)
 // blobDescriptor describes Blob's fields and edges
 // for the generic mutation runtime.
 var blobDescriptor = &entbuilder.Descriptor{
-	Name:   "Blob",
-	IDType: reflect.TypeFor[uuid.UUID](),
+	Name:    "Blob",
+	IDType:  reflect.TypeFor[uuid.UUID](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"uuid": {
 			Type:   reflect.TypeFor[uuid.UUID](),

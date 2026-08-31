@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // TweetLikeUpdate is the builder for updating TweetLike entities.
 type TweetLikeUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *TweetLikeMutation
 }
@@ -37,44 +39,11 @@ func (_u *TweetLikeUpdate) Where(ps ...predicate.TweetLike) *TweetLikeUpdate {
 	return _u
 }
 
-// SetLikedAt sets the "liked_at" field.
-func (_u *TweetLikeUpdate) SetLikedAt(v time.Time) *TweetLikeUpdate {
-	_ = _u.mutation.SetField("liked_at", v)
-	return _u
-}
-
-// SetNillableLikedAt sets the "liked_at" field if the given value is not nil.
-func (_u *TweetLikeUpdate) SetNillableLikedAt(v *time.Time) *TweetLikeUpdate {
-	if v != nil {
-		_u.SetLikedAt(*v)
-	}
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *TweetLikeUpdate) SetUserID(v int) *TweetLikeUpdate {
-	_ = _u.mutation.SetEdgeID("user", v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *TweetLikeUpdate) SetNillableUserID(v *int) *TweetLikeUpdate {
-	if v != nil {
-		_u.SetUserID(*v)
-	}
-	return _u
-}
-
-// SetTweetID sets the "tweet_id" field.
-func (_u *TweetLikeUpdate) SetTweetID(v int) *TweetLikeUpdate {
-	_ = _u.mutation.SetEdgeID("tweet", v)
-	return _u
-}
-
-// SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (_u *TweetLikeUpdate) SetNillableTweetID(v *int) *TweetLikeUpdate {
-	if v != nil {
-		_u.SetTweetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TweetLikeUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *TweetLikeUpdate) With(as ...entfield.Assignment) *TweetLikeUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -98,6 +67,9 @@ func (_u *TweetLikeUpdate) ClearUser() *TweetLikeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TweetLikeUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TweetLikeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -223,6 +195,7 @@ func (_u *TweetLikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type TweetLikeUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *TweetLikeMutation
 }
@@ -232,44 +205,11 @@ func NewTweetLikeUpdateOne(c Config, hooks []Hook, mutation *TweetLikeMutation) 
 	return &TweetLikeUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetLikedAt sets the "liked_at" field.
-func (_u *TweetLikeUpdateOne) SetLikedAt(v time.Time) *TweetLikeUpdateOne {
-	_ = _u.mutation.SetField("liked_at", v)
-	return _u
-}
-
-// SetNillableLikedAt sets the "liked_at" field if the given value is not nil.
-func (_u *TweetLikeUpdateOne) SetNillableLikedAt(v *time.Time) *TweetLikeUpdateOne {
-	if v != nil {
-		_u.SetLikedAt(*v)
-	}
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *TweetLikeUpdateOne) SetUserID(v int) *TweetLikeUpdateOne {
-	_ = _u.mutation.SetEdgeID("user", v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *TweetLikeUpdateOne) SetNillableUserID(v *int) *TweetLikeUpdateOne {
-	if v != nil {
-		_u.SetUserID(*v)
-	}
-	return _u
-}
-
-// SetTweetID sets the "tweet_id" field.
-func (_u *TweetLikeUpdateOne) SetTweetID(v int) *TweetLikeUpdateOne {
-	_ = _u.mutation.SetEdgeID("tweet", v)
-	return _u
-}
-
-// SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (_u *TweetLikeUpdateOne) SetNillableTweetID(v *int) *TweetLikeUpdateOne {
-	if v != nil {
-		_u.SetTweetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TweetLikeUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *TweetLikeUpdateOne) With(as ...entfield.Assignment) *TweetLikeUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -306,6 +246,9 @@ func (_u *TweetLikeUpdateOne) Select(field string, fields ...string) *TweetLikeU
 
 // Save executes the query and returns the updated TweetLike entity.
 func (_u *TweetLikeUpdateOne) Save(ctx context.Context) (*TweetLike, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[TweetLike](ctx, &entbuilder.UpdateState[*TweetLikeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

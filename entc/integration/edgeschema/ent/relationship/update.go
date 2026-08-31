@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // RelationshipUpdate is the builder for updating Relationship entities.
 type RelationshipUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *RelationshipMutation
 }
@@ -36,72 +38,12 @@ func (_u *RelationshipUpdate) Where(ps ...predicate.Relationship) *RelationshipU
 	return _u
 }
 
-// SetWeight sets the "weight" field.
-func (_u *RelationshipUpdate) SetWeight(v int) *RelationshipUpdate {
-	_ = _u.mutation.ResetField("weight")
-	_ = _u.mutation.SetField("weight", v)
-	return _u
-}
-
-// SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_u *RelationshipUpdate) SetNillableWeight(v *int) *RelationshipUpdate {
-	if v != nil {
-		_u.SetWeight(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RelationshipUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *RelationshipUpdate) With(as ...entfield.Assignment) *RelationshipUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddWeight adds value to the "weight" field.
-func (_u *RelationshipUpdate) AddWeight(v int) *RelationshipUpdate {
-	_ = _u.mutation.AddField("weight", v)
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *RelationshipUpdate) SetUserID(v int) *RelationshipUpdate {
-	_ = _u.mutation.SetEdgeID("user", v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *RelationshipUpdate) SetNillableUserID(v *int) *RelationshipUpdate {
-	if v != nil {
-		_u.SetUserID(*v)
-	}
-	return _u
-}
-
-// SetRelativeID sets the "relative_id" field.
-func (_u *RelationshipUpdate) SetRelativeID(v int) *RelationshipUpdate {
-	_ = _u.mutation.SetEdgeID("relative", v)
-	return _u
-}
-
-// SetNillableRelativeID sets the "relative_id" field if the given value is not nil.
-func (_u *RelationshipUpdate) SetNillableRelativeID(v *int) *RelationshipUpdate {
-	if v != nil {
-		_u.SetRelativeID(*v)
-	}
-	return _u
-}
-
-// SetInfoID sets the "info_id" field.
-func (_u *RelationshipUpdate) SetInfoID(v int) *RelationshipUpdate {
-	_ = _u.mutation.SetEdgeID("info", v)
-	return _u
-}
-
-// SetNillableInfoID sets the "info_id" field if the given value is not nil.
-func (_u *RelationshipUpdate) SetNillableInfoID(v *int) *RelationshipUpdate {
-	if v != nil {
-		_u.SetInfoID(*v)
-	}
-	return _u
-}
-
-// ClearInfoID clears the value of the "info_id" field.
-func (_u *RelationshipUpdate) ClearInfoID() *RelationshipUpdate {
-	_ = _u.mutation.ClearEdge("info")
 	return _u
 }
 
@@ -130,6 +72,9 @@ func (_u *RelationshipUpdate) ClearInfo() *RelationshipUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RelationshipUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RelationshipMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -288,6 +233,7 @@ func (_u *RelationshipUpdate) sqlSave(ctx context.Context) (_node int, err error
 type RelationshipUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *RelationshipMutation
 }
@@ -297,72 +243,12 @@ func NewRelationshipUpdateOne(c Config, hooks []Hook, mutation *RelationshipMuta
 	return &RelationshipUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetWeight sets the "weight" field.
-func (_u *RelationshipUpdateOne) SetWeight(v int) *RelationshipUpdateOne {
-	_ = _u.mutation.ResetField("weight")
-	_ = _u.mutation.SetField("weight", v)
-	return _u
-}
-
-// SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_u *RelationshipUpdateOne) SetNillableWeight(v *int) *RelationshipUpdateOne {
-	if v != nil {
-		_u.SetWeight(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RelationshipUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *RelationshipUpdateOne) With(as ...entfield.Assignment) *RelationshipUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddWeight adds value to the "weight" field.
-func (_u *RelationshipUpdateOne) AddWeight(v int) *RelationshipUpdateOne {
-	_ = _u.mutation.AddField("weight", v)
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *RelationshipUpdateOne) SetUserID(v int) *RelationshipUpdateOne {
-	_ = _u.mutation.SetEdgeID("user", v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *RelationshipUpdateOne) SetNillableUserID(v *int) *RelationshipUpdateOne {
-	if v != nil {
-		_u.SetUserID(*v)
-	}
-	return _u
-}
-
-// SetRelativeID sets the "relative_id" field.
-func (_u *RelationshipUpdateOne) SetRelativeID(v int) *RelationshipUpdateOne {
-	_ = _u.mutation.SetEdgeID("relative", v)
-	return _u
-}
-
-// SetNillableRelativeID sets the "relative_id" field if the given value is not nil.
-func (_u *RelationshipUpdateOne) SetNillableRelativeID(v *int) *RelationshipUpdateOne {
-	if v != nil {
-		_u.SetRelativeID(*v)
-	}
-	return _u
-}
-
-// SetInfoID sets the "info_id" field.
-func (_u *RelationshipUpdateOne) SetInfoID(v int) *RelationshipUpdateOne {
-	_ = _u.mutation.SetEdgeID("info", v)
-	return _u
-}
-
-// SetNillableInfoID sets the "info_id" field if the given value is not nil.
-func (_u *RelationshipUpdateOne) SetNillableInfoID(v *int) *RelationshipUpdateOne {
-	if v != nil {
-		_u.SetInfoID(*v)
-	}
-	return _u
-}
-
-// ClearInfoID clears the value of the "info_id" field.
-func (_u *RelationshipUpdateOne) ClearInfoID() *RelationshipUpdateOne {
-	_ = _u.mutation.ClearEdge("info")
 	return _u
 }
 
@@ -404,6 +290,9 @@ func (_u *RelationshipUpdateOne) Select(field string, fields ...string) *Relatio
 
 // Save executes the query and returns the updated Relationship entity.
 func (_u *RelationshipUpdateOne) Save(ctx context.Context) (*Relationship, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Relationship](ctx, &entbuilder.UpdateState[*RelationshipMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

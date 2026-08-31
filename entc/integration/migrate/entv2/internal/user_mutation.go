@@ -26,8 +26,9 @@ type UserMutationOption = func(*UserMutation)
 // userDescriptor describes User's fields and edges
 // for the generic mutation runtime.
 var userDescriptor = &entbuilder.Descriptor{
-	Name:   "User",
-	IDType: reflect.TypeFor[int](),
+	Name:    "User",
+	IDType:  reflect.TypeFor[int](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"mixed_string": {
 			Type:   reflect.TypeFor[string](),

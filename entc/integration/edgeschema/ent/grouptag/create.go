@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // GroupTagCreate is the builder for creating a GroupTag entity.
 type GroupTagCreate struct {
 	Config
+	err      error
 	mutation *GroupTagMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,15 +32,12 @@ func NewGroupTagCreate(c Config, hooks []Hook, mutation *GroupTagMutation) *Grou
 	return &GroupTagCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetTagID sets the "tag_id" field.
-func (_c *GroupTagCreate) SetTagID(v int) *GroupTagCreate {
-	_ = _c.mutation.SetEdgeID("tag", v)
-	return _c
-}
-
-// SetGroupID sets the "group_id" field.
-func (_c *GroupTagCreate) SetGroupID(v int) *GroupTagCreate {
-	_ = _c.mutation.SetEdgeID("group", v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupTagCreate builder. The first error from as is recorded and returned by Save.
+func (_c *GroupTagCreate) With(as ...entfield.Assignment) *GroupTagCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -49,6 +48,9 @@ func (_c *GroupTagCreate) Mutation() *GroupTagMutation {
 
 // Save creates the GroupTag in the database.
 func (_c *GroupTagCreate) Save(ctx context.Context) (*GroupTag, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -235,6 +237,12 @@ func (_c *GroupTagCreateBulk) Save(ctx context.Context) ([]*GroupTag, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GroupTagMutation)
 				if !ok {

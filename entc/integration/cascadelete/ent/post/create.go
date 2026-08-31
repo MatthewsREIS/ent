@@ -13,12 +13,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // PostCreate is the builder for creating a Post entity.
 type PostCreate struct {
 	Config
+	err      error
 	mutation *PostMutation
 	hooks    []Hook
 }
@@ -28,37 +30,12 @@ func NewPostCreate(c Config, hooks []Hook, mutation *PostMutation) *PostCreate {
 	return &PostCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_c *PostCreate) SetText(v string) *PostCreate {
-	_ = _c.mutation.SetField("text", v)
-	return _c
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_c *PostCreate) SetNillableText(v *string) *PostCreate {
-	if v != nil {
-		_c.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PostCreate builder. The first error from as is recorded and returned by Save.
+func (_c *PostCreate) With(as ...entfield.Assignment) *PostCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetAuthorID sets the "author_id" field.
-func (_c *PostCreate) SetAuthorID(v int) *PostCreate {
-	_ = _c.mutation.SetEdgeID("author", v)
-	return _c
-}
-
-// SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_c *PostCreate) SetNillableAuthorID(v *int) *PostCreate {
-	if v != nil {
-		_c.SetAuthorID(*v)
-	}
-	return _c
-}
-
-// AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
-func (_c *PostCreate) AddCommentIDs(ids ...int) *PostCreate {
-	_ = _c.mutation.AddEdgeIDs("comments", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -69,6 +46,9 @@ func (_c *PostCreate) Mutation() *PostMutation {
 
 // Save creates the Post in the database.
 func (_c *PostCreate) Save(ctx context.Context) (*Post, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -202,6 +182,12 @@ func (_c *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PostMutation)

@@ -9,7 +9,6 @@ package pet
 import (
 	"context"
 	"errors"
-	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -18,12 +17,13 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 	"entgo.io/ent/runtime/entbuilder"
-	"github.com/google/uuid"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	Config
+	err      error
 	mutation *PetMutation
 	hooks    []Hook
 }
@@ -33,106 +33,11 @@ func NewPetCreate(c Config, hooks []Hook, mutation *PetMutation) *PetCreate {
 	return &PetCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetAge sets the "age" field.
-func (_c *PetCreate) SetAge(v float64) *PetCreate {
-	_ = _c.mutation.SetField("age", v)
-	return _c
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_c *PetCreate) SetNillableAge(v *float64) *PetCreate {
-	if v != nil {
-		_c.SetAge(*v)
-	}
-	return _c
-}
-
-// SetName sets the "name" field.
-func (_c *PetCreate) SetName(v string) *PetCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetUUID sets the "uuid" field.
-func (_c *PetCreate) SetUUID(v uuid.UUID) *PetCreate {
-	_ = _c.mutation.SetField("uuid", v)
-	return _c
-}
-
-// SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_c *PetCreate) SetNillableUUID(v *uuid.UUID) *PetCreate {
-	if v != nil {
-		_c.SetUUID(*v)
-	}
-	return _c
-}
-
-// SetNickname sets the "nickname" field.
-func (_c *PetCreate) SetNickname(v string) *PetCreate {
-	_ = _c.mutation.SetField("nickname", v)
-	return _c
-}
-
-// SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_c *PetCreate) SetNillableNickname(v *string) *PetCreate {
-	if v != nil {
-		_c.SetNickname(*v)
-	}
-	return _c
-}
-
-// SetTrained sets the "trained" field.
-func (_c *PetCreate) SetTrained(v bool) *PetCreate {
-	_ = _c.mutation.SetField("trained", v)
-	return _c
-}
-
-// SetNillableTrained sets the "trained" field if the given value is not nil.
-func (_c *PetCreate) SetNillableTrained(v *bool) *PetCreate {
-	if v != nil {
-		_c.SetTrained(*v)
-	}
-	return _c
-}
-
-// SetOptionalTime sets the "optional_time" field.
-func (_c *PetCreate) SetOptionalTime(v time.Time) *PetCreate {
-	_ = _c.mutation.SetField("optional_time", v)
-	return _c
-}
-
-// SetNillableOptionalTime sets the "optional_time" field if the given value is not nil.
-func (_c *PetCreate) SetNillableOptionalTime(v *time.Time) *PetCreate {
-	if v != nil {
-		_c.SetOptionalTime(*v)
-	}
-	return _c
-}
-
-// SetTeamID sets the "team" edge to the User entity by ID.
-func (_c *PetCreate) SetTeamID(id string) *PetCreate {
-	_ = _c.mutation.SetEdgeID("team", id)
-	return _c
-}
-
-// SetNillableTeamID sets the "team" edge to the User entity by ID if the given value is not nil.
-func (_c *PetCreate) SetNillableTeamID(id *string) *PetCreate {
-	if id != nil {
-		_c = _c.SetTeamID(*id)
-	}
-	return _c
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_c *PetCreate) SetOwnerID(id string) *PetCreate {
-	_ = _c.mutation.SetEdgeID("owner", id)
-	return _c
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_c *PetCreate) SetNillableOwnerID(id *string) *PetCreate {
-	if id != nil {
-		_c = _c.SetOwnerID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PetCreate builder. The first error from as is recorded and returned by Save.
+func (_c *PetCreate) With(as ...entfield.Assignment) *PetCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -144,6 +49,9 @@ func (_c *PetCreate) Mutation() *PetMutation {
 
 // Save creates the Pet in the database.
 func (_c *PetCreate) Save(ctx context.Context) (*Pet, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -23,6 +24,7 @@ import (
 // BlobUpdate is the builder for updating Blob entities.
 type BlobUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *BlobMutation
 }
@@ -38,58 +40,12 @@ func (_u *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
 	return _u
 }
 
-// SetUUID sets the "uuid" field.
-func (_u *BlobUpdate) SetUUID(v uuid.UUID) *BlobUpdate {
-	_ = _u.mutation.SetField("uuid", v)
-	return _u
-}
-
-// SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_u *BlobUpdate) SetNillableUUID(v *uuid.UUID) *BlobUpdate {
-	if v != nil {
-		_u.SetUUID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the BlobUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *BlobUpdate) With(as ...entfield.Assignment) *BlobUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetCount sets the "count" field.
-func (_u *BlobUpdate) SetCount(v int) *BlobUpdate {
-	_ = _u.mutation.ResetField("count")
-	_ = _u.mutation.SetField("count", v)
-	return _u
-}
-
-// SetNillableCount sets the "count" field if the given value is not nil.
-func (_u *BlobUpdate) SetNillableCount(v *int) *BlobUpdate {
-	if v != nil {
-		_u.SetCount(*v)
-	}
-	return _u
-}
-
-// AddCount adds value to the "count" field.
-func (_u *BlobUpdate) AddCount(v int) *BlobUpdate {
-	_ = _u.mutation.AddField("count", v)
-	return _u
-}
-
-// SetParentID sets the "parent" edge to the Blob entity by ID.
-func (_u *BlobUpdate) SetParentID(id uuid.UUID) *BlobUpdate {
-	_ = _u.mutation.SetEdgeID("parent", id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
-func (_u *BlobUpdate) SetNillableParentID(id *uuid.UUID) *BlobUpdate {
-	if id != nil {
-		_u = _u.SetParentID(*id)
-	}
-	return _u
-}
-
-// AddLinkIDs adds the "links" edge to the Blob entity by IDs.
-func (_u *BlobUpdate) AddLinkIDs(ids ...uuid.UUID) *BlobUpdate {
-	_ = _u.mutation.AddEdgeIDs("links", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -118,6 +74,9 @@ func (_u *BlobUpdate) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *BlobUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*BlobMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -273,6 +232,7 @@ func (_u *BlobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type BlobUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *BlobMutation
 }
@@ -282,58 +242,12 @@ func NewBlobUpdateOne(c Config, hooks []Hook, mutation *BlobMutation) *BlobUpdat
 	return &BlobUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetUUID sets the "uuid" field.
-func (_u *BlobUpdateOne) SetUUID(v uuid.UUID) *BlobUpdateOne {
-	_ = _u.mutation.SetField("uuid", v)
-	return _u
-}
-
-// SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_u *BlobUpdateOne) SetNillableUUID(v *uuid.UUID) *BlobUpdateOne {
-	if v != nil {
-		_u.SetUUID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the BlobUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *BlobUpdateOne) With(as ...entfield.Assignment) *BlobUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetCount sets the "count" field.
-func (_u *BlobUpdateOne) SetCount(v int) *BlobUpdateOne {
-	_ = _u.mutation.ResetField("count")
-	_ = _u.mutation.SetField("count", v)
-	return _u
-}
-
-// SetNillableCount sets the "count" field if the given value is not nil.
-func (_u *BlobUpdateOne) SetNillableCount(v *int) *BlobUpdateOne {
-	if v != nil {
-		_u.SetCount(*v)
-	}
-	return _u
-}
-
-// AddCount adds value to the "count" field.
-func (_u *BlobUpdateOne) AddCount(v int) *BlobUpdateOne {
-	_ = _u.mutation.AddField("count", v)
-	return _u
-}
-
-// SetParentID sets the "parent" edge to the Blob entity by ID.
-func (_u *BlobUpdateOne) SetParentID(id uuid.UUID) *BlobUpdateOne {
-	_ = _u.mutation.SetEdgeID("parent", id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
-func (_u *BlobUpdateOne) SetNillableParentID(id *uuid.UUID) *BlobUpdateOne {
-	if id != nil {
-		_u = _u.SetParentID(*id)
-	}
-	return _u
-}
-
-// AddLinkIDs adds the "links" edge to the Blob entity by IDs.
-func (_u *BlobUpdateOne) AddLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("links", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -375,6 +289,9 @@ func (_u *BlobUpdateOne) Select(field string, fields ...string) *BlobUpdateOne {
 
 // Save executes the query and returns the updated Blob entity.
 func (_u *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Blob](ctx, &entbuilder.UpdateState[*BlobMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

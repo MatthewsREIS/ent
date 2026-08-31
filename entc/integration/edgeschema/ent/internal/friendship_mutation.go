@@ -45,12 +45,14 @@ var friendshipDescriptor = &entbuilder.Descriptor{
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
 			Field:        "user_id",
+			Immutable:    true,
 		},
 		"friend": {
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
 			Field:        "friend_id",
+			Immutable:    true,
 		},
 	}}
 

@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserTweetUpdate is the builder for updating UserTweet entities.
 type UserTweetUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *UserTweetMutation
 }
@@ -37,44 +39,11 @@ func (_u *UserTweetUpdate) Where(ps ...predicate.UserTweet) *UserTweetUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *UserTweetUpdate) SetCreatedAt(v time.Time) *UserTweetUpdate {
-	_ = _u.mutation.SetField("created_at", v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *UserTweetUpdate) SetNillableCreatedAt(v *time.Time) *UserTweetUpdate {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *UserTweetUpdate) SetUserID(v int) *UserTweetUpdate {
-	_ = _u.mutation.SetEdgeID("user", v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserTweetUpdate) SetNillableUserID(v *int) *UserTweetUpdate {
-	if v != nil {
-		_u.SetUserID(*v)
-	}
-	return _u
-}
-
-// SetTweetID sets the "tweet_id" field.
-func (_u *UserTweetUpdate) SetTweetID(v int) *UserTweetUpdate {
-	_ = _u.mutation.SetEdgeID("tweet", v)
-	return _u
-}
-
-// SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (_u *UserTweetUpdate) SetNillableTweetID(v *int) *UserTweetUpdate {
-	if v != nil {
-		_u.SetTweetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserTweetUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *UserTweetUpdate) With(as ...entfield.Assignment) *UserTweetUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -98,6 +67,9 @@ func (_u *UserTweetUpdate) ClearTweet() *UserTweetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserTweetUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserTweetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -223,6 +195,7 @@ func (_u *UserTweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type UserTweetUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *UserTweetMutation
 }
@@ -232,44 +205,11 @@ func NewUserTweetUpdateOne(c Config, hooks []Hook, mutation *UserTweetMutation) 
 	return &UserTweetUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *UserTweetUpdateOne) SetCreatedAt(v time.Time) *UserTweetUpdateOne {
-	_ = _u.mutation.SetField("created_at", v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *UserTweetUpdateOne) SetNillableCreatedAt(v *time.Time) *UserTweetUpdateOne {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *UserTweetUpdateOne) SetUserID(v int) *UserTweetUpdateOne {
-	_ = _u.mutation.SetEdgeID("user", v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserTweetUpdateOne) SetNillableUserID(v *int) *UserTweetUpdateOne {
-	if v != nil {
-		_u.SetUserID(*v)
-	}
-	return _u
-}
-
-// SetTweetID sets the "tweet_id" field.
-func (_u *UserTweetUpdateOne) SetTweetID(v int) *UserTweetUpdateOne {
-	_ = _u.mutation.SetEdgeID("tweet", v)
-	return _u
-}
-
-// SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (_u *UserTweetUpdateOne) SetNillableTweetID(v *int) *UserTweetUpdateOne {
-	if v != nil {
-		_u.SetTweetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserTweetUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *UserTweetUpdateOne) With(as ...entfield.Assignment) *UserTweetUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -306,6 +246,9 @@ func (_u *UserTweetUpdateOne) Select(field string, fields ...string) *UserTweetU
 
 // Save executes the query and returns the updated UserTweet entity.
 func (_u *UserTweetUpdateOne) Save(ctx context.Context) (*UserTweet, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[UserTweet](ctx, &entbuilder.UpdateState[*UserTweetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

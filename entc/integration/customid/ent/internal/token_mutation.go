@@ -26,8 +26,9 @@ type TokenMutationOption = func(*TokenMutation)
 // tokenDescriptor describes Token's fields and edges
 // for the generic mutation runtime.
 var tokenDescriptor = &entbuilder.Descriptor{
-	Name:   "Token",
-	IDType: reflect.TypeFor[sid.ID](),
+	Name:    "Token",
+	IDType:  reflect.TypeFor[sid.ID](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"body": {
 			Type:   reflect.TypeFor[string](),

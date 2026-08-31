@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // AttachedFileUpdate is the builder for updating AttachedFile entities.
 type AttachedFileUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *AttachedFileMutation
 }
@@ -37,51 +39,12 @@ func (_u *AttachedFileUpdate) Where(ps ...predicate.AttachedFile) *AttachedFileU
 	return _u
 }
 
-// SetAttachTime sets the "attach_time" field.
-func (_u *AttachedFileUpdate) SetAttachTime(v time.Time) *AttachedFileUpdate {
-	_ = _u.mutation.SetField("attach_time", v)
-	return _u
-}
-
-// SetNillableAttachTime sets the "attach_time" field if the given value is not nil.
-func (_u *AttachedFileUpdate) SetNillableAttachTime(v *time.Time) *AttachedFileUpdate {
-	if v != nil {
-		_u.SetAttachTime(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the AttachedFileUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *AttachedFileUpdate) With(as ...entfield.Assignment) *AttachedFileUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetFID sets the "f_id" field.
-func (_u *AttachedFileUpdate) SetFID(v int) *AttachedFileUpdate {
-	_ = _u.mutation.SetEdgeID("fi", v)
-	return _u
-}
-
-// SetNillableFID sets the "f_id" field if the given value is not nil.
-func (_u *AttachedFileUpdate) SetNillableFID(v *int) *AttachedFileUpdate {
-	if v != nil {
-		_u.SetFID(*v)
-	}
-	return _u
-}
-
-// SetProcID sets the "proc_id" field.
-func (_u *AttachedFileUpdate) SetProcID(v int) *AttachedFileUpdate {
-	_ = _u.mutation.SetEdgeID("proc", v)
-	return _u
-}
-
-// SetNillableProcID sets the "proc_id" field if the given value is not nil.
-func (_u *AttachedFileUpdate) SetNillableProcID(v *int) *AttachedFileUpdate {
-	if v != nil {
-		_u.SetProcID(*v)
-	}
-	return _u
-}
-
-// SetFiID sets the "fi" edge to the File entity by ID.
-func (_u *AttachedFileUpdate) SetFiID(id int) *AttachedFileUpdate {
-	_ = _u.mutation.SetEdgeID("fi", id)
 	return _u
 }
 
@@ -104,6 +67,9 @@ func (_u *AttachedFileUpdate) ClearProc() *AttachedFileUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *AttachedFileUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*AttachedFileMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -229,6 +195,7 @@ func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (_node int, err error
 type AttachedFileUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *AttachedFileMutation
 }
@@ -238,51 +205,12 @@ func NewAttachedFileUpdateOne(c Config, hooks []Hook, mutation *AttachedFileMuta
 	return &AttachedFileUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetAttachTime sets the "attach_time" field.
-func (_u *AttachedFileUpdateOne) SetAttachTime(v time.Time) *AttachedFileUpdateOne {
-	_ = _u.mutation.SetField("attach_time", v)
-	return _u
-}
-
-// SetNillableAttachTime sets the "attach_time" field if the given value is not nil.
-func (_u *AttachedFileUpdateOne) SetNillableAttachTime(v *time.Time) *AttachedFileUpdateOne {
-	if v != nil {
-		_u.SetAttachTime(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the AttachedFileUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *AttachedFileUpdateOne) With(as ...entfield.Assignment) *AttachedFileUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetFID sets the "f_id" field.
-func (_u *AttachedFileUpdateOne) SetFID(v int) *AttachedFileUpdateOne {
-	_ = _u.mutation.SetEdgeID("fi", v)
-	return _u
-}
-
-// SetNillableFID sets the "f_id" field if the given value is not nil.
-func (_u *AttachedFileUpdateOne) SetNillableFID(v *int) *AttachedFileUpdateOne {
-	if v != nil {
-		_u.SetFID(*v)
-	}
-	return _u
-}
-
-// SetProcID sets the "proc_id" field.
-func (_u *AttachedFileUpdateOne) SetProcID(v int) *AttachedFileUpdateOne {
-	_ = _u.mutation.SetEdgeID("proc", v)
-	return _u
-}
-
-// SetNillableProcID sets the "proc_id" field if the given value is not nil.
-func (_u *AttachedFileUpdateOne) SetNillableProcID(v *int) *AttachedFileUpdateOne {
-	if v != nil {
-		_u.SetProcID(*v)
-	}
-	return _u
-}
-
-// SetFiID sets the "fi" edge to the File entity by ID.
-func (_u *AttachedFileUpdateOne) SetFiID(id int) *AttachedFileUpdateOne {
-	_ = _u.mutation.SetEdgeID("fi", id)
 	return _u
 }
 
@@ -318,6 +246,9 @@ func (_u *AttachedFileUpdateOne) Select(field string, fields ...string) *Attache
 
 // Save executes the query and returns the updated AttachedFile entity.
 func (_u *AttachedFileUpdateOne) Save(ctx context.Context) (*AttachedFile, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[AttachedFile](ctx, &entbuilder.UpdateState[*AttachedFileMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

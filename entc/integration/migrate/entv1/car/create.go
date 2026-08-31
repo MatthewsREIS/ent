@@ -12,12 +12,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CarCreate is the builder for creating a Car entity.
 type CarCreate struct {
 	Config
+	err      error
 	mutation *CarMutation
 	hooks    []Hook
 }
@@ -27,16 +29,11 @@ func NewCarCreate(c Config, hooks []Hook, mutation *CarMutation) *CarCreate {
 	return &CarCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_c *CarCreate) SetOwnerID(id int) *CarCreate {
-	_ = _c.mutation.SetEdgeID("owner", id)
-	return _c
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_c *CarCreate) SetNillableOwnerID(id *int) *CarCreate {
-	if id != nil {
-		_c = _c.SetOwnerID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CarCreate builder. The first error from as is recorded and returned by Save.
+func (_c *CarCreate) With(as ...entfield.Assignment) *CarCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -48,6 +45,9 @@ func (_c *CarCreate) Mutation() *CarMutation {
 
 // Save creates the Car in the database.
 func (_c *CarCreate) Save(ctx context.Context) (*Car, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -148,6 +148,12 @@ func (_c *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CarMutation)
 				if !ok {

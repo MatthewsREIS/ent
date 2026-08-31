@@ -16,11 +16,13 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // SpecUpdate is the builder for updating Spec entities.
 type SpecUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *SpecMutation
 }
@@ -36,9 +38,12 @@ func (_u *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
 	return _u
 }
 
-// AddCardIDs adds the "card" edge to the Card entity by IDs.
-func (_u *SpecUpdate) AddCardIDs(ids ...string) *SpecUpdate {
-	_ = _u.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the SpecUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *SpecUpdate) With(as ...entfield.Assignment) *SpecUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -61,6 +66,9 @@ func (_u *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *SpecUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
@@ -126,6 +134,7 @@ func (_u *SpecUpdate) gremlin() *dsl.Traversal {
 type SpecUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *SpecMutation
 }
@@ -135,9 +144,12 @@ func NewSpecUpdateOne(c Config, hooks []Hook, mutation *SpecMutation) *SpecUpdat
 	return &SpecUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// AddCardIDs adds the "card" edge to the Card entity by IDs.
-func (_u *SpecUpdateOne) AddCardIDs(ids ...string) *SpecUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the SpecUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *SpecUpdateOne) With(as ...entfield.Assignment) *SpecUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -173,6 +185,9 @@ func (_u *SpecUpdateOne) Select(field string, fields ...string) *SpecUpdateOne {
 
 // Save executes the query and returns the updated Spec entity.
 func (_u *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 

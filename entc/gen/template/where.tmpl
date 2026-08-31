@@ -22,30 +22,47 @@ in the LICENSE file in the root directory of this source tree.
 		{{- if $.HasOneFieldID }}
 			{{- $kind := $.ID.HandleKind }}
 			// ID is the handle for the id field.
-			ID entfield.{{ $kind }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $.ID.Type.String $.Package }}{{ else }}{{ $.ID.Type }}{{ end }}]{{ end }}
+			ID entfield.{{ $kind }}{{ if not (eq $kind "Time") }}[{{ if eq $kind "Enum" }}{{ trimPackage $.ID.Type.String $.Package }}{{ else }}{{ $.ID.Type }}{{ end }}]{{ end }}
 		{{- end }}
 		{{- range $f := $.Fields }}
+			{{- $edgeName := $f.EdgeName }}
 			{{- $kind := $f.HandleKind }}
-			{{- if $kind }}
+			{{- if $edgeName }}
+				// {{ $f.StructField }} is the handle for the {{ quote $f.Name }} field (backs the {{ quote $edgeName }} edge).
+				{{ $f.StructField }} entfield.EdgeField[{{ $f.Type }}]
+			{{- else if $f.IsJSON }}
 				// {{ $f.StructField }} is the handle for the {{ quote $f.Name }} field.
-				{{ $f.StructField }} entfield.{{ $kind }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}]{{ end }}
+				{{ $f.StructField }} entfield.JSON[{{ $f.Type }}]
+			{{- else if $kind }}
+				// {{ $f.StructField }} is the handle for the {{ quote $f.Name }} field.
+				{{ $f.StructField }} entfield.{{ $kind }}{{ if not (eq $kind "Time") }}[{{ if eq $kind "Enum" }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}]{{ end }}
 			{{- end }}
 		{{- end }}
 	}{
 		{{- if $.HasOneFieldID }}
 			{{- $kind := $.ID.HandleKind }}
-			ID: entfield.New{{ $kind }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $.ID.Type.String $.Package }}{{ else }}{{ $.ID.Type }}{{ end }}]{{ end }}({{ $.ID.Constant }}),
+			ID: entfield.New{{ $kind }}{{ if not (eq $kind "Time") }}[{{ if eq $kind "Enum" }}{{ trimPackage $.ID.Type.String $.Package }}{{ else }}{{ $.ID.Type }}{{ end }}]{{ end }}({{ $.ID.Constant }}, {{ printf "%q" $.ID.Name }}),
 		{{- end }}
 		{{- range $f := $.Fields }}
+			{{- $edgeName := $f.EdgeName }}
 			{{- $kind := $f.HandleKind }}
-			{{- if $kind }}
+			{{- if $edgeName }}
+				{{ $f.StructField }}: entfield.NewEdgeField[{{ $f.Type }}]({{ $f.Constant }}, {{ printf "%q" $edgeName }}),
+			{{- else if $f.IsJSON }}
+				{{ $f.StructField }}: entfield.NewJSON[{{ $f.Type }}]({{ printf "%q" $f.Name }}),
+			{{- else if $kind }}
 				{{- /* ValueScanner.<X>.Value is populated by the runtime package's init(),
 				which runs AFTER this package's own var initializers (Go inits
 				imports before importers). Capturing the method value directly
 				here would freeze in the zero value. Wrap it in a closure over the
 				package-level ValueScanner var instead, so the lookup happens at
 				call time, once every init() has already run. */}}
-				{{ $f.StructField }}: entfield.New{{ $kind }}{{ if $f.HasValueScanner }}Scan{{ end }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}]{{ end }}({{ $f.Constant }}{{ if $f.HasValueScanner }}, func(v {{ $f.Type }}) (driver.Value, error) { return ValueScanner.{{ $f.StructField }}.Value(v) }{{ end }}),
+				{{- /* col ({{ $f.Constant }}) is the DB column (may differ from the
+				schema field name via field.StorageKey), used for predicates; name
+				({{ printf "%q" $f.Name }}) is the schema-declared field name, used
+				by assignment methods to route into entbuilder.Mutation — see
+				entfield.String's doc comment. */}}
+				{{ $f.StructField }}: entfield.New{{ $kind }}{{ if $f.HasValueScanner }}Scan{{ end }}{{ if not (eq $kind "Time") }}[{{ if eq $kind "Enum" }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}]{{ end }}({{ $f.Constant }}, {{ printf "%q" $f.Name }}{{ if $f.HasValueScanner }}, func(v {{ $f.Type }}) (driver.Value, error) { return ValueScanner.{{ $f.StructField }}.Value(v) }{{ end }}),
 			{{- end }}
 		{{- end }}
 	}
@@ -54,7 +71,7 @@ in the LICENSE file in the root directory of this source tree.
 	var E = struct {
 		{{- range $e := $.Edges }}
 			// {{ $e.StructField }} is the handle for the {{ quote $e.Name }} edge.
-			{{ $e.StructField }} entfield.Edge[predicate.{{ $e.Type.Name }}]
+			{{ $e.StructField }} entfield.Edge[predicate.{{ $e.Type.Name }}, {{ if $e.Type.HasCompositeID }}struct{}{{ else }}{{ $e.Type.ID.Type }}{{ end }}]
 		{{- end }}
 	}{
 		{{- range $e := $.Edges }}
@@ -81,7 +98,7 @@ in the LICENSE file in the root directory of this source tree.
 						{{- $schema = print $.Name $e.StructField }}
 					{{- end }}
 				{{- end }}
-				{{ $e.StructField }}: entfield.NewEdgeSteps[predicate.{{ $e.Type.Name }}](new{{ pascal $e.Name }}Step, []func(*sql.Selector, *sqlgraph.Step){
+				{{ $e.StructField }}: entfield.NewEdgeSteps[predicate.{{ $e.Type.Name }}, {{ if $e.Type.HasCompositeID }}struct{}{{ else }}{{ $e.Type.ID.Type }}{{ end }}]({{ printf "%q" $e.Name }}, new{{ pascal $e.Name }}Step, []func(*sql.Selector, *sqlgraph.Step){
 					func(s *sql.Selector, step *sqlgraph.Step) {
 						schemaConfig := internal.SchemaConfigFromContext(s.Context())
 						step.To.Schema = schemaConfig.{{ $e.Type.Name }}
@@ -89,7 +106,7 @@ in the LICENSE file in the root directory of this source tree.
 					},
 				}{{ if $edgeHasSoftDelete }}, sql.FieldIsNull("deleted_at"){{ end }}),
 			{{- else }}
-				{{ $e.StructField }}: entfield.NewEdge[predicate.{{ $e.Type.Name }}](new{{ pascal $e.Name }}Step{{ if $edgeHasSoftDelete }}, sql.FieldIsNull("deleted_at"){{ end }}),
+				{{ $e.StructField }}: entfield.NewEdge[predicate.{{ $e.Type.Name }}, {{ if $e.Type.HasCompositeID }}struct{}{{ else }}{{ $e.Type.ID.Type }}{{ end }}]({{ printf "%q" $e.Name }}, new{{ pascal $e.Name }}Step{{ if $edgeHasSoftDelete }}, sql.FieldIsNull("deleted_at"){{ end }}),
 			{{- end }}
 		{{- end }}
 	}

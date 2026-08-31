@@ -19,26 +19,26 @@ var F = struct {
 	ID entfield.Value[uuid.UUID]
 	// AddedAt is the handle for the "added_at" field.
 	AddedAt entfield.Time
-	// TagID is the handle for the "tag_id" field.
-	TagID entfield.Number[int]
-	// TweetID is the handle for the "tweet_id" field.
-	TweetID entfield.Number[int]
+	// TagID is the handle for the "tag_id" field (backs the "tag" edge).
+	TagID entfield.EdgeField[int]
+	// TweetID is the handle for the "tweet_id" field (backs the "tweet" edge).
+	TweetID entfield.EdgeField[int]
 }{
-	ID:      entfield.NewValue[uuid.UUID](FieldID),
-	AddedAt: entfield.NewTime(FieldAddedAt),
-	TagID:   entfield.NewNumber[int](FieldTagID),
-	TweetID: entfield.NewNumber[int](FieldTweetID),
+	ID:      entfield.NewValue[uuid.UUID](FieldID, "id"),
+	AddedAt: entfield.NewTime(FieldAddedAt, "added_at"),
+	TagID:   entfield.NewEdgeField[int](FieldTagID, "tag"),
+	TweetID: entfield.NewEdgeField[int](FieldTweetID, "tweet"),
 }
 
 // E holds typed edge handles for every edge of the TweetTag type.
 var E = struct {
 	// Tag is the handle for the "tag" edge.
-	Tag entfield.Edge[predicate.Tag]
+	Tag entfield.Edge[predicate.Tag, int]
 	// Tweet is the handle for the "tweet" edge.
-	Tweet entfield.Edge[predicate.Tweet]
+	Tweet entfield.Edge[predicate.Tweet, int]
 }{
-	Tag:   entfield.NewEdge[predicate.Tag](newTagStep),
-	Tweet: entfield.NewEdge[predicate.Tweet](newTweetStep),
+	Tag:   entfield.NewEdge[predicate.Tag, int]("tag", newTagStep),
+	Tweet: entfield.NewEdge[predicate.Tweet, int]("tweet", newTweetStep),
 }
 
 // And groups predicates with the AND operator between them.

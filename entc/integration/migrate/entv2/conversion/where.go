@@ -35,16 +35,16 @@ var F = struct {
 	// Uint64ToString is the handle for the "uint64_to_string" field.
 	Uint64ToString entfield.String[string]
 }{
-	ID:             entfield.NewNumber[int](FieldID),
-	Name:           entfield.NewString[string](FieldName),
-	Int8ToString:   entfield.NewString[string](FieldInt8ToString),
-	Uint8ToString:  entfield.NewString[string](FieldUint8ToString),
-	Int16ToString:  entfield.NewString[string](FieldInt16ToString),
-	Uint16ToString: entfield.NewString[string](FieldUint16ToString),
-	Int32ToString:  entfield.NewString[string](FieldInt32ToString),
-	Uint32ToString: entfield.NewString[string](FieldUint32ToString),
-	Int64ToString:  entfield.NewString[string](FieldInt64ToString),
-	Uint64ToString: entfield.NewString[string](FieldUint64ToString),
+	ID:             entfield.NewNumber[int](FieldID, "id"),
+	Name:           entfield.NewString[string](FieldName, "name"),
+	Int8ToString:   entfield.NewString[string](FieldInt8ToString, "int8_to_string"),
+	Uint8ToString:  entfield.NewString[string](FieldUint8ToString, "uint8_to_string"),
+	Int16ToString:  entfield.NewString[string](FieldInt16ToString, "int16_to_string"),
+	Uint16ToString: entfield.NewString[string](FieldUint16ToString, "uint16_to_string"),
+	Int32ToString:  entfield.NewString[string](FieldInt32ToString, "int32_to_string"),
+	Uint32ToString: entfield.NewString[string](FieldUint32ToString, "uint32_to_string"),
+	Int64ToString:  entfield.NewString[string](FieldInt64ToString, "int64_to_string"),
+	Uint64ToString: entfield.NewString[string](FieldUint64ToString, "uint64_to_string"),
 }
 
 // E holds typed edge handles for every edge of the Conversion type.

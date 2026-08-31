@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // LinkUpdate is the builder for updating Link entities.
 type LinkUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *LinkMutation
 }
@@ -37,9 +39,12 @@ func (_u *LinkUpdate) Where(ps ...predicate.Link) *LinkUpdate {
 	return _u
 }
 
-// SetLinkInformation sets the "link_information" field.
-func (_u *LinkUpdate) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpdate {
-	_ = _u.mutation.SetField("link_information", v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the LinkUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *LinkUpdate) With(as ...entfield.Assignment) *LinkUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -50,6 +55,9 @@ func (_u *LinkUpdate) Mutation() *LinkMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *LinkUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*LinkMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -103,6 +111,7 @@ func (_u *LinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type LinkUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *LinkMutation
 }
@@ -112,9 +121,12 @@ func NewLinkUpdateOne(c Config, hooks []Hook, mutation *LinkMutation) *LinkUpdat
 	return &LinkUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetLinkInformation sets the "link_information" field.
-func (_u *LinkUpdateOne) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpdateOne {
-	_ = _u.mutation.SetField("link_information", v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the LinkUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *LinkUpdateOne) With(as ...entfield.Assignment) *LinkUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -138,6 +150,9 @@ func (_u *LinkUpdateOne) Select(field string, fields ...string) *LinkUpdateOne {
 
 // Save executes the query and returns the updated Link entity.
 func (_u *LinkUpdateOne) Save(ctx context.Context) (*Link, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Link](ctx, &entbuilder.UpdateState[*LinkMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

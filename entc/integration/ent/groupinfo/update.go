@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // GroupInfoUpdate is the builder for updating GroupInfo entities.
 type GroupInfoUpdate struct {
 	Config
+	err       error
 	hooks     []Hook
 	mutation  *GroupInfoMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -37,44 +39,12 @@ func (_u *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
 	return _u
 }
 
-// SetDesc sets the "desc" field.
-func (_u *GroupInfoUpdate) SetDesc(v string) *GroupInfoUpdate {
-	_ = _u.mutation.SetField("desc", v)
-	return _u
-}
-
-// SetNillableDesc sets the "desc" field if the given value is not nil.
-func (_u *GroupInfoUpdate) SetNillableDesc(v *string) *GroupInfoUpdate {
-	if v != nil {
-		_u.SetDesc(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupInfoUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *GroupInfoUpdate) With(as ...entfield.Assignment) *GroupInfoUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetMaxUsers sets the "max_users" field.
-func (_u *GroupInfoUpdate) SetMaxUsers(v int) *GroupInfoUpdate {
-	_ = _u.mutation.ResetField("max_users")
-	_ = _u.mutation.SetField("max_users", v)
-	return _u
-}
-
-// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_u *GroupInfoUpdate) SetNillableMaxUsers(v *int) *GroupInfoUpdate {
-	if v != nil {
-		_u.SetMaxUsers(*v)
-	}
-	return _u
-}
-
-// AddMaxUsers adds value to the "max_users" field.
-func (_u *GroupInfoUpdate) AddMaxUsers(v int) *GroupInfoUpdate {
-	_ = _u.mutation.AddField("max_users", v)
-	return _u
-}
-
-// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_u *GroupInfoUpdate) AddGroupIDs(ids ...int) *GroupInfoUpdate {
-	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -97,6 +67,9 @@ func (_u *GroupInfoUpdate) RemoveGroupIDs(ids ...int) *GroupInfoUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*GroupInfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -209,6 +182,7 @@ func (_u *GroupInfoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type GroupInfoUpdateOne struct {
 	Config
 	fields    []string
+	err       error
 	hooks     []Hook
 	mutation  *GroupInfoMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -219,44 +193,12 @@ func NewGroupInfoUpdateOne(c Config, hooks []Hook, mutation *GroupInfoMutation) 
 	return &GroupInfoUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetDesc sets the "desc" field.
-func (_u *GroupInfoUpdateOne) SetDesc(v string) *GroupInfoUpdateOne {
-	_ = _u.mutation.SetField("desc", v)
-	return _u
-}
-
-// SetNillableDesc sets the "desc" field if the given value is not nil.
-func (_u *GroupInfoUpdateOne) SetNillableDesc(v *string) *GroupInfoUpdateOne {
-	if v != nil {
-		_u.SetDesc(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupInfoUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *GroupInfoUpdateOne) With(as ...entfield.Assignment) *GroupInfoUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetMaxUsers sets the "max_users" field.
-func (_u *GroupInfoUpdateOne) SetMaxUsers(v int) *GroupInfoUpdateOne {
-	_ = _u.mutation.ResetField("max_users")
-	_ = _u.mutation.SetField("max_users", v)
-	return _u
-}
-
-// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_u *GroupInfoUpdateOne) SetNillableMaxUsers(v *int) *GroupInfoUpdateOne {
-	if v != nil {
-		_u.SetMaxUsers(*v)
-	}
-	return _u
-}
-
-// AddMaxUsers adds value to the "max_users" field.
-func (_u *GroupInfoUpdateOne) AddMaxUsers(v int) *GroupInfoUpdateOne {
-	_ = _u.mutation.AddField("max_users", v)
-	return _u
-}
-
-// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_u *GroupInfoUpdateOne) AddGroupIDs(ids ...int) *GroupInfoUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -292,6 +234,9 @@ func (_u *GroupInfoUpdateOne) Select(field string, fields ...string) *GroupInfoU
 
 // Save executes the query and returns the updated GroupInfo entity.
 func (_u *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[GroupInfo](ctx, &entbuilder.UpdateState[*GroupInfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

@@ -27,29 +27,29 @@ var F = struct {
 	// Active is the handle for the "active" field.
 	Active entfield.Bool[bool]
 }{
-	ID:       entfield.NewNumber[int](FieldID),
-	Version:  entfield.NewNumber[int](FieldVersion),
-	Name:     entfield.NewString[string](FieldName),
-	Worth:    entfield.NewNumber[uint](FieldWorth),
-	Password: entfield.NewString[string](FieldPassword),
-	Active:   entfield.NewBool[bool](FieldActive),
+	ID:       entfield.NewNumber[int](FieldID, "id"),
+	Version:  entfield.NewNumber[int](FieldVersion, "version"),
+	Name:     entfield.NewString[string](FieldName, "name"),
+	Worth:    entfield.NewNumber[uint](FieldWorth, "worth"),
+	Password: entfield.NewString[string](FieldPassword, "password"),
+	Active:   entfield.NewBool[bool](FieldActive, "active"),
 }
 
 // E holds typed edge handles for every edge of the User type.
 var E = struct {
 	// Cards is the handle for the "cards" edge.
-	Cards entfield.Edge[predicate.Card]
+	Cards entfield.Edge[predicate.Card, int]
 	// Pets is the handle for the "pets" edge.
-	Pets entfield.Edge[predicate.Pet]
+	Pets entfield.Edge[predicate.Pet, int]
 	// Friends is the handle for the "friends" edge.
-	Friends entfield.Edge[predicate.User]
+	Friends entfield.Edge[predicate.User, int]
 	// BestFriend is the handle for the "best_friend" edge.
-	BestFriend entfield.Edge[predicate.User]
+	BestFriend entfield.Edge[predicate.User, int]
 }{
-	Cards:      entfield.NewEdge[predicate.Card](newCardsStep),
-	Pets:       entfield.NewEdge[predicate.Pet](newPetsStep),
-	Friends:    entfield.NewEdge[predicate.User](newFriendsStep),
-	BestFriend: entfield.NewEdge[predicate.User](newBestFriendStep),
+	Cards:      entfield.NewEdge[predicate.Card, int]("cards", newCardsStep),
+	Pets:       entfield.NewEdge[predicate.Pet, int]("pets", newPetsStep),
+	Friends:    entfield.NewEdge[predicate.User, int]("friends", newFriendsStep),
+	BestFriend: entfield.NewEdge[predicate.User, int]("best_friend", newBestFriendStep),
 }
 
 // And groups predicates with the AND operator between them.

@@ -26,8 +26,9 @@ type AccountMutationOption = func(*AccountMutation)
 // accountDescriptor describes Account's fields and edges
 // for the generic mutation runtime.
 var accountDescriptor = &entbuilder.Descriptor{
-	Name:   "Account",
-	IDType: reflect.TypeFor[sid.ID](),
+	Name:    "Account",
+	IDType:  reflect.TypeFor[sid.ID](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"email": {
 			Type:   reflect.TypeFor[string](),

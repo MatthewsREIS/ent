@@ -23,10 +23,10 @@ var F = struct {
 	// Tz3 is the handle for the "tz3" field.
 	Tz3 entfield.Time
 }{
-	ID:     entfield.NewNumber[int](FieldID),
-	Custom: entfield.NewString[string](FieldCustom),
-	Tz0:    entfield.NewTime(FieldTz0),
-	Tz3:    entfield.NewTime(FieldTz3),
+	ID:     entfield.NewNumber[int](FieldID, "id"),
+	Custom: entfield.NewString[string](FieldCustom, "custom"),
+	Tz0:    entfield.NewTime(FieldTz0, "tz0"),
+	Tz3:    entfield.NewTime(FieldTz3, "tz3"),
 }
 
 // E holds typed edge handles for every edge of the CustomType type.

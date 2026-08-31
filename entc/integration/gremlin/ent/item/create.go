@@ -16,11 +16,13 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // ItemCreate is the builder for creating a Item entity.
 type ItemCreate struct {
 	Config
+	err      error
 	mutation *ItemMutation
 	hooks    []Hook
 }
@@ -30,30 +32,11 @@ func NewItemCreate(c Config, hooks []Hook, mutation *ItemMutation) *ItemCreate {
 	return &ItemCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_c *ItemCreate) SetText(v string) *ItemCreate {
-	_ = _c.mutation.SetField("text", v)
-	return _c
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_c *ItemCreate) SetNillableText(v *string) *ItemCreate {
-	if v != nil {
-		_c.SetText(*v)
-	}
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *ItemCreate) SetID(v string) *ItemCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *ItemCreate) SetNillableID(v *string) *ItemCreate {
-	if v != nil {
-		_c.SetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ItemCreate builder. The first error from as is recorded and returned by Save.
+func (_c *ItemCreate) With(as ...entfield.Assignment) *ItemCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -65,6 +48,9 @@ func (_c *ItemCreate) Mutation() *ItemMutation {
 
 // Save creates the Item in the database.
 func (_c *ItemCreate) Save(ctx context.Context) (*Item, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }

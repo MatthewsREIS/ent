@@ -13,12 +13,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	Config
+	err      error
 	mutation *PetMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -29,56 +31,11 @@ func NewPetCreate(c Config, hooks []Hook, mutation *PetMutation) *PetCreate {
 	return &PetCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetID sets the "id" field.
-func (_c *PetCreate) SetID(v string) *PetCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *PetCreate) SetNillableID(v *string) *PetCreate {
-	if v != nil {
-		_c.SetID(*v)
-	}
-	return _c
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_c *PetCreate) SetOwnerID(id int) *PetCreate {
-	_ = _c.mutation.SetEdgeID("owner", id)
-	return _c
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_c *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
-	if id != nil {
-		_c = _c.SetOwnerID(*id)
-	}
-	return _c
-}
-
-// AddCarIDs adds the "cars" edge to the Car entity by IDs.
-func (_c *PetCreate) AddCarIDs(ids ...int) *PetCreate {
-	_ = _c.mutation.AddEdgeIDs("cars", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddFriendIDs adds the "friends" edge to the Pet entity by IDs.
-func (_c *PetCreate) AddFriendIDs(ids ...string) *PetCreate {
-	_ = _c.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// SetBestFriendID sets the "best_friend" edge to the Pet entity by ID.
-func (_c *PetCreate) SetBestFriendID(id string) *PetCreate {
-	_ = _c.mutation.SetEdgeID("best_friend", id)
-	return _c
-}
-
-// SetNillableBestFriendID sets the "best_friend" edge to the Pet entity by ID if the given value is not nil.
-func (_c *PetCreate) SetNillableBestFriendID(id *string) *PetCreate {
-	if id != nil {
-		_c = _c.SetBestFriendID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PetCreate builder. The first error from as is recorded and returned by Save.
+func (_c *PetCreate) With(as ...entfield.Assignment) *PetCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -90,6 +47,9 @@ func (_c *PetCreate) Mutation() *PetMutation {
 
 // Save creates the Pet in the database.
 func (_c *PetCreate) Save(ctx context.Context) (*Pet, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -327,6 +287,12 @@ func (_c *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PetMutation)

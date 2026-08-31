@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	Config
+	err      error
 	mutation *UserMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,252 +32,11 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 	return &UserCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetOptionalInt sets the "optional_int" field.
-func (_c *UserCreate) SetOptionalInt(v int) *UserCreate {
-	_ = _c.mutation.SetField("optional_int", v)
-	return _c
-}
-
-// SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
-func (_c *UserCreate) SetNillableOptionalInt(v *int) *UserCreate {
-	if v != nil {
-		_c.SetOptionalInt(*v)
-	}
-	return _c
-}
-
-// SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(v int) *UserCreate {
-	_ = _c.mutation.SetField("age", v)
-	return _c
-}
-
-// SetName sets the "name" field.
-func (_c *UserCreate) SetName(v string) *UserCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetLast sets the "last" field.
-func (_c *UserCreate) SetLast(v string) *UserCreate {
-	_ = _c.mutation.SetField("last", v)
-	return _c
-}
-
-// SetNillableLast sets the "last" field if the given value is not nil.
-func (_c *UserCreate) SetNillableLast(v *string) *UserCreate {
-	if v != nil {
-		_c.SetLast(*v)
-	}
-	return _c
-}
-
-// SetNickname sets the "nickname" field.
-func (_c *UserCreate) SetNickname(v string) *UserCreate {
-	_ = _c.mutation.SetField("nickname", v)
-	return _c
-}
-
-// SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_c *UserCreate) SetNillableNickname(v *string) *UserCreate {
-	if v != nil {
-		_c.SetNickname(*v)
-	}
-	return _c
-}
-
-// SetAddress sets the "address" field.
-func (_c *UserCreate) SetAddress(v string) *UserCreate {
-	_ = _c.mutation.SetField("address", v)
-	return _c
-}
-
-// SetNillableAddress sets the "address" field if the given value is not nil.
-func (_c *UserCreate) SetNillableAddress(v *string) *UserCreate {
-	if v != nil {
-		_c.SetAddress(*v)
-	}
-	return _c
-}
-
-// SetPhone sets the "phone" field.
-func (_c *UserCreate) SetPhone(v string) *UserCreate {
-	_ = _c.mutation.SetField("phone", v)
-	return _c
-}
-
-// SetNillablePhone sets the "phone" field if the given value is not nil.
-func (_c *UserCreate) SetNillablePhone(v *string) *UserCreate {
-	if v != nil {
-		_c.SetPhone(*v)
-	}
-	return _c
-}
-
-// SetPassword sets the "password" field.
-func (_c *UserCreate) SetPassword(v string) *UserCreate {
-	_ = _c.mutation.SetField("password", v)
-	return _c
-}
-
-// SetNillablePassword sets the "password" field if the given value is not nil.
-func (_c *UserCreate) SetNillablePassword(v *string) *UserCreate {
-	if v != nil {
-		_c.SetPassword(*v)
-	}
-	return _c
-}
-
-// SetRole sets the "role" field.
-func (_c *UserCreate) SetRole(v Role) *UserCreate {
-	_ = _c.mutation.SetField("role", v)
-	return _c
-}
-
-// SetNillableRole sets the "role" field if the given value is not nil.
-func (_c *UserCreate) SetNillableRole(v *Role) *UserCreate {
-	if v != nil {
-		_c.SetRole(*v)
-	}
-	return _c
-}
-
-// SetEmployment sets the "employment" field.
-func (_c *UserCreate) SetEmployment(v Employment) *UserCreate {
-	_ = _c.mutation.SetField("employment", v)
-	return _c
-}
-
-// SetNillableEmployment sets the "employment" field if the given value is not nil.
-func (_c *UserCreate) SetNillableEmployment(v *Employment) *UserCreate {
-	if v != nil {
-		_c.SetEmployment(*v)
-	}
-	return _c
-}
-
-// SetSSOCert sets the "SSOCert" field.
-func (_c *UserCreate) SetSSOCert(v string) *UserCreate {
-	_ = _c.mutation.SetField("SSOCert", v)
-	return _c
-}
-
-// SetNillableSSOCert sets the "SSOCert" field if the given value is not nil.
-func (_c *UserCreate) SetNillableSSOCert(v *string) *UserCreate {
-	if v != nil {
-		_c.SetSSOCert(*v)
-	}
-	return _c
-}
-
-// SetFilesCount sets the "files_count" field.
-func (_c *UserCreate) SetFilesCount(v int) *UserCreate {
-	_ = _c.mutation.SetField("files_count", v)
-	return _c
-}
-
-// SetNillableFilesCount sets the "files_count" field if the given value is not nil.
-func (_c *UserCreate) SetNillableFilesCount(v *int) *UserCreate {
-	if v != nil {
-		_c.SetFilesCount(*v)
-	}
-	return _c
-}
-
-// SetCardID sets the "card" edge to the Card entity by ID.
-func (_c *UserCreate) SetCardID(id int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("card", id)
-	return _c
-}
-
-// SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableCardID(id *int) *UserCreate {
-	if id != nil {
-		_c = _c.SetCardID(*id)
-	}
-	return _c
-}
-
-// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_c *UserCreate) AddPetIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_c *UserCreate) AddFileIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_c *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddFriendIDs adds the "friends" edge to the User entity by IDs.
-func (_c *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddFollowerIDs adds the "followers" edge to the User entity by IDs.
-func (_c *UserCreate) AddFollowerIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("followers", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddFollowingIDs adds the "following" edge to the User entity by IDs.
-func (_c *UserCreate) AddFollowingIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("following", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// SetTeamID sets the "team" edge to the Pet entity by ID.
-func (_c *UserCreate) SetTeamID(id int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("team", id)
-	return _c
-}
-
-// SetNillableTeamID sets the "team" edge to the Pet entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableTeamID(id *int) *UserCreate {
-	if id != nil {
-		_c = _c.SetTeamID(*id)
-	}
-	return _c
-}
-
-// SetSpouseID sets the "spouse" edge to the User entity by ID.
-func (_c *UserCreate) SetSpouseID(id int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("spouse", id)
-	return _c
-}
-
-// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableSpouseID(id *int) *UserCreate {
-	if id != nil {
-		_c = _c.SetSpouseID(*id)
-	}
-	return _c
-}
-
-// AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// SetParentID sets the "parent" edge to the User entity by ID.
-func (_c *UserCreate) SetParentID(id int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("parent", id)
-	return _c
-}
-
-// SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableParentID(id *int) *UserCreate {
-	if id != nil {
-		_c = _c.SetParentID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserCreate builder. The first error from as is recorded and returned by Save.
+func (_c *UserCreate) With(as ...entfield.Assignment) *UserCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -287,6 +48,9 @@ func (_c *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
@@ -708,6 +472,12 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserMutation)

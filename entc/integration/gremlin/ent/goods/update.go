@@ -14,11 +14,13 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // GoodsUpdate is the builder for updating Goods entities.
 type GoodsUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *GoodsMutation
 }
@@ -34,6 +36,15 @@ func (_u *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
 	return _u
 }
 
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GoodsUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *GoodsUpdate) With(as ...entfield.Assignment) *GoodsUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
+}
+
 // Mutation returns the GoodsMutation object of the builder.
 func (_u *GoodsUpdate) Mutation() *GoodsMutation {
 	return _u.mutation
@@ -41,6 +52,9 @@ func (_u *GoodsUpdate) Mutation() *GoodsMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GoodsUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
@@ -96,6 +110,7 @@ func (_u *GoodsUpdate) gremlin() *dsl.Traversal {
 type GoodsUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *GoodsMutation
 }
@@ -103,6 +118,15 @@ type GoodsUpdateOne struct {
 // NewGoodsUpdateOne returns a new GoodsUpdateOne initialized with the given config, hooks, and mutation.
 func NewGoodsUpdateOne(c Config, hooks []Hook, mutation *GoodsMutation) *GoodsUpdateOne {
 	return &GoodsUpdateOne{Config: c, hooks: hooks, mutation: mutation}
+}
+
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GoodsUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *GoodsUpdateOne) With(as ...entfield.Assignment) *GoodsUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
 }
 
 // Mutation returns the GoodsMutation object of the builder.
@@ -125,6 +149,9 @@ func (_u *GoodsUpdateOne) Select(field string, fields ...string) *GoodsUpdateOne
 
 // Save executes the query and returns the updated Goods entity.
 func (_u *GoodsUpdateOne) Save(ctx context.Context) (*Goods, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 

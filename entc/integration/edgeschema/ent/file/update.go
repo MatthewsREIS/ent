@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // FileUpdate is the builder for updating File entities.
 type FileUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *FileMutation
 }
@@ -36,23 +38,12 @@ func (_u *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *FileUpdate) SetName(v string) *FileUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *FileUpdate) SetNillableName(v *string) *FileUpdate {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the FileUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *FileUpdate) With(as ...entfield.Assignment) *FileUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddProcessIDs adds the "processes" edge to the Process entity by IDs.
-func (_u *FileUpdate) AddProcessIDs(ids ...int) *FileUpdate {
-	_ = _u.mutation.AddEdgeIDs("processes", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -75,6 +66,9 @@ func (_u *FileUpdate) RemoveProcessIDs(ids ...int) *FileUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FileUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*FileMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -173,6 +167,7 @@ func (_u *FileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type FileUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *FileMutation
 }
@@ -182,23 +177,12 @@ func NewFileUpdateOne(c Config, hooks []Hook, mutation *FileMutation) *FileUpdat
 	return &FileUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_u *FileUpdateOne) SetName(v string) *FileUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *FileUpdateOne) SetNillableName(v *string) *FileUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the FileUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *FileUpdateOne) With(as ...entfield.Assignment) *FileUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddProcessIDs adds the "processes" edge to the Process entity by IDs.
-func (_u *FileUpdateOne) AddProcessIDs(ids ...int) *FileUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("processes", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -234,6 +218,9 @@ func (_u *FileUpdateOne) Select(field string, fields ...string) *FileUpdateOne {
 
 // Save executes the query and returns the updated File entity.
 func (_u *FileUpdateOne) Save(ctx context.Context) (*File, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[File](ctx, &entbuilder.UpdateState[*FileMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

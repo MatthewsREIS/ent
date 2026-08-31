@@ -22,33 +22,33 @@ var F = struct {
 	Weight entfield.Number[int]
 	// CreatedAt is the handle for the "created_at" field.
 	CreatedAt entfield.Time
-	// UserID is the handle for the "user_id" field.
-	UserID entfield.Number[int]
-	// FriendID is the handle for the "friend_id" field.
-	FriendID entfield.Number[int]
+	// UserID is the handle for the "user_id" field (backs the "user" edge).
+	UserID entfield.EdgeField[int]
+	// FriendID is the handle for the "friend_id" field (backs the "friend" edge).
+	FriendID entfield.EdgeField[int]
 }{
-	ID:        entfield.NewNumber[int](FieldID),
-	Weight:    entfield.NewNumber[int](FieldWeight),
-	CreatedAt: entfield.NewTime(FieldCreatedAt),
-	UserID:    entfield.NewNumber[int](FieldUserID),
-	FriendID:  entfield.NewNumber[int](FieldFriendID),
+	ID:        entfield.NewNumber[int](FieldID, "id"),
+	Weight:    entfield.NewNumber[int](FieldWeight, "weight"),
+	CreatedAt: entfield.NewTime(FieldCreatedAt, "created_at"),
+	UserID:    entfield.NewEdgeField[int](FieldUserID, "user"),
+	FriendID:  entfield.NewEdgeField[int](FieldFriendID, "friend"),
 }
 
 // E holds typed edge handles for every edge of the Friendship type.
 var E = struct {
 	// User is the handle for the "user" edge.
-	User entfield.Edge[predicate.User]
+	User entfield.Edge[predicate.User, int]
 	// Friend is the handle for the "friend" edge.
-	Friend entfield.Edge[predicate.User]
+	Friend entfield.Edge[predicate.User, int]
 }{
-	User: entfield.NewEdgeSteps[predicate.User](newUserStep, []func(*sql.Selector, *sqlgraph.Step){
+	User: entfield.NewEdgeSteps[predicate.User, int]("user", newUserStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.User
 			step.Edge.Schema = schemaConfig.Friendship
 		},
 	}),
-	Friend: entfield.NewEdgeSteps[predicate.User](newFriendStep, []func(*sql.Selector, *sqlgraph.Step){
+	Friend: entfield.NewEdgeSteps[predicate.User, int]("friend", newFriendStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.User

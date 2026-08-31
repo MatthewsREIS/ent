@@ -23,9 +23,9 @@ func TestIDType(t *testing.T) {
 	ctx := context.Background()
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 
-	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
+	a8m := client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx)
 	require.Equal(t, "a8m", a8m.Name)
-	neta := client.User.Create().SetName("neta").SetSpouseID(a8m.ID).SaveX(ctx)
+	neta := client.User.Create().With(user.F.Name.Set("neta"), user.E.Spouse.SetID(a8m.ID)).SaveX(ctx)
 	require.Equal(t, "neta", neta.Name)
 	require.Equal(t, []string{a8m.Name}, ent.QueryUserSpouse(client.User, neta).Select(user.FieldName).StringsX(ctx))
 }
