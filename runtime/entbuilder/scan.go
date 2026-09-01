@@ -134,7 +134,13 @@ func buildFieldPlan(spec FieldSpec, isFK bool) *fieldPlan {
 	case isValueScanner(spec.Type):
 		p.kind = scanCustom
 		p.elemType = concreteElem(spec.Type)
-		p.wrapNull = spec.Nillable && !isStandardNullType(p.elemType)
+		// isFK implies nullable: an unexported FK column is NULL whenever the
+		// edge is absent, and FieldSpec entries built from Descriptor.FKColumns
+		// carry no Nillable flag. Without the wrap, a NULL scans into a
+		// non-nil *T holding the zero value, assignCustom cannot tell that from
+		// a real zero id, and the FK setter stores a pointer to it — so
+		// GetFooID() returns non-nil for an edge that does not exist.
+		p.wrapNull = (spec.Nillable || isFK) && !isStandardNullType(p.elemType)
 	default:
 		p.kind = scanBasic
 	}
