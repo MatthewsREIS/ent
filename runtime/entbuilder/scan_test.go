@@ -374,12 +374,41 @@ func TestAssignRow_ForeignKeyColumn_ScannerGoTypeTarget(t *testing.T) {
 	desc := fixtureDescriptor()
 	e := &fixtureEntity{}
 	scanAndAssign(t, desc, e, []string{"fk_scanner_col"}, func(cells []any) {
-		if err := cells[0].(*fixtureScanner).Scan("uuid-like-value"); err != nil {
+		// FK cells of a Scanner GoType are wrapped in sql.NullScanner so a NULL
+		// edge stays distinguishable from a scanned zero value.
+		ns := cells[0].(*sql.NullScanner)
+		if err := ns.Scan("uuid-like-value"); err != nil {
 			t.Fatal(err)
 		}
 	})
 	if e.fkScannerField == nil || e.fkScannerField.V != "uuid-like-value" {
 		t.Errorf("fkScannerField = %+v, want &{uuid-like-value}", e.fkScannerField)
+	}
+}
+
+// TestAssignRow_ForeignKeyColumn_NullLeavesNil covers a NULL foreign key for
+// each FK target shape. A NULL FK means "no edge", so the setter must not be
+// called at all and the pointer must stay nil — a non-nil pointer to the zero
+// value is indistinguishable from a real edge to the zero-valued id, and every
+// `if e.GetFooID() != nil` in consuming code silently takes the wrong branch.
+//
+// The scanner shape is the one that regressed: without wrapNull its cell is a
+// plain non-nil *fixtureScanner, so a NULL row is indistinguishable from a
+// scanned zero value unless the plan wraps it in sql.NullScanner.
+func TestAssignRow_ForeignKeyColumn_NullLeavesNil(t *testing.T) {
+	desc := fixtureDescriptor()
+	e := &fixtureEntity{}
+	// Populate nothing: every cell stays at its zero/invalid state, which is
+	// exactly what database/sql leaves behind for a NULL column.
+	scanAndAssign(t, desc, e, []string{"fk_col", "fk_string_col", "fk_scanner_col"}, func(cells []any) {})
+	if e.fkField != nil {
+		t.Errorf("fkField = %v, want nil for a NULL foreign key", *e.fkField)
+	}
+	if e.fkStringField != nil {
+		t.Errorf("fkStringField = %q, want nil for a NULL foreign key", *e.fkStringField)
+	}
+	if e.fkScannerField != nil {
+		t.Errorf("fkScannerField = %+v, want nil for a NULL foreign key", *e.fkScannerField)
 	}
 }
 

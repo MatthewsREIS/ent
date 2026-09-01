@@ -82,6 +82,19 @@ in the LICENSE file in the root directory of this source tree.
 					{{- $edgeHasSoftDelete = true }}
 				{{- end }}
 			{{- end }}
+			{{- /* Same check on the junction of an M2M through-edge. The join row
+			is its own record there, so a soft-deleted junction means the edge is
+			gone even when both endpoints are live — and that has to be filtered
+			on the junction, inside the neighbor subquery. */}}
+			{{- $junctionHasSoftDelete := false }}
+			{{- if and $e.M2M $e.Through }}
+				{{- range $f := $e.Through.Fields }}
+					{{- if eq $f.Name "deleted_at" }}
+						{{- $junctionHasSoftDelete = true }}
+					{{- end }}
+				{{- end }}
+			{{- end }}
+
 			{{- if $.FeatureEnabled "sql/schemaconfig" }}
 				{{- /* Mirror dialect/sql/query/step/ctxschemaconfig's schema-name resolution
 				(see dialect/sql/feature/schemaconfig.tmpl) so Has/HasWith/OrderBy* route
@@ -104,9 +117,9 @@ in the LICENSE file in the root directory of this source tree.
 						step.To.Schema = schemaConfig.{{ $e.Type.Name }}
 						step.Edge.Schema = schemaConfig.{{ $schema }}
 					},
-				}{{ if $edgeHasSoftDelete }}, sql.FieldIsNull("deleted_at"){{ end }}),
+				}{{ if $edgeHasSoftDelete }}, sql.FieldIsNull("deleted_at"){{ end }}){{ if $junctionHasSoftDelete }}.WithJunction({{ template "dialect/sql/edge/junctionfilter" $ }}){{ end }},
 			{{- else }}
-				{{ $e.StructField }}: entfield.NewEdge[predicate.{{ $e.Type.Name }}, {{ if $e.Type.HasCompositeID }}struct{}{{ else }}{{ $e.Type.ID.Type }}{{ end }}]({{ printf "%q" $e.Name }}, new{{ pascal $e.Name }}Step{{ if $edgeHasSoftDelete }}, sql.FieldIsNull("deleted_at"){{ end }}),
+				{{ $e.StructField }}: entfield.NewEdge[predicate.{{ $e.Type.Name }}, {{ if $e.Type.HasCompositeID }}struct{}{{ else }}{{ $e.Type.ID.Type }}{{ end }}]({{ printf "%q" $e.Name }}, new{{ pascal $e.Name }}Step{{ if $edgeHasSoftDelete }}, sql.FieldIsNull("deleted_at"){{ end }}){{ if $junctionHasSoftDelete }}.WithJunction({{ template "dialect/sql/edge/junctionfilter" $ }}){{ end }},
 			{{- end }}
 		{{- end }}
 	}
@@ -294,3 +307,11 @@ func Not(p predicate.{{ $.Name }}) predicate.{{ $.Name }} {
 
 {{/* A template that can be overridden in order to add additional code for the type package. */}}
 {{ define "where/additional" }}{{ end }}
+
+{{/* The junction-table filter applied inside Has/HasWith for an M2M
+through-edge whose join entity is soft-deletable. Defined separately so a
+project can override it — the deleted_at convention is ent's, but whether a
+query may opt out of it (a "show deleted too" context, say) is the project's. */}}
+{{ define "dialect/sql/edge/junctionfilter" -}}
+	func(sel *sql.Selector, t *sql.SelectTable) { sel.Where(sql.IsNull(t.C("deleted_at"))) }
+{{- end }}
