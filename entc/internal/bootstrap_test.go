@@ -90,15 +90,40 @@ func (Tenant) Interceptors() []ent.Interceptor {
 	s := string(out)
 	require.Contains(t, s, "func (Tenant) Policy() ent.Policy {")
 	require.Contains(t, s, "func (Tenant) Interceptors() []ent.Interceptor {")
-	// Policy() returns a composite struct literal (not []ent.Hook) so falls
-	// back to return nil. Interceptors() has 1 element so becomes make([]ent.Interceptor, 1).
-	require.Contains(t, s, "return nil", "Policy body must be replaced")
+	// Policy() has no element count, so it becomes the zero-value
+	// privacy.Policy{} — non-nil, so the loader's nil-check still detects a
+	// policy. Interceptors() has 1 element so becomes make([]ent.Interceptor, 1).
+	require.Contains(t, s, "return privacy.Policy{}", "Policy body must be replaced with the zero-value privacy.Policy{}")
 	require.Contains(t, s, "return make([]ent.Interceptor, 1)", "Interceptors body must be replaced with correct count")
 	require.NotContains(t, s, "DenyIfNoTenant", "Policy body must be gone")
 	require.NotContains(t, s, "FilterTenant", "Interceptors body must be gone")
-	require.NotContains(t, s, `"entgo.io/ent/privacy"`, "privacy import must be dropped (now unused)")
+	require.Contains(t, s, `"entgo.io/ent/privacy"`, "privacy import must stay (used by the privacy.Policy{} stub)")
 	require.NotContains(t, s, `"example.com/x/ent/gen/rule"`, "rule import must be dropped (now unused)")
 	require.Contains(t, s, `"entgo.io/ent"`, "ent import must stay")
+}
+
+func TestStripHookBodies_PolicyHelperCallStillStrippedToNonNil(t *testing.T) {
+	src := `package schema
+
+import (
+	"entgo.io/ent"
+)
+
+type Outreach struct {
+	ent.Schema
+}
+
+func (Outreach) Policy() ent.Policy {
+	return outreachPolicy()
+}
+`
+	out, err := StripHookBodies([]byte(src), nil)
+	require.NoError(t, err)
+	s := string(out)
+	require.Contains(t, s, "func (Outreach) Policy() ent.Policy {")
+	require.Contains(t, s, "return privacy.Policy{}", "helper-call Policy body must still be replaced with the zero-value privacy.Policy{}")
+	require.NotContains(t, s, "outreachPolicy", "original helper call must be gone")
+	require.Contains(t, s, `"entgo.io/ent/privacy"`, "privacy import must be added for the privacy.Policy{} stub")
 }
 
 func TestStripHookBodies_PreservesUnrelatedFunctions(t *testing.T) {
