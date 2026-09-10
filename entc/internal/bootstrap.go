@@ -35,8 +35,11 @@ var hookMethodNames = map[string]bool{
 }
 
 // hookSliceTypes maps hook/interceptor method names to the Go slice type used
-// in the count-preserving make() stub expression. Policy() has no entry: its
-// returns are rewritten to nil (it is a single value, never slot-counted).
+// in the count-preserving make() stub expression. Policy() has no entry: it
+// has no element count to preserve, so its returns are rewritten to the
+// zero-value privacy.Policy{} instead — a non-nil ent.Policy, which is what
+// the loader's presence check (Schema.loadPolicy) requires to register the
+// schema's policy at all.
 var hookSliceTypes = map[string]string{
 	"Hooks":        "ent.Hook",
 	"Interceptors": "ent.Interceptor",
@@ -289,7 +292,10 @@ func returnsHookSlice(fn *ast.FuncDecl) bool {
 // replaced with a count-preserving stub, while PRESERVING the method's control
 // flow. Each single-value return is rewritten as:
 //   - Hooks/Interceptors: `return make([]T, N)` when N > 0, else `return nil`.
-//   - Policy: `return nil` (a single value, never slot-counted).
+//   - Policy: `return privacy.Policy{}`. The loader detects a schema's policy
+//     by calling Policy() and keeping the result only if non-nil, so a `nil`
+//     stub here would make the loader see no policy at all and codegen would
+//     wire no policy enforcement, even though the real Policy() returns one.
 //
 // N is derived from the return expression: composite-literal length, or the
 // funcCounts entry for a named-function call (e.g. `return myHooks()`),
@@ -336,6 +342,7 @@ func stripHookBodies(src []byte, funcCounts map[string]int, pkgNames map[string]
 		return nil, fmt.Errorf("bootstrap: parse: %w", err)
 	}
 
+	var rewrotePolicy bool
 	for _, decl := range f.Decls {
 		fn, ok := decl.(*ast.FuncDecl)
 		if !ok || fn.Recv == nil {
@@ -345,9 +352,18 @@ func stripHookBodies(src []byte, funcCounts map[string]int, pkgNames map[string]
 		if !hookMethodNames[fn.Name.Name] {
 			continue
 		}
-		if err := stripHookMethodReturns(fset, fn, hookSliceTypes[fn.Name.Name], funcCounts); err != nil {
+		rewrote, err := stripHookMethodReturns(fset, fn, hookSliceTypes[fn.Name.Name], funcCounts)
+		if err != nil {
 			return nil, err
 		}
+		rewrotePolicy = rewrotePolicy || rewrote
+	}
+
+	// The privacy.Policy{} stub emitted by stripHookMethodReturns needs this
+	// import; add it before the unused-import pruning below so the pruner's
+	// usage scan (which now finds a real reference) is what keeps it.
+	if rewrotePolicy {
+		astutil.AddImport(fset, f, "entgo.io/ent/privacy")
 	}
 
 	// Remove imports made unused by stripping. Iterate over a copy because
@@ -603,10 +619,12 @@ func stripAndCopyTree(src, dst string, funcCounts map[string]int, pkgNames map[s
 //
 // For Hooks/Interceptors (elemType != ""): the return value becomes
 // make([]elemType, N) where N is the count implied by the original expression,
-// or nil when N == 0. For Policy (elemType == ""): every return becomes nil.
-func stripHookMethodReturns(fset *token.FileSet, fn *ast.FuncDecl, elemType string, funcCounts map[string]int) error {
+// or nil when N == 0. For Policy (elemType == ""): every return becomes the
+// zero-value privacy.Policy{}, since the loader keeps a schema's policy only
+// when Policy() returns non-nil.
+func stripHookMethodReturns(fset *token.FileSet, fn *ast.FuncDecl, elemType string, funcCounts map[string]int) (rewrotePolicy bool, err error) {
 	if fn.Body == nil {
-		return nil
+		return false, nil
 	}
 	var stripErr error
 	astutil.Apply(fn.Body, func(c *astutil.Cursor) bool {
@@ -621,7 +639,10 @@ func stripHookMethodReturns(fset *token.FileSet, fn *ast.FuncDecl, elemType stri
 				return false
 			}
 			if elemType == "" {
-				node.Results[0] = ast.NewIdent("nil")
+				node.Results[0] = &ast.CompositeLit{
+					Type: &ast.SelectorExpr{X: ast.NewIdent("privacy"), Sel: ast.NewIdent("Policy")},
+				}
+				rewrotePolicy = true
 				return false
 			}
 			n, ok := countReturnResult(node.Results[0], funcCounts)
@@ -641,7 +662,7 @@ func stripHookMethodReturns(fset *token.FileSet, fn *ast.FuncDecl, elemType stri
 		}
 		return true
 	}, nil)
-	return stripErr
+	return rewrotePolicy, stripErr
 }
 
 // countReturnResult returns the hook/interceptor element count implied by a

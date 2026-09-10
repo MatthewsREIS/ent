@@ -1,9 +1,34 @@
 package entfield
 
 import (
+	"context"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
+
+// neighborScope, when set, supplies an extra predicate for the neighbor side
+// of Has and HasWith, keyed by the neighbor's table; nil means none. Row
+// security registers it: a subquery into a scoped table runs outside that
+// table's own query policy, so without this every hasXWith on a parent
+// bypasses the policy.
+var neighborScope func(ctx context.Context, table string) func(*sql.Selector)
+
+// SetNeighborScope installs the process-wide neighbor scope. Call once at init.
+func SetNeighborScope(f func(ctx context.Context, table string) func(*sql.Selector)) {
+	neighborScope = f
+}
+
+func scopeFor(s *sql.Selector, table string) func(*sql.Selector) {
+	if neighborScope == nil {
+		return nil
+	}
+	ctx := s.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return neighborScope(ctx, table)
+}
 
 // Edge is the generated per-edge handle. step returns a fresh neighbor step
 // (the generated newXStep() constructors have exactly this signature).
@@ -65,22 +90,26 @@ func (e Edge[TP, ID]) mkStep(s *sql.Selector) *sqlgraph.Step {
 func (e Edge[TP, ID]) Has() P {
 	return func(s *sql.Selector) {
 		step := e.mkStep(s)
-		if len(e.junctionFilters) == 0 {
+		scope := scopeFor(s, step.To.Table)
+		switch {
+		case scope != nil:
+			e.hasNeighborsWith(s, step, scope)
+		case len(e.junctionFilters) == 0:
 			sqlgraph.HasNeighbors(s, step)
-			return
+		default:
+			builder := sql.Dialect(s.Dialect())
+			pk1 := step.Edge.Columns[0]
+			if step.Edge.Inverse {
+				pk1 = step.Edge.Columns[1]
+			}
+			junction := builder.Table(step.Edge.Table).Schema(step.Edge.Schema)
+			sel := builder.Select(junction.C(pk1)).From(junction)
+			sel.WithContext(s.Context())
+			for _, f := range e.junctionFilters {
+				f(sel, junction)
+			}
+			s.Where(sql.In(s.C(step.From.Column), sel))
 		}
-		builder := sql.Dialect(s.Dialect())
-		pk1 := step.Edge.Columns[0]
-		if step.Edge.Inverse {
-			pk1 = step.Edge.Columns[1]
-		}
-		junction := builder.Table(step.Edge.Table).Schema(step.Edge.Schema)
-		sel := builder.Select(junction.C(pk1)).From(junction)
-		sel.WithContext(s.Context())
-		for _, f := range e.junctionFilters {
-			f(sel, junction)
-		}
-		s.Where(sql.In(s.C(step.From.Column), sel))
 	}
 }
 
@@ -89,40 +118,47 @@ func (e Edge[TP, ID]) Has() P {
 func (e Edge[TP, ID]) HasWith(preds ...TP) P {
 	return func(s *sql.Selector) {
 		step := e.mkStep(s)
-		neighbor := func(s *sql.Selector) {
+		scope := scopeFor(s, step.To.Table)
+		e.hasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}
 			for _, f := range e.neighborFilters {
 				f(s)
 			}
-		}
-		if len(e.junctionFilters) == 0 {
-			sqlgraph.HasNeighborsWith(s, step, neighbor)
-			return
-		}
-		builder := sql.Dialect(s.Dialect())
-		pk1, pk2 := step.Edge.Columns[1], step.Edge.Columns[0]
-		if step.Edge.Inverse {
-			pk1, pk2 = pk2, pk1
-		}
-		to := builder.Table(step.To.Table).Schema(step.To.Schema)
-		junction := builder.Table(step.Edge.Table).Schema(step.Edge.Schema)
-		join := builder.Select(junction.C(pk2)).
-			From(junction).
-			Join(to).
-			On(junction.C(pk1), to.C(step.To.Column))
-		matches := builder.Select().From(to)
-		matches.WithContext(s.Context())
-		neighbor(matches)
-		join.FromSelect(matches)
-		// After FromSelect, not before: it replaces the selector's WHERE clause
-		// with the neighbor predicates, which would drop these.
-		for _, f := range e.junctionFilters {
-			f(join, junction)
-		}
-		s.Where(sql.In(s.C(step.From.Column), join))
+			if scope != nil {
+				scope(s)
+			}
+		})
 	}
+}
+
+func (e Edge[TP, ID]) hasNeighborsWith(s *sql.Selector, step *sqlgraph.Step, neighbor func(*sql.Selector)) {
+	if len(e.junctionFilters) == 0 {
+		sqlgraph.HasNeighborsWith(s, step, neighbor)
+		return
+	}
+	builder := sql.Dialect(s.Dialect())
+	pk1, pk2 := step.Edge.Columns[1], step.Edge.Columns[0]
+	if step.Edge.Inverse {
+		pk1, pk2 = pk2, pk1
+	}
+	to := builder.Table(step.To.Table).Schema(step.To.Schema)
+	junction := builder.Table(step.Edge.Table).Schema(step.Edge.Schema)
+	join := builder.Select(junction.C(pk2)).
+		From(junction).
+		Join(to).
+		On(junction.C(pk1), to.C(step.To.Column))
+	matches := builder.Select().From(to)
+	matches.WithContext(s.Context())
+	neighbor(matches)
+	join.FromSelect(matches)
+	// After FromSelect, not before: it replaces the selector's WHERE clause
+	// with the neighbor predicates, which would drop these.
+	for _, f := range e.junctionFilters {
+		f(join, junction)
+	}
+	s.Where(sql.In(s.C(step.From.Column), join))
 }
 
 // OrderByCount orders the results by the count of the edge connections.
