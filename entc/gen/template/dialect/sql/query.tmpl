@@ -252,6 +252,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 		selector = {{ $receiver }}.Sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	selector.WithContext(ctx)
 	if {{ $receiver }}.Ctx.Unique != nil && *{{ $receiver }}.Ctx.Unique {
 		selector.Distinct()
 	}
