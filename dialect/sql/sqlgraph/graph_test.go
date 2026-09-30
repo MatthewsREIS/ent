@@ -2491,6 +2491,34 @@ func TestQueryNodes(t *testing.T) {
 	require.Equal(t, 3, n)
 }
 
+func TestQueryNodesFromSelectorCarriesTheContext(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	mock.ExpectQuery(escape("SELECT `users`.`id` FROM `users` WHERE `age` < ?")).
+		WithArgs(40).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}))
+
+	type viewerKey struct{}
+	var seen any
+	spec := &QuerySpec{
+		Node: &NodeSpec{
+			Table:   "users",
+			Columns: []string{"id"},
+			ID:      &FieldSpec{Column: "id", Type: field.TypeInt},
+		},
+		From: sql.Dialect(dialect.MySQL).Select().From(sql.Table("users")),
+		Predicate: func(s *sql.Selector) {
+			seen = s.Context().Value(viewerKey{})
+			s.Where(sql.LT("age", 40))
+		},
+		ScanValues: func(columns []string) ([]any, error) { return (&user{}).values(columns) },
+		Assign:     func([]string, []any) error { return nil },
+	}
+	ctx := context.WithValue(context.Background(), viewerKey{}, "viewer")
+	require.NoError(t, QueryNodes(ctx, sql.OpenDB("", db), spec))
+	require.Equal(t, "viewer", seen, "a predicate on a traversal's From selector must see the query context")
+}
+
 func TestQueryNodesSchema(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
