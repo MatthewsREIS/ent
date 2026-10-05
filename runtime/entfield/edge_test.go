@@ -1,6 +1,7 @@
 package entfield_test
 
 import (
+	"context"
 	"testing"
 
 	"entgo.io/ent/dialect/sql"
@@ -126,4 +127,29 @@ func TestEdgeOrderBy(t *testing.T) {
 	q, _ := render(t, e.OrderBy(sql.OrderByField("name")))
 	require.Contains(t, q, `SELECT "pets"."owner_id", "pets"."name" FROM "pets"`)
 	require.Contains(t, q, `ORDER BY "t1"."name"`)
+}
+
+// FALSIFY: pass nil instead of scopeFor(...) in OrderByCount / OrderBy; the
+// "pets"."owner_id" = $1 term disappears from the neighbor join.
+func TestEdgeOrderScoped(t *testing.T) {
+	entfield.SetNeighborScope(func(_ context.Context, table string) func(*sql.Selector) {
+		if table != "pets" {
+			return nil
+		}
+		return func(s *sql.Selector) { s.Where(sql.EQ(s.C("owner_id"), 7)) }
+	})
+	t.Cleanup(func() { entfield.SetNeighborScope(nil) })
+	e := entfield.NewEdge[entfield.P, int]("pets", petsStep)
+
+	q, args := render(t, e.OrderByCount())
+	require.Contains(t, q, `FROM "pets" WHERE "pets"."owner_id" = $1 GROUP BY "pets"."owner_id"`)
+	require.Equal(t, []any{7}, args)
+
+	q, args = render(t, e.OrderBy(sql.OrderByField("name")))
+	require.Contains(t, q, `FROM "pets" WHERE "pets"."owner_id" = $1 GROUP BY "pets"."owner_id"`)
+	require.Equal(t, []any{7}, args)
+
+	q, args = render(t, entfield.NewEdge[entfield.P, int]("groups", groupsStep).OrderByCount())
+	require.NotContains(t, q, "WHERE")
+	require.Empty(t, args)
 }

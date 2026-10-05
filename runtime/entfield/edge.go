@@ -8,7 +8,7 @@ import (
 )
 
 // neighborScope, when set, supplies an extra predicate for the neighbor side
-// of Has and HasWith, keyed by the neighbor's table; nil means none. Row
+// of Has, HasWith, OrderBy and OrderByCount, keyed by the neighbor's table; nil means none. Row
 // security registers it: a subquery into a scoped table runs outside that
 // table's own query policy, so without this every hasXWith on a parent
 // bypasses the policy.
@@ -164,14 +164,16 @@ func (e Edge[TP, ID]) hasNeighborsWith(s *sql.Selector, step *sqlgraph.Step, nei
 // OrderByCount orders the results by the count of the edge connections.
 func (e Edge[TP, ID]) OrderByCount(opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, e.mkStep(s), opts...)
+		step := e.mkStep(s)
+		sqlgraph.OrderByNeighborsCountScoped(s, step, scopeFor(s, step.To.Table), opts...)
 	}
 }
 
 // OrderBy orders the results by terms of the edge's neighbor table.
 func (e Edge[TP, ID]) OrderBy(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, e.mkStep(s), append([]sql.OrderTerm{term}, terms...)...)
+		step := e.mkStep(s)
+		sqlgraph.OrderByNeighborTermsScoped(s, step, scopeFor(s, step.To.Table), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
