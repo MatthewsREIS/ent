@@ -1651,6 +1651,11 @@ func (s *SelectTable) Schema(name string) *SelectTable {
 	return s
 }
 
+// Name returns the table name, without schema or alias.
+func (s *SelectTable) Name() string {
+	return s.name
+}
+
 // As adds the AS clause to the table selector.
 func (s *SelectTable) As(alias string) *SelectTable {
 	s.as = alias

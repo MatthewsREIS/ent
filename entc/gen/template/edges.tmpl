@@ -114,10 +114,11 @@ func {{ $lfunc }}(ctx context.Context, query *{{ $e.Type.Package }}.{{ $edgeQuer
 			{{- end }}
 			{{- $edgeid := print $e.Type.Package "." $e.Type.ID.Constant }}
 			{{- $fk1idx := 1 }}{{- $fk2idx := 0 }}{{ if $e.IsInverse }}{{ $fk1idx = 0 }}{{ $fk2idx = 1 }}{{ end }}
-			s.Join(joinT).On(s.C({{ $edgeid }}), joinT.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk1idx }}]))
-			s.Where(sql.InValues(joinT.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk2idx }}]), edgeIDs...))
+			joinV := sqlgraph.ScopedJunction(s, joinT)
+			s.Join(joinV).On(s.C({{ $edgeid }}), joinV.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk1idx }}]))
+			s.Where(sql.InValues(joinV.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk2idx }}]), edgeIDs...))
 			columns := s.SelectedColumns()
-			s.Select(joinT.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk2idx }}]))
+			s.Select(joinV.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk2idx }}]))
 			s.AppendSelect(columns...)
 			s.SetDistinct(false)
 		})
@@ -319,10 +320,11 @@ func {{ $nlfunc }}(ctx context.Context, query *{{ $e.Type.Package }}.{{ $edgeQue
 			{{- end }}
 			{{- $edgeid := print $e.Type.Package "." $e.Type.ID.Constant }}
 			{{- $fk1idx := 1 }}{{- $fk2idx := 0 }}{{ if $e.IsInverse }}{{ $fk1idx = 0 }}{{ $fk2idx = 1 }}{{ end }}
-			s.Join(joinT).On(s.C({{ $edgeid }}), joinT.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk1idx }}]))
-			s.Where(sql.InValues(joinT.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk2idx }}]), edgeIDs...))
+			joinV := sqlgraph.ScopedJunction(s, joinT)
+			s.Join(joinV).On(s.C({{ $edgeid }}), joinV.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk1idx }}]))
+			s.Where(sql.InValues(joinV.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk2idx }}]), edgeIDs...))
 			columns := s.SelectedColumns()
-			s.Select(joinT.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk2idx }}]))
+			s.Select(joinV.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk2idx }}]))
 			s.AppendSelect(columns...)
 			s.SetDistinct(false)
 		})

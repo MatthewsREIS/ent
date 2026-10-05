@@ -153,3 +153,29 @@ func TestEdgeOrderScoped(t *testing.T) {
 	require.NotContains(t, q, "WHERE")
 	require.Empty(t, args)
 }
+
+// FALSIFY: drop the junction scope from Has's junction-filter branch or from
+// hasNeighborsWith's; the "user_groups"."owner_id" term disappears.
+func TestEdgeJunctionScoped(t *testing.T) {
+	entfield.SetNeighborScope(func(_ context.Context, table string) func(*sql.Selector) {
+		if table != "user_groups" {
+			return nil
+		}
+		return func(s *sql.Selector) { s.Where(sql.EQ(s.C("owner_id"), 7)) }
+	})
+	t.Cleanup(func() { entfield.SetNeighborScope(nil) })
+	for name, e := range map[string]entfield.Edge[entfield.P, int]{
+		"plain":    entfield.NewEdge[entfield.P, int]("groups", groupsStep),
+		"filtered": entfield.NewEdge[entfield.P, int]("groups", groupsStep).WithJunction(junctionNotDeleted()),
+	} {
+		t.Run(name, func(t *testing.T) {
+			q, args := render(t, e.Has())
+			require.Contains(t, q, `"user_groups"."owner_id" = $1`)
+			require.Equal(t, []any{7}, args)
+			q, args = render(t, e.HasWith(sql.FieldEQ("name", "admins")))
+			require.Contains(t, q, `"t1"."name" = $1`)
+			require.Contains(t, q, `"user_groups"."owner_id" = $2`)
+			require.Equal(t, []any{"admins", 7}, args)
+		})
+	}
+}

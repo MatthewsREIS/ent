@@ -2907,3 +2907,94 @@ func TestOrderByNeighborTermsScoped(t *testing.T) {
 		require.Equal(t, `SELECT "users"."name", "t1"."total_users" FROM "users" LEFT JOIN (SELECT "user_id", SUM("group"."num_users") AS "total_users" FROM "group" JOIN "user_groups" AS "t1" ON "group"."id" = "t1"."group_id" WHERE "group"."owner_id" = $1 GROUP BY "user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."total_users" NULLS FIRST`, query)
 	})
 }
+
+// junctionOwnerScope registers a row-security rule on the user_groups join
+// table. A scope call without the viewer context fails closed, so a path that
+// drops the context renders FALSE instead of the owner term.
+func junctionOwnerScope(t *testing.T) {
+	SetNeighborScope(func(ctx context.Context, table string) func(*sql.Selector) {
+		if table != "user_groups" {
+			return nil
+		}
+		if ctx.Value(scopeCtxKey{}) != "viewer" {
+			return func(s *sql.Selector) { s.Where(sql.False()) }
+		}
+		return func(s *sql.Selector) { s.Where(sql.EQ(s.C("owner_id"), 1)) }
+	})
+	t.Cleanup(func() { SetNeighborScope(nil) })
+}
+
+func viewerCtx() context.Context {
+	return context.WithValue(context.Background(), scopeCtxKey{}, "viewer")
+}
+
+func userGroupsStep(v any) *Step {
+	return NewStep(From("users", "id", v), To("groups", "id"), Edge(M2M, false, "user_groups", "user_id", "group_id"))
+}
+
+// FALSIFY: make scopeJunction a no-op (or ScopedJunction return t); every
+// subtest loses its "user_groups"."owner_id" = term.
+func TestJunctionScope(t *testing.T) {
+	junctionOwnerScope(t)
+	pg := sql.Dialect(dialect.Postgres)
+	users := func() *sql.Selector {
+		return pg.Select("*").From(pg.Table("users")).WithContext(viewerCtx())
+	}
+	t.Run("Neighbors", func(t *testing.T) {
+		query, args := NeighborsContext(viewerCtx(), dialect.Postgres, userGroupsStep(1)).Query()
+		require.Equal(t, `SELECT * FROM "groups" JOIN (SELECT "user_groups"."group_id" FROM "user_groups" WHERE "user_groups"."user_id" = $1 AND "user_groups"."owner_id" = $2) AS "t1" ON "groups"."id" = "t1"."group_id"`, query)
+		require.Equal(t, []any{1, 1}, args)
+	})
+	t.Run("SetNeighbors", func(t *testing.T) {
+		set := pg.Select().From(pg.Table("users")).Where(sql.EQ("name", "a8m")).WithContext(viewerCtx())
+		query, args := SetNeighbors(dialect.Postgres, userGroupsStep(set)).Query()
+		require.Equal(t, `SELECT * FROM "groups" JOIN (SELECT "user_groups"."group_id" FROM "user_groups" JOIN (SELECT "users"."id" FROM "users" WHERE "name" = $1) AS "t1" ON "user_groups"."user_id" = "t1"."id" WHERE "user_groups"."owner_id" = $2) AS "t1" ON "groups"."id" = "t1"."group_id"`, query)
+		require.Equal(t, []any{"a8m", 1}, args)
+	})
+	t.Run("HasNeighbors", func(t *testing.T) {
+		s := users()
+		HasNeighbors(s, userGroupsStep(nil))
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "users" WHERE "users"."id" IN (SELECT "user_groups"."user_id" FROM "user_groups" WHERE "user_groups"."owner_id" = $1)`, query)
+		require.Equal(t, []any{1}, args)
+	})
+	t.Run("HasNeighborsWith", func(t *testing.T) {
+		s := users()
+		HasNeighborsWith(s, userGroupsStep(nil), func(s *sql.Selector) { s.Where(sql.EQ(s.C("name"), "GitHub")) })
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "users" WHERE "users"."id" IN (SELECT "user_groups"."user_id" FROM "user_groups" JOIN "groups" AS "t1" ON "user_groups"."group_id" = "t1"."id" WHERE "t1"."name" = $1 AND "user_groups"."owner_id" = $2)`, query)
+		require.Equal(t, []any{"GitHub", 1}, args)
+	})
+	t.Run("OrderByNeighborsCount", func(t *testing.T) {
+		s := users()
+		OrderByNeighborsCount(s, userGroupsStep(nil))
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "users" LEFT JOIN (SELECT "user_groups"."user_id", COUNT(*) AS "count_groups" FROM "user_groups" WHERE "user_groups"."owner_id" = $1 GROUP BY "user_groups"."user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."count_groups" NULLS FIRST`, query)
+		require.Equal(t, []any{1}, args)
+	})
+	t.Run("OrderByNeighborTerms", func(t *testing.T) {
+		s := users()
+		OrderByNeighborTerms(s, userGroupsStep(nil), sql.OrderBySum("num_users", sql.OrderSelectAs("total_users")))
+		query, args := s.Query()
+		require.Equal(t, `SELECT *, "t1"."total_users" FROM "users" LEFT JOIN (SELECT "user_id", SUM("groups"."num_users") AS "total_users" FROM "groups" JOIN (SELECT * FROM "user_groups" WHERE "user_groups"."owner_id" = $1) AS "t1" ON "groups"."id" = "t1"."group_id" GROUP BY "user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."total_users" NULLS FIRST`, query)
+		require.Equal(t, []any{1}, args)
+	})
+	t.Run("ScopedJunction", func(t *testing.T) {
+		s := pg.Select("*").From(pg.Table("groups")).WithContext(viewerCtx())
+		joinT := ScopedJunction(s, pg.Table("user_groups"))
+		s.Join(joinT).On(s.C("id"), joinT.C("group_id"))
+		s.Where(sql.InValues(joinT.C("user_id"), 7))
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "groups" JOIN (SELECT * FROM "user_groups" WHERE "user_groups"."owner_id" = $1) AS "t1" ON "groups"."id" = "t1"."group_id" WHERE "t1"."user_id" IN ($2)`, query)
+		require.Equal(t, []any{1, 7}, args)
+	})
+	t.Run("UnscopedTableUntouched", func(t *testing.T) {
+		s := users()
+		HasNeighbors(s, NewStep(From("users", "id"), To("pets", "id"), Edge(M2M, false, "user_pets", "user_id", "pet_id")))
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "users" WHERE "users"."id" IN (SELECT "user_pets"."user_id" FROM "user_pets")`, query)
+		require.Empty(t, args)
+		joinT := pg.Table("user_pets")
+		require.Same(t, joinT, ScopedJunction(users(), joinT))
+	})
+}

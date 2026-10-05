@@ -163,6 +163,10 @@ func (s *Step) ThroughEdgeTable() bool {
 // Neighbors returns a Selector for evaluating the path-step
 // and getting the neighbors of one vertex.
 func Neighbors(dialect string, s *Step) (q *sql.Selector) {
+	return neighbors(context.Background(), dialect, s, false)
+}
+
+func neighbors(ctx context.Context, dialect string, s *Step, scoped bool) (q *sql.Selector) {
 	builder := sql.Dialect(dialect)
 	switch {
 	case s.ThroughEdgeTable():
@@ -175,6 +179,9 @@ func Neighbors(dialect string, s *Step) (q *sql.Selector) {
 		match := builder.Select(join.C(pk1)).
 			From(join).
 			Where(sql.EQ(join.C(pk2), s.From.V))
+		if scoped {
+			scopeJunction(ctx, match, s)
+		}
 		q = builder.Select().
 			From(to).
 			Join(match).
@@ -196,6 +203,12 @@ func Neighbors(dialect string, s *Step) (q *sql.Selector) {
 	return q
 }
 
+// NeighborsContext is Neighbors for a query running under ctx, which scopes
+// the join table of a through-edge step.
+func NeighborsContext(ctx context.Context, dialect string, s *Step) *sql.Selector {
+	return neighbors(ctx, dialect, s, true)
+}
+
 // SetNeighbors returns a Selector for evaluating the path-step
 // and getting the neighbors of set of vertices.
 func SetNeighbors(dialect string, s *Step) (q *sql.Selector) {
@@ -214,6 +227,7 @@ func SetNeighbors(dialect string, s *Step) (q *sql.Selector) {
 			From(join).
 			Join(set).
 			On(join.C(pk2), set.C(s.From.Column))
+		scopeJunction(set.Context(), match, s)
 		q = builder.Select().
 			From(to).
 			Join(match).
@@ -246,12 +260,9 @@ func HasNeighbors(q *sql.Selector, s *Step) {
 			pk1 = s.Edge.Columns[1]
 		}
 		join := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
-		q.Where(
-			sql.In(
-				q.C(s.From.Column),
-				builder.Select(join.C(pk1)).From(join),
-			),
-		)
+		edges := builder.Select(join.C(pk1)).From(join)
+		scopeJunction(q.Context(), edges, s)
+		q.Where(sql.In(q.C(s.From.Column), edges))
 	case s.FromEdgeOwner():
 		q.Where(sql.NotNull(q.C(s.Edge.Columns[0])))
 	case s.ToEdgeOwner():
@@ -296,6 +307,8 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 		matches.WithContext(q.Context())
 		pred(matches)
 		join.FromSelect(matches)
+		// After FromSelect, which replaces join's WHERE clause.
+		scopeJunction(q.Context(), join, s)
 		q.Where(sql.In(q.C(s.From.Column), join))
 	case s.FromEdgeOwner():
 		to := builder.Table(s.To.Table).Schema(s.To.Schema)
@@ -429,6 +442,7 @@ func OrderByNeighborsCountScoped(q *sql.Selector, s *Step, scope func(*sql.Selec
 		join = build.Select(
 			joinT.C(pk1),
 		).From(joinT).GroupBy(joinT.C(pk1))
+		scopeJunction(q.Context(), join, s)
 		if scope != nil {
 			pk2 := s.Edge.Columns[1]
 			if s.Edge.Inverse {
@@ -548,6 +562,46 @@ func selectTerms(q *sql.Selector, ts []sql.OrderTerm) {
 	}
 }
 
+// neighborScope, when set, supplies the row filter for a table that a graph
+// step reads outside its own query: a neighbor in Has/HasWith and edge
+// ordering, and the M2M join table of every through-edge step. nil means none.
+var neighborScope func(ctx context.Context, table string) func(*sql.Selector)
+
+// SetNeighborScope installs the process-wide neighbor scope. Call once at init.
+func SetNeighborScope(f func(ctx context.Context, table string) func(*sql.Selector)) {
+	neighborScope = f
+}
+
+// NeighborScope returns the registered scope for table under ctx, or nil.
+func NeighborScope(ctx context.Context, table string) func(*sql.Selector) {
+	if neighborScope == nil {
+		return nil
+	}
+	return neighborScope(ctx, table)
+}
+
+// scopeJunction restricts sel, a selector whose first table is s's join
+// table, to the join rows visible under ctx.
+func scopeJunction(ctx context.Context, sel *sql.Selector, s *Step) {
+	if scope := NeighborScope(ctx, s.Edge.Table); scope != nil {
+		sel.WithContext(ctx)
+		scope(sel)
+	}
+}
+
+// ScopedJunction returns the M2M join table t to join into q: t itself, or
+// the subquery of its rows visible under q's context. Join the result before
+// qualifying columns with its C; the join assigns its alias.
+func ScopedJunction(q *sql.Selector, t *sql.SelectTable) sql.TableView {
+	scope := NeighborScope(q.Context(), t.Name())
+	if scope == nil {
+		return t
+	}
+	visible := sql.Dialect(q.Dialect()).Select().From(t).WithContext(q.Context())
+	scope(visible)
+	return visible
+}
+
 // scopeNeighbors applies scope to sel, a selector whose table is the neighbor
 // table, carrying q's context for the scope to read.
 func scopeNeighbors(q, sel *sql.Selector, scope func(*sql.Selector)) {
@@ -587,7 +641,7 @@ func OrderByNeighborTermsScoped(q *sql.Selector, s *Step, scope func(*sql.Select
 			pk1, pk2 = pk2, pk1
 		}
 		toT := build.Table(s.To.Table).Schema(s.To.Schema)
-		joinT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
+		joinT := ScopedJunction(q, build.Table(s.Edge.Table).Schema(s.Edge.Schema))
 		join = build.Select(pk2).
 			From(toT).
 			Join(joinT).

@@ -7,27 +7,27 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
-// neighborScope, when set, supplies an extra predicate for the neighbor side
-// of Has, HasWith, OrderBy and OrderByCount, keyed by the neighbor's table; nil means none. Row
-// security registers it: a subquery into a scoped table runs outside that
-// table's own query policy, so without this every hasXWith on a parent
-// bypasses the policy.
-var neighborScope func(ctx context.Context, table string) func(*sql.Selector)
-
-// SetNeighborScope installs the process-wide neighbor scope. Call once at init.
+// SetNeighborScope installs the process-wide neighbor scope (see
+// sqlgraph.SetNeighborScope). It supplies an extra predicate, keyed by table,
+// for the neighbor and M2M join table of Has, HasWith, OrderBy and
+// OrderByCount; nil means none. Row security registers it: a subquery into a
+// scoped table runs outside that table's own query policy, so without this
+// every hasXWith on a parent bypasses the policy. Call once at init.
 func SetNeighborScope(f func(ctx context.Context, table string) func(*sql.Selector)) {
-	neighborScope = f
+	sqlgraph.SetNeighborScope(f)
 }
 
 func scopeFor(s *sql.Selector, table string) func(*sql.Selector) {
-	if neighborScope == nil {
-		return nil
+	return sqlgraph.NeighborScope(s.Context(), table)
+}
+
+// scopeJunction restricts sel, whose first table is step's join table, to the
+// join rows the neighbor scope admits.
+func scopeJunction(s, sel *sql.Selector, step *sqlgraph.Step) {
+	if scope := scopeFor(s, step.Edge.Table); scope != nil {
+		sel.WithContext(s.Context())
+		scope(sel)
 	}
-	ctx := s.Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	return neighborScope(ctx, table)
 }
 
 // Edge is the generated per-edge handle. step returns a fresh neighbor step
@@ -108,6 +108,7 @@ func (e Edge[TP, ID]) Has() P {
 			for _, f := range e.junctionFilters {
 				f(sel, junction)
 			}
+			scopeJunction(s, sel, step)
 			s.Where(sql.In(s.C(step.From.Column), sel))
 		}
 	}
@@ -158,6 +159,7 @@ func (e Edge[TP, ID]) hasNeighborsWith(s *sql.Selector, step *sqlgraph.Step, nei
 	for _, f := range e.junctionFilters {
 		f(join, junction)
 	}
+	scopeJunction(s, join, step)
 	s.Where(sql.In(s.C(step.From.Column), join))
 }
 
