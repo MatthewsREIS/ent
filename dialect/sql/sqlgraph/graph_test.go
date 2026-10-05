@@ -2805,3 +2805,105 @@ func incrementingEdgeFields() func() []*FieldSpec {
 		return []*FieldSpec{{Column: "ts", Type: field.TypeInt, Value: n}}
 	}
 }
+
+type scopeCtxKey struct{}
+
+// ownerScope stands in for a row-security read rule on the neighbor table. It
+// fails the test unless it sees the outer query's context.
+func ownerScope(t *testing.T) func(*sql.Selector) {
+	return func(s *sql.Selector) {
+		require.Equal(t, "viewer", s.Context().Value(scopeCtxKey{}))
+		s.Where(sql.EQ(s.C("owner_id"), 1))
+	}
+}
+
+func scopedUsers() *sql.Selector {
+	build := sql.Dialect(dialect.Postgres)
+	t1 := build.Table("users")
+	s := build.Select(t1.C("name")).From(t1)
+	s.WithContext(context.WithValue(context.Background(), scopeCtxKey{}, "viewer"))
+	return s
+}
+
+// FALSIFY: make scopeNeighbors a no-op, or drop the scope branches in
+// OrderByNeighborsCountScoped; every subtest loses its "owner_id" = $1 term.
+func TestOrderByNeighborsCountScoped(t *testing.T) {
+	t.Run("O2M", func(t *testing.T) {
+		s := scopedUsers()
+		OrderByNeighborsCountScoped(s,
+			NewStep(From("users", "id"), To("pets", "id"), Edge(O2M, false, "pets", "user_id")),
+			ownerScope(t), sql.OrderDesc())
+		query, args := s.Query()
+		require.Equal(t, []any{1}, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "pets"."user_id", COUNT(*) AS "count_pets" FROM "pets" WHERE "pets"."owner_id" = $1 GROUP BY "pets"."user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."count_pets" DESC NULLS LAST`, query)
+	})
+	t.Run("M2M", func(t *testing.T) {
+		s := scopedUsers()
+		OrderByNeighborsCountScoped(s,
+			NewStep(From("users", "id"), To("groups", "id"), Edge(M2M, false, "user_groups", "user_id", "group_id")),
+			ownerScope(t))
+		query, args := s.Query()
+		require.Equal(t, []any{1}, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "user_groups"."user_id", COUNT(*) AS "count_groups" FROM "user_groups" WHERE "user_groups"."group_id" IN (SELECT "groups"."id" FROM "groups" WHERE "groups"."owner_id" = $1) GROUP BY "user_groups"."user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."count_groups" NULLS FIRST`, query)
+	})
+	t.Run("M2O", func(t *testing.T) {
+		for _, desc := range []bool{false, true} {
+			s := scopedUsers()
+			var opts []sql.OrderTermOption
+			if desc {
+				opts = append(opts, sql.OrderDesc())
+			}
+			OrderByNeighborsCountScoped(s,
+				NewStep(From("users", "id"), To("workplace", "id"), Edge(M2O, true, "users", "workplace_id")),
+				ownerScope(t), opts...)
+			query, args := s.Query()
+			require.Equal(t, []any{1}, args)
+			exists := `EXISTS (SELECT * FROM "workplace" WHERE "workplace"."id" = "users"."workplace_id" AND "workplace"."owner_id" = $1)`
+			if !desc {
+				exists = "NOT " + exists
+			}
+			require.Equal(t, `SELECT "users"."name" FROM "users" ORDER BY `+exists, query)
+		}
+	})
+	t.Run("NilScope", func(t *testing.T) {
+		step := NewStep(From("users", "id"), To("groups", "id"), Edge(M2M, false, "user_groups", "user_id", "group_id"))
+		s1, s2 := scopedUsers(), scopedUsers()
+		OrderByNeighborsCount(s1, step)
+		OrderByNeighborsCountScoped(s2, step, nil)
+		q1, _ := s1.Query()
+		q2, _ := s2.Query()
+		require.Equal(t, q1, q2)
+	})
+}
+
+// FALSIFY: make scopeNeighbors a no-op; every subtest loses its
+// "owner_id" = $1 term.
+func TestOrderByNeighborTermsScoped(t *testing.T) {
+	t.Run("M2O", func(t *testing.T) {
+		s := scopedUsers()
+		OrderByNeighborTermsScoped(s,
+			NewStep(From("users", "id"), To("workplace", "id"), Edge(M2O, true, "users", "workplace_id")),
+			ownerScope(t), sql.OrderByField("name"))
+		query, args := s.Query()
+		require.Equal(t, []any{1}, args)
+		require.Equal(t, `SELECT "users"."name" FROM "users" LEFT JOIN (SELECT "workplace"."id", "workplace"."name" FROM "workplace" WHERE "workplace"."owner_id" = $1) AS "t1" ON "users"."workplace_id" = "t1"."id" ORDER BY "t1"."name" NULLS FIRST`, query)
+	})
+	t.Run("O2M", func(t *testing.T) {
+		s := scopedUsers()
+		OrderByNeighborTermsScoped(s,
+			NewStep(From("users", "id"), To("repo", "id"), Edge(O2M, false, "repo", "user_id")),
+			ownerScope(t), sql.OrderBySum("num_stars", sql.OrderSelectAs("total_stars")))
+		query, args := s.Query()
+		require.Equal(t, []any{1}, args)
+		require.Equal(t, `SELECT "users"."name", "t1"."total_stars" FROM "users" LEFT JOIN (SELECT "repo"."user_id", SUM("repo"."num_stars") AS "total_stars" FROM "repo" WHERE "repo"."owner_id" = $1 GROUP BY "repo"."user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."total_stars" NULLS FIRST`, query)
+	})
+	t.Run("M2M", func(t *testing.T) {
+		s := scopedUsers()
+		OrderByNeighborTermsScoped(s,
+			NewStep(From("users", "id"), To("group", "id"), Edge(M2M, false, "user_groups", "user_id", "group_id")),
+			ownerScope(t), sql.OrderBySum("num_users", sql.OrderSelectAs("total_users")))
+		query, args := s.Query()
+		require.Equal(t, []any{1}, args)
+		require.Equal(t, `SELECT "users"."name", "t1"."total_users" FROM "users" LEFT JOIN (SELECT "user_id", SUM("group"."num_users") AS "total_users" FROM "group" JOIN "user_groups" AS "t1" ON "group"."id" = "t1"."group_id" WHERE "group"."owner_id" = $1 GROUP BY "user_id") AS "t1" ON "users"."id" = "t1"."user_id" ORDER BY "t1"."total_users" NULLS FIRST`, query)
+	})
+}

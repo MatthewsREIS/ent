@@ -378,12 +378,32 @@ func countAlias(q *sql.Selector, s *Step, opt *sql.OrderTermOptions) string {
 // OrderByNeighborsCount appends ordering based on the number of neighbors.
 // For example, order users by their number of posts.
 func OrderByNeighborsCount(q *sql.Selector, s *Step, opts ...sql.OrderTermOption) {
+	OrderByNeighborsCountScoped(q, s, nil, opts...)
+}
+
+// OrderByNeighborsCountScoped is like OrderByNeighborsCount, but counts only
+// the neighbors that pass scope, which is applied to a selector over the
+// neighbor (To) table. A nil scope is the same as OrderByNeighborsCount.
+func OrderByNeighborsCountScoped(q *sql.Selector, s *Step, scope func(*sql.Selector), opts ...sql.OrderTermOption) {
 	var (
 		join  *sql.Selector
 		opt   = sql.NewOrderTermOptions(opts...)
 		build = sql.Dialect(q.Dialect())
 	)
 	switch {
+	case s.FromEdgeOwner() && scope != nil:
+		// A non-null FK may point at an invisible neighbor, so nullability
+		// no longer answers "has a neighbor"; EXISTS stands in for IS NOT NULL.
+		toT := build.Table(s.To.Table).Schema(s.To.Schema)
+		exists := build.Select().From(toT).
+			Where(sql.ColumnsEQ(toT.C(s.To.Column), q.C(s.Edge.Columns[0])))
+		scopeNeighbors(q, exists, scope)
+		q.OrderExpr(sql.ExprFunc(func(b *sql.Builder) {
+			if !opt.Desc {
+				b.WriteString("NOT ")
+			}
+			b.Join(sql.Exists(exists))
+		}))
 	case s.FromEdgeOwner():
 		// For M2O and O2O inverse, the FK resides in the same table.
 		// Hence, the order by is on the nullability of the column.
@@ -409,6 +429,16 @@ func OrderByNeighborsCount(q *sql.Selector, s *Step, opts ...sql.OrderTermOption
 		join = build.Select(
 			joinT.C(pk1),
 		).From(joinT).GroupBy(joinT.C(pk1))
+		if scope != nil {
+			pk2 := s.Edge.Columns[1]
+			if s.Edge.Inverse {
+				pk2 = s.Edge.Columns[0]
+			}
+			toT := build.Table(s.To.Table).Schema(s.To.Schema)
+			visible := build.Select(toT.C(s.To.Column)).From(toT)
+			scopeNeighbors(q, visible, scope)
+			join.Where(sql.In(joinT.C(pk2), visible))
+		}
 		selectTerms(join, terms)
 		q.LeftJoin(join).
 			On(
@@ -425,6 +455,7 @@ func OrderByNeighborsCount(q *sql.Selector, s *Step, opts ...sql.OrderTermOption
 		join = build.Select(
 			edgeT.C(s.Edge.Columns[0]),
 		).From(edgeT).GroupBy(edgeT.C(s.Edge.Columns[0]))
+		scopeNeighbors(q, join, scope)
 		selectTerms(join, terms)
 		q.LeftJoin(join).
 			On(
@@ -517,9 +548,26 @@ func selectTerms(q *sql.Selector, ts []sql.OrderTerm) {
 	}
 }
 
+// scopeNeighbors applies scope to sel, a selector whose table is the neighbor
+// table, carrying q's context for the scope to read.
+func scopeNeighbors(q, sel *sql.Selector, scope func(*sql.Selector)) {
+	if scope == nil {
+		return
+	}
+	sel.WithContext(q.Context())
+	scope(sel)
+}
+
 // OrderByNeighborTerms appends ordering based on the number of neighbors.
 // For example, order users by their number of posts.
 func OrderByNeighborTerms(q *sql.Selector, s *Step, opts ...sql.OrderTerm) {
+	OrderByNeighborTermsScoped(q, s, nil, opts...)
+}
+
+// OrderByNeighborTermsScoped is like OrderByNeighborTerms, but the joined
+// neighbor rows are only those passing scope, so an excluded neighbor yields
+// NULL terms. A nil scope is the same as OrderByNeighborTerms.
+func OrderByNeighborTermsScoped(q *sql.Selector, s *Step, scope func(*sql.Selector), opts ...sql.OrderTerm) {
 	var (
 		join  *sql.Selector
 		build = sql.Dialect(q.Dialect())
@@ -529,6 +577,7 @@ func OrderByNeighborTerms(q *sql.Selector, s *Step, opts ...sql.OrderTerm) {
 		toT := build.Table(s.To.Table).Schema(s.To.Schema)
 		join = build.Select(toT.C(s.To.Column)).
 			From(toT)
+		scopeNeighbors(q, join, scope)
 		selectTerms(join, opts)
 		q.LeftJoin(join).
 			On(q.C(s.Edge.Columns[0]), join.C(s.To.Column))
@@ -544,6 +593,7 @@ func OrderByNeighborTerms(q *sql.Selector, s *Step, opts ...sql.OrderTerm) {
 			Join(joinT).
 			On(toT.C(s.To.Column), joinT.C(pk1)).
 			GroupBy(pk2)
+		scopeNeighbors(q, join, scope)
 		selectTerms(join, opts)
 		q.LeftJoin(join).
 			On(q.C(s.From.Column), join.C(pk2))
@@ -552,6 +602,7 @@ func OrderByNeighborTerms(q *sql.Selector, s *Step, opts ...sql.OrderTerm) {
 		join = build.Select(toT.C(s.Edge.Columns[0])).
 			From(toT).
 			GroupBy(toT.C(s.Edge.Columns[0]))
+		scopeNeighbors(q, join, scope)
 		selectTerms(join, opts)
 		q.LeftJoin(join).
 			On(q.C(s.From.Column), join.C(s.Edge.Columns[0]))
