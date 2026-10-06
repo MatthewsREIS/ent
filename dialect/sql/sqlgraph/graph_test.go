@@ -2998,3 +2998,14 @@ func TestJunctionScope(t *testing.T) {
 		require.Same(t, joinT, ScopedJunction(users(), joinT))
 	})
 }
+
+func TestNeighborScopeNilContext(t *testing.T) {
+	defer SetNeighborScope(nil)
+	var got context.Context
+	SetNeighborScope(func(ctx context.Context, _ string) func(*sql.Selector) {
+		got = ctx
+		return nil
+	})
+	NeighborScope(nil, "t") //nolint:staticcheck
+	require.NotNil(t, got)
+}

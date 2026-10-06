@@ -577,6 +577,9 @@ func NeighborScope(ctx context.Context, table string) func(*sql.Selector) {
 	if neighborScope == nil {
 		return nil
 	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	return neighborScope(ctx, table)
 }
 
