@@ -334,7 +334,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	{{ $ident }} = sqlgraph.Neighbors({{ $receiver }}.Drv.Dialect(), step)
+	{{ $ident }} = sqlgraph.NeighborsContext(ctx, {{ $receiver }}.Drv.Dialect(), step)
 {{ end }}
 
 {{ define "dialect/sql/query/eagerloading/m2massign" }}
