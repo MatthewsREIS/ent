@@ -176,16 +176,18 @@ func neighbors(ctx context.Context, dialect string, s *Step, scoped bool) (q *sq
 		}
 		to := builder.Table(s.To.Table).Schema(s.To.Schema)
 		join := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
+		cond := sql.EQ(join.C(pk2), s.From.V)
+		if scoped {
+			cond = junctionCond(dialect, join, s, cond, func() context.Context { return q.Context() })
+		}
 		match := builder.Select(join.C(pk1)).
 			From(join).
-			Where(sql.EQ(join.C(pk2), s.From.V))
-		if scoped {
-			scopeJunction(ctx, match, s)
-		}
+			Where(cond)
 		q = builder.Select().
 			From(to).
 			Join(match).
-			On(to.C(s.To.Column), match.C(pk1))
+			On(to.C(s.To.Column), match.C(pk1)).
+			WithContext(ctx)
 	case s.FromEdgeOwner():
 		t1 := builder.Table(s.To.Table).Schema(s.To.Schema)
 		t2 := builder.Select(s.Edge.Columns[0]).
@@ -225,13 +227,13 @@ func SetNeighbors(dialect string, s *Step) (q *sql.Selector) {
 		join := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		match := builder.Select(join.C(pk1)).
 			From(join).
-			Join(set).
-			On(join.C(pk2), set.C(s.From.Column))
-		scopeJunction(set.Context(), match, s)
+			Join(set)
+		match.OnP(junctionCond(dialect, join, s, sql.ColumnsEQ(join.C(pk2), set.C(s.From.Column)), func() context.Context { return q.Context() }))
 		q = builder.Select().
 			From(to).
 			Join(match).
-			On(to.C(s.To.Column), match.C(pk1))
+			On(to.C(s.To.Column), match.C(pk1)).
+			WithContext(set.Context())
 	case s.FromEdgeOwner():
 		t1 := builder.Table(s.To.Table).Schema(s.To.Schema)
 		set.Select(set.C(s.Edge.Columns[0]))
@@ -590,6 +592,29 @@ func scopeJunction(ctx context.Context, sel *sql.Selector, s *Step) {
 		sel.WithContext(ctx)
 		scope(sel)
 	}
+}
+
+// junctionCond returns cond extended by the scope of s's join table under
+// ctxOf(), resolved each time it is built: a path step is built in prepareQuery,
+// before interceptors stamp the context, and the query rebinds the step's
+// selector to its execution context before building it. The scope may only
+// add WHERE terms.
+func junctionCond(dialect string, join *sql.SelectTable, s *Step, cond *sql.Predicate, ctxOf func() context.Context) *sql.Predicate {
+	if neighborScope == nil {
+		return cond
+	}
+	return sql.P(func(b *sql.Builder) {
+		ctx := ctxOf()
+		if scope := NeighborScope(ctx, s.Edge.Table); scope != nil {
+			visible := sql.Dialect(dialect).Select().From(join).WithContext(ctx)
+			scope(visible)
+			if p := visible.P(); p != nil {
+				b.Join(sql.And(cond, p))
+				return
+			}
+		}
+		b.Join(cond)
+	})
 }
 
 // ScopedJunction returns the M2M join table t to join into q: t itself, or
