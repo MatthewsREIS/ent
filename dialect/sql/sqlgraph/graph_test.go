@@ -2948,7 +2948,7 @@ func TestJunctionScope(t *testing.T) {
 	t.Run("SetNeighbors", func(t *testing.T) {
 		set := pg.Select().From(pg.Table("users")).Where(sql.EQ("name", "a8m")).WithContext(viewerCtx())
 		query, args := SetNeighbors(dialect.Postgres, userGroupsStep(set)).Query()
-		require.Equal(t, `SELECT * FROM "groups" JOIN (SELECT "user_groups"."group_id" FROM "user_groups" JOIN (SELECT "users"."id" FROM "users" WHERE "name" = $1) AS "t1" ON "user_groups"."user_id" = "t1"."id" WHERE "user_groups"."owner_id" = $2) AS "t1" ON "groups"."id" = "t1"."group_id"`, query)
+		require.Equal(t, `SELECT * FROM "groups" JOIN (SELECT "user_groups"."group_id" FROM "user_groups" JOIN (SELECT "users"."id" FROM "users" WHERE "name" = $1) AS "t1" ON "user_groups"."user_id" = "t1"."id" AND "user_groups"."owner_id" = $2) AS "t1" ON "groups"."id" = "t1"."group_id"`, query)
 		require.Equal(t, []any{"a8m", 1}, args)
 	})
 	t.Run("HasNeighbors", func(t *testing.T) {
@@ -2996,6 +2996,28 @@ func TestJunctionScope(t *testing.T) {
 		require.Empty(t, args)
 		joinT := pg.Table("user_pets")
 		require.Same(t, joinT, ScopedJunction(users(), joinT))
+	})
+}
+
+// A path step is built in prepareQuery, before interceptors stamp the
+// context; the query rebinds the step's selector to the execution context
+// before building it. FALSIFY: scope the junction at path time; both subtests
+// render FALSE.
+func TestJunctionScopeExecutionContext(t *testing.T) {
+	junctionOwnerScope(t)
+	pg := sql.Dialect(dialect.Postgres)
+	t.Run("NeighborsContext", func(t *testing.T) {
+		q := NeighborsContext(context.Background(), dialect.Postgres, userGroupsStep(1))
+		query, args := q.WithContext(viewerCtx()).Query()
+		require.Equal(t, `SELECT * FROM "groups" JOIN (SELECT "user_groups"."group_id" FROM "user_groups" WHERE "user_groups"."user_id" = $1 AND "user_groups"."owner_id" = $2) AS "t1" ON "groups"."id" = "t1"."group_id"`, query)
+		require.Equal(t, []any{1, 1}, args)
+	})
+	t.Run("SetNeighbors", func(t *testing.T) {
+		set := pg.Select().From(pg.Table("users")).Where(sql.EQ("name", "a8m"))
+		q := SetNeighbors(dialect.Postgres, userGroupsStep(set))
+		query, args := q.WithContext(viewerCtx()).Query()
+		require.Equal(t, `SELECT * FROM "groups" JOIN (SELECT "user_groups"."group_id" FROM "user_groups" JOIN (SELECT "users"."id" FROM "users" WHERE "name" = $1) AS "t1" ON "user_groups"."user_id" = "t1"."id" AND "user_groups"."owner_id" = $2) AS "t1" ON "groups"."id" = "t1"."group_id"`, query)
+		require.Equal(t, []any{"a8m", 1}, args)
 	})
 }
 
