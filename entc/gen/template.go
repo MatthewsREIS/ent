@@ -330,6 +330,7 @@ var (
 		"import/additional/*",
 		"model/additional/*",
 		"model/comment/additional/*",
+		"model/import/additional/*",
 		"model/edges/fields/additional/*",
 		"tx/additional/*",
 		"tx/additional/*/*",

@@ -25,7 +25,6 @@ import (
 	"entgo.io/ent/schema/field"
 
 	"golang.org/x/sync/errgroup"
-	"golang.org/x/tools/imports"
 )
 
 type (
@@ -1539,7 +1538,7 @@ func (a assets) format() error {
 	for path, content := range a.files {
 		path, content := path, content
 		wg.Go(func() error {
-			src, err := imports.Process(path, content.content, nil)
+			src, err := FormatSource(path, content.content)
 			if err != nil {
 				return fmt.Errorf("format file %s: %w", path, err)
 			}

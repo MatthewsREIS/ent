@@ -53,6 +53,8 @@ func (c *Client) init() {
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"{{ $.Config.Package }}/migrate"
 	{{ range $n := $.Nodes }}
