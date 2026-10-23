@@ -18,6 +18,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"sync"
 	"text/template/parse"
 
 	"entgo.io/ent/dialect/sql/schema"
@@ -1533,12 +1534,13 @@ func (a assets) write() error {
 
 // format runs "goimports" on all assets.
 func (a assets) format() error {
+	names := a.packageNames()
 	var wg errgroup.Group
 	wg.SetLimit(runtime.GOMAXPROCS(0))
 	for path, content := range a.files {
 		path, content := path, content
 		wg.Go(func() error {
-			src, err := FormatSource(path, content.content)
+			src, err := FormatSource(path, content.content, names[filepath.Dir(path)])
 			if err != nil {
 				return fmt.Errorf("format file %s: %w", path, err)
 			}
@@ -1549,6 +1551,35 @@ func (a assets) format() error {
 		})
 	}
 	return wg.Wait()
+}
+
+// packageNames collects, per output directory, the package-level names its
+// files declare, so FormatSource can tell a sibling-file value from a package.
+func (a assets) packageNames() map[string]map[string]bool {
+	var (
+		mu    sync.Mutex
+		names = map[string]map[string]bool{}
+		wg    errgroup.Group
+	)
+	wg.SetLimit(runtime.GOMAXPROCS(0))
+	for path, content := range a.files {
+		path, content := path, content
+		wg.Go(func() error {
+			found := PackageLevelNames(path, content.content)
+			mu.Lock()
+			defer mu.Unlock()
+			dir := filepath.Dir(path)
+			if names[dir] == nil {
+				names[dir] = map[string]bool{}
+			}
+			for _, n := range found {
+				names[dir][n] = true
+			}
+			return nil
+		})
+	}
+	_ = wg.Wait()
+	return names
 }
 
 // expect panics if the condition is false.

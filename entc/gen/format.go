@@ -24,19 +24,52 @@ var formatOnly = &imports.Options{Comments: true, TabIndent: true, TabWidth: 8, 
 // FormatSource formats a generated file the way goimports does. goimports
 // resolves packages for every file that qualifies a name with no import, and
 // each resolution spawns `go env` and walks the module cache. A file whose
-// qualifiers are all imported only needs its unused imports dropped and its
-// import block sorted, so that case skips the resolution.
-func FormatSource(filename string, src []byte) ([]byte, error) {
-	if pruned, ok := pruneUnusedImports(filename, src); ok {
+// qualifiers are all imports or package-level names of its own package only
+// needs its unused imports dropped and its import block sorted, so that case
+// skips the resolution. packageNames holds the names the package declares in
+// other files; see PackageLevelNames.
+func FormatSource(filename string, src []byte, packageNames map[string]bool) ([]byte, error) {
+	if pruned, ok := pruneUnusedImports(filename, src, packageNames); ok {
 		return imports.Process(filename, pruned, formatOnly)
 	}
 	return imports.Process(filename, src, nil)
 }
 
+// PackageLevelNames returns the names a file declares at package level. A
+// package name can be spelled unlike its import path, so a qualifier that is
+// neither an import nor one of these names needs goimports to resolve it.
+func PackageLevelNames(filename string, src []byte) []string {
+	f, err := parser.ParseFile(token.NewFileSet(), filename, src, parser.SkipObjectResolution)
+	if err != nil {
+		return nil
+	}
+	var names []string
+	for _, d := range f.Decls {
+		switch d := d.(type) {
+		case *ast.FuncDecl:
+			if d.Recv == nil {
+				names = append(names, d.Name.Name)
+			}
+		case *ast.GenDecl:
+			for _, s := range d.Specs {
+				switch s := s.(type) {
+				case *ast.ValueSpec:
+					for _, n := range s.Names {
+						names = append(names, n.Name)
+					}
+				case *ast.TypeSpec:
+					names = append(names, s.Name.Name)
+				}
+			}
+		}
+	}
+	return names
+}
+
 // pruneUnusedImports drops the imports no selector in the file qualifies with.
-// It reports false when a selector qualifies a lowercase name that no import
-// declares; an exported one is a package-level value from a sibling file.
-func pruneUnusedImports(filename string, src []byte) ([]byte, bool) {
+// It reports false when a selector qualifies a name that neither an import nor
+// packageNames declares.
+func pruneUnusedImports(filename string, src []byte, packageNames map[string]bool) ([]byte, bool) {
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, filename, src, parser.ParseComments)
 	if err != nil {
@@ -56,7 +89,7 @@ func pruneUnusedImports(filename string, src []byte) ([]byte, bool) {
 		declared[importName(imp)] = true
 	}
 	for name := range used {
-		if !declared[name] && !ast.IsExported(name) {
+		if !declared[name] && !packageNames[name] {
 			return nil, false
 		}
 	}
