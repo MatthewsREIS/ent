@@ -26,22 +26,23 @@ var formatOnly = &imports.Options{Comments: true, TabIndent: true, TabWidth: 8, 
 // each resolution spawns `go env` and walks the module cache. A file whose
 // qualifiers are all imports or package-level names of its own package only
 // needs its unused imports dropped and its import block sorted, so that case
-// skips the resolution. packageNames holds the names the package declares in
-// other files; see PackageLevelNames.
-func FormatSource(filename string, src []byte, packageNames map[string]bool) ([]byte, error) {
+// skips the resolution. packageNames holds, per package clause, the names the
+// other files of that package declare; see PackageLevelNames.
+func FormatSource(filename string, src []byte, packageNames map[string]map[string]bool) ([]byte, error) {
 	if pruned, ok := pruneUnusedImports(filename, src, packageNames); ok {
 		return imports.Process(filename, pruned, formatOnly)
 	}
 	return imports.Process(filename, src, nil)
 }
 
-// PackageLevelNames returns the names a file declares at package level. A
-// package name can be spelled unlike its import path, so a qualifier that is
-// neither an import nor one of these names needs goimports to resolve it.
-func PackageLevelNames(filename string, src []byte) []string {
+// PackageLevelNames returns a file's package clause and the names it declares
+// at package level. A package name can be spelled unlike its import path, so a
+// qualifier that is neither an import nor one of these names needs goimports
+// to resolve it.
+func PackageLevelNames(filename string, src []byte) (string, []string) {
 	f, err := parser.ParseFile(token.NewFileSet(), filename, src, parser.SkipObjectResolution)
 	if err != nil {
-		return nil
+		return "", nil
 	}
 	var names []string
 	for _, d := range f.Decls {
@@ -63,13 +64,14 @@ func PackageLevelNames(filename string, src []byte) []string {
 			}
 		}
 	}
-	return names
+	return f.Name.Name, names
 }
 
 // pruneUnusedImports drops the imports no selector in the file qualifies with.
 // It reports false when a selector qualifies a name that neither an import nor
-// packageNames declares.
-func pruneUnusedImports(filename string, src []byte, packageNames map[string]bool) ([]byte, bool) {
+// the file's package declares. The "C" import stays whether or not the file
+// qualifies with it, since a cgo preamble or //export needs it.
+func pruneUnusedImports(filename string, src []byte, packageNames map[string]map[string]bool) ([]byte, bool) {
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, filename, src, parser.ParseComments)
 	if err != nil {
@@ -88,17 +90,18 @@ func pruneUnusedImports(filename string, src []byte, packageNames map[string]boo
 	for _, imp := range f.Imports {
 		declared[importName(imp)] = true
 	}
+	siblings := packageNames[f.Name.Name]
 	for name := range used {
-		if !declared[name] && !packageNames[name] {
+		if !declared[name] && !siblings[name] {
 			return nil, false
 		}
 	}
 	for _, imp := range append([]*ast.ImportSpec(nil), f.Imports...) {
 		name := importName(imp)
-		if name == "_" || name == "." || used[name] {
+		p, _ := strconv.Unquote(imp.Path.Value)
+		if name == "_" || name == "." || p == "C" || used[name] {
 			continue
 		}
-		p, _ := strconv.Unquote(imp.Path.Value)
 		if imp.Name != nil {
 			astutil.DeleteNamedImport(fset, f, name, p)
 		} else {

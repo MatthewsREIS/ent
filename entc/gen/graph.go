@@ -1553,27 +1553,38 @@ func (a assets) format() error {
 	return wg.Wait()
 }
 
-// packageNames collects, per output directory, the package-level names its
-// files declare, so FormatSource can tell a sibling-file value from a package.
-func (a assets) packageNames() map[string]map[string]bool {
+// packageNames collects, per output directory and package clause, the
+// package-level names the non-test files declare, so FormatSource can tell a
+// sibling-file value from a package. Test files see production names but not
+// the other way round, so they contribute nothing.
+func (a assets) packageNames() map[string]map[string]map[string]bool {
 	var (
 		mu    sync.Mutex
-		names = map[string]map[string]bool{}
+		names = map[string]map[string]map[string]bool{}
 		wg    errgroup.Group
 	)
 	wg.SetLimit(runtime.GOMAXPROCS(0))
 	for path, content := range a.files {
+		if strings.HasSuffix(path, "_test.go") {
+			continue
+		}
 		path, content := path, content
 		wg.Go(func() error {
-			found := PackageLevelNames(path, content.content)
+			pkg, found := PackageLevelNames(path, content.content)
+			if pkg == "" {
+				return nil
+			}
 			mu.Lock()
 			defer mu.Unlock()
 			dir := filepath.Dir(path)
 			if names[dir] == nil {
-				names[dir] = map[string]bool{}
+				names[dir] = map[string]map[string]bool{}
+			}
+			if names[dir][pkg] == nil {
+				names[dir][pkg] = map[string]bool{}
 			}
 			for _, n := range found {
-				names[dir][n] = true
+				names[dir][pkg][n] = true
 			}
 			return nil
 		})

@@ -85,7 +85,9 @@ func TestPruneUnusedImportsSiblingValueQualifier(t *testing.T) {
 	src := "package p\n\nimport \"fmt\"\n\nfunc f() string { return fmt.Sprint(Field.ID) }\n"
 	_, ok := pruneUnusedImports("p.go", []byte(src), nil)
 	require.False(t, ok)
-	out, ok := pruneUnusedImports("p.go", []byte(src), map[string]bool{"Field": true})
+	_, ok = pruneUnusedImports("p.go", []byte(src), map[string]map[string]bool{"q": {"Field": true}})
+	require.False(t, ok, "a name declared by another package in the directory does not count")
+	out, ok := pruneUnusedImports("p.go", []byte(src), map[string]map[string]bool{"p": {"Field": true}})
 	require.True(t, ok)
 	require.Contains(t, string(out), `"fmt"`)
 }
@@ -96,8 +98,33 @@ func TestPruneUnusedImportsUppercasePackageQualifier(t *testing.T) {
 	require.False(t, ok)
 }
 
+func TestPruneUnusedImportsKeepsCgoImport(t *testing.T) {
+	src := "package p\n\n// #include <stdio.h>\nimport \"C\"\n\nimport \"fmt\"\n\nfunc f() {}\n"
+	out, ok := pruneUnusedImports("p.go", []byte(src), nil)
+	require.True(t, ok)
+	require.Contains(t, string(out), `import "C"`)
+	require.NotContains(t, string(out), `"fmt"`)
+}
+
 func TestPackageLevelNames(t *testing.T) {
 	src := "package p\n\nimport \"fmt\"\n\nvar A, b = 1, 2\n\nconst C = 1\n\ntype T struct{}\n\nfunc F() { fmt.Println() }\n\nfunc (T) M() {}\n"
-	require.Equal(t, []string{"A", "b", "C", "T", "F"}, PackageLevelNames("p.go", []byte(src)))
-	require.Nil(t, PackageLevelNames("p.go", []byte("not go")))
+	pkg, names := PackageLevelNames("p.go", []byte(src))
+	require.Equal(t, "p", pkg)
+	require.Equal(t, []string{"A", "b", "C", "T", "F"}, names)
+	pkg, names = PackageLevelNames("p.go", []byte("not go"))
+	require.Equal(t, "", pkg)
+	require.Nil(t, names)
+}
+
+func TestAssetsPackageNamesByPackageWithoutTestFiles(t *testing.T) {
+	a := assets{files: map[string]assetFile{
+		"d/a.go":      {content: []byte("package p\n\nvar Field int\n")},
+		"d/a_test.go": {content: []byte("package p_test\n\nvar time = 1\n")},
+		"d/b_test.go": {content: []byte("package p\n\nvar Edge int\n")},
+		"e/c.go":      {content: []byte("package q\n\nvar Edge int\n")},
+	}}
+	require.Equal(t, map[string]map[string]map[string]bool{
+		"d": {"p": {"Field": true}},
+		"e": {"q": {"Edge": true}},
+	}, a.packageNames())
 }
