@@ -18,6 +18,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"sync"
 	"text/template/parse"
 
 	"entgo.io/ent/dialect/sql/schema"
@@ -25,7 +26,6 @@ import (
 	"entgo.io/ent/schema/field"
 
 	"golang.org/x/sync/errgroup"
-	"golang.org/x/tools/imports"
 )
 
 type (
@@ -1534,12 +1534,13 @@ func (a assets) write() error {
 
 // format runs "goimports" on all assets.
 func (a assets) format() error {
+	names := a.packageNames()
 	var wg errgroup.Group
 	wg.SetLimit(runtime.GOMAXPROCS(0))
 	for path, content := range a.files {
 		path, content := path, content
 		wg.Go(func() error {
-			src, err := imports.Process(path, content.content, nil)
+			src, err := FormatSource(path, content.content, names[filepath.Dir(path)])
 			if err != nil {
 				return fmt.Errorf("format file %s: %w", path, err)
 			}
@@ -1550,6 +1551,46 @@ func (a assets) format() error {
 		})
 	}
 	return wg.Wait()
+}
+
+// packageNames collects, per output directory and package clause, the
+// package-level names the non-test files declare, so FormatSource can tell a
+// sibling-file value from a package. Test files see production names but not
+// the other way round, so they contribute nothing.
+func (a assets) packageNames() map[string]map[string]map[string]bool {
+	var (
+		mu    sync.Mutex
+		names = map[string]map[string]map[string]bool{}
+		wg    errgroup.Group
+	)
+	wg.SetLimit(runtime.GOMAXPROCS(0))
+	for path, content := range a.files {
+		if strings.HasSuffix(path, "_test.go") {
+			continue
+		}
+		path, content := path, content
+		wg.Go(func() error {
+			pkg, found := PackageLevelNames(path, content.content)
+			if pkg == "" {
+				return nil
+			}
+			mu.Lock()
+			defer mu.Unlock()
+			dir := filepath.Dir(path)
+			if names[dir] == nil {
+				names[dir] = map[string]map[string]bool{}
+			}
+			if names[dir][pkg] == nil {
+				names[dir][pkg] = map[string]bool{}
+			}
+			for _, n := range found {
+				names[dir][pkg][n] = true
+			}
+			return nil
+		})
+	}
+	_ = wg.Wait()
+	return names
 }
 
 // expect panics if the condition is false.

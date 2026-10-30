@@ -18,6 +18,12 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"time"
+	{{- with $tmpls := matchTemplate "model/import/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	{{- if $.HasValueScanner }}
 		"entgo.io/ent/schema/field"
 	{{- end }}

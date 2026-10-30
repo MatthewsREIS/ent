@@ -12,12 +12,25 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
 	{{- /* Ignore generating on graph templates (e.g. config.tmpl, client.tmpl, etc). */}}
 	{{- if ne $.Config.Package $.Package }}
+		"{{ $.Config.Package }}/internal"
 		"{{ $.Config.Package }}/predicate"
+		{{- if and (hasField $ "Scope") ($.Scope.InSubPackage) }}
+			{{- $throughs := dict }}
+			{{- range $e := $.EdgesWithID }}
+				{{- with $e.Through }}
+					{{- if and .HasDefault (not (hasKey $throughs .PackageDir)) }}
+						{{- $throughs = set $throughs .PackageDir true }}
+		"{{ $.Config.Package }}/{{ .PackageDir }}"
+					{{- end }}
+				{{- end }}
+			{{- end }}
+		{{- end }}
 		{{- if $.HasOneFieldID }}
 			{{- with $.ID.Type.PkgPath }}
 				{{- $name := $.ID.Type.PkgName }}
